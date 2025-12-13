@@ -1,1 +1,1 @@
-# NeonChess
+neon-chess
