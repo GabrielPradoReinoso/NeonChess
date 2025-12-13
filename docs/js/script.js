@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 2) MULTIJUGADOR ONLINE (Socket.IO + salas)
   // ==========================================================
-  const isHosting =
+  /* const isHosting =
     location.hostname.endsWith(".web.app") ||
     location.hostname.endsWith(".firebaseapp.com");
 
@@ -65,12 +65,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const CLOUD_RUN_URL = "https://chess-socket-mbzdrwz7ga-ew.a.run.app";
   // Server local (node / server.js escucha en 8080)
   const LOCAL_SOCKET_URL = "http://localhost:8080";
-
-  const socket = isHosting
+ */
+  /* const socket = isHosting
     ? io(CLOUD_RUN_URL, { path: "/socket.io" })
-    : io(LOCAL_SOCKET_URL, { path: "/socket.io" });
+    : io(LOCAL_SOCKET_URL, { path: "/socket.io" }); */
 
-  socket.on("connect", () => console.log("[io] conectado", socket.id));
+  /* socket.on("connect", () => console.log("[io] conectado", socket.id));
   socket.on("connect_error", (err) => console.error("[io] error", err.message));
 
   // El rival mueve (evento recibido desde el servidor)
@@ -80,7 +80,66 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   let onlineMoveQueue = [];
-  let processingQueue = false;
+  let processingQueue = false; */
+
+  const isHosting =
+    location.hostname.endsWith(".web.app") ||
+    location.hostname.endsWith(".firebaseapp.com");
+
+  const CLOUD_RUN_URL = "https://chess-socket-mbzdrwz7ga-ew.a.run.app";
+  const LOCAL_SOCKET_URL = "http://localhost:8080";
+
+  // 👇 NUEVO
+  const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
+
+  let socket = null;
+
+  function ensureSocket() {
+    if (socket) return socket;
+
+    if (IS_GITHUB_PAGES) {
+      console.warn(
+        "[io] GitHub Pages: modo online deshabilitado (no hay servidor)."
+      );
+      return null;
+    }
+
+    const url = isHosting ? CLOUD_RUN_URL : LOCAL_SOCKET_URL;
+    socket = io(url, { path: "/socket.io" });
+
+    socket.on("connect", () => console.log("[io] conectado", socket.id));
+    socket.on("connect_error", (err) =>
+      console.error("[io] error", err.message)
+    );
+
+    socket.on("opponentMove", (move) => {
+      console.log("[ON] opponentMove", move);
+      movePiece(move.from, move.to, false);
+    });
+
+    socket.on("gameCreated", (roomId) => {
+      currentRoomId = roomId;
+      if (roomCodeText && createdRoomBox) {
+        roomCodeText.textContent = roomId;
+        createdRoomBox.classList.remove("hidden");
+      }
+    });
+
+    socket.on("startGame", ({ roomId, color }) => {
+      currentRoomId = roomId;
+      humanColor = color;
+      currentTurn = "w";
+      onlineChoice.classList.add("hidden");
+      onlineLobby.classList.add("hidden");
+      gameContainer.classList.remove("hidden");
+      actuallyStartGame();
+    });
+
+    socket.on("invalidMove", (mv) => console.warn("Movimiento inválido:", mv));
+    socket.on("gameOver", (result) => alert("Fin de la partida: " + result));
+
+    return socket;
+  }
 
   function enqueueOnlineMove(move) {
     onlineMoveQueue.push(move);
@@ -122,7 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
       let attempts = 0;
 
       const tryEmit = () => {
-        socket.timeout(3000).emit("playerMove", payload, (err, res) => {
+        const s = ensureSocket();
+        if (!s) return;
+        s.timeout(3000).emit("playerMove", payload, (err, res) => {
           if (err || !res?.ok) {
             if (attempts++ < MAX_RETRY) setTimeout(tryEmit, 500);
           }
@@ -146,44 +207,43 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnLocal = document.getElementById("btnLocal"); // BOTÓN REAL
 
   if (btnLocal) {
-  btnLocal.addEventListener("pointerup", () => {
-    console.log("Modo robot seleccionado");
+    btnLocal.addEventListener("pointerup", () => {
+      console.log("Modo robot seleccionado");
 
-    // Reset del modo
-    isOnlineGame = false;
-    currentRoomId = null;
+      // Reset del modo
+      isOnlineGame = false;
+      currentRoomId = null;
 
-    // Ocultar pantalla inicial
-    if (mainSection) mainSection.style.display = "none";
+      // Ocultar pantalla inicial
+      if (mainSection) mainSection.style.display = "none";
 
-    // ⭐ MOSTRAR CONTENEDOR DEL JUEGO (menú)
-    const gameContainer = document.getElementById("gameContainer");
-    const gameSetup = document.getElementById("gameSetup");
+      // ⭐ MOSTRAR CONTENEDOR DEL JUEGO (menú)
+      const gameContainer = document.getElementById("gameContainer");
+      const gameSetup = document.getElementById("gameSetup");
 
-    if (gameContainer) gameContainer.classList.remove("hidden");
-    if (gameSetup) gameSetup.classList.remove("hidden");
+      if (gameContainer) gameContainer.classList.remove("hidden");
+      if (gameSetup) gameSetup.classList.remove("hidden");
 
-    // Cerrar dropdowns invisibles
-    document.querySelectorAll(".options").forEach((opt) => {
-      opt.classList.remove("open");
+      // Cerrar dropdowns invisibles
+      document.querySelectorAll(".options").forEach((opt) => {
+        opt.classList.remove("open");
+      });
+
+      // Ajustes por defecto
+      humanColor = "w";
+      selectedTime = null;
+
+      const playButton = document.getElementById("playButton");
+      if (playButton) playButton.classList.remove("hidden");
+
+      // Asegurar que el menú se renderiza correctamente
+      requestAnimationFrame(() => {
+        gameSetup.style.opacity = "1";
+        gameSetup.style.visibility = "visible";
+        gameSetup.style.display = "block";
+      });
     });
-
-    // Ajustes por defecto
-    humanColor = "w";
-    selectedTime = null;
-
-    const playButton = document.getElementById("playButton");
-    if (playButton) playButton.classList.remove("hidden");
-
-    // Asegurar que el menú se renderiza correctamente
-    requestAnimationFrame(() => {
-      gameSetup.style.opacity = "1";
-      gameSetup.style.visibility = "visible";
-      gameSetup.style.display = "block";
-    });
-  });
-}
-
+  }
 
   const mainSection = document.getElementById("mainSection");
 
@@ -192,6 +252,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (btnOnline && onlineChoice) {
     btnOnline.addEventListener("pointerup", () => {
+      const s = ensureSocket();
+      if (!s) {
+        alert(
+          "El modo online no funciona en GitHub Pages. Usa modo robot/local o despliega el servidor."
+        );
+        return;
+      }
+
       if (mainSection) mainSection.style.display = "none";
       onlineChoice.classList.remove("hidden");
       isOnlineGame = true;
@@ -209,11 +277,11 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnCreateRoom) {
     btnCreateRoom.addEventListener("pointerup", () => {
       btnCreateRoom.disabled = true;
-      socket.emit("newGame");
+      ensureSocket()?.emit("newGame");
     });
   }
 
-  socket.on("gameCreated", (roomId) => {
+  /* socket.on("gameCreated", (roomId) => {
     currentRoomId = roomId;
     if (roomCodeText && createdRoomBox) {
       roomCodeText.textContent = roomId;
@@ -234,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnJoinRoom && joinCodeInput) {
     btnJoinRoom.addEventListener("pointerup", () => {
       const code = (joinCodeInput.value || "").trim();
-      if (code) socket.emit("joinGame", code);
+      if (code) ensureSocket()?.emit("joinGame", code);
     });
   }
 
@@ -256,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
   socket.on("gameOver", (result) => {
     alert("Fin de la partida: " + result);
   });
-
+ */
   // ==========================================================
   // 3) DROPDOWNS DE CONFIGURACIÓN (dificultad / color / tiempo)
   // ==========================================================
@@ -2446,113 +2514,65 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ==========================================================
-// 26) INICIO Y RESETEO DE PARTIDA
-// ==========================================================
-function actuallyStartGame() {
-  // --- 1) Ajustar perfiles UI ---
-  syncProfilesUI();
+  // 26) INICIO Y RESETEO DE PARTIDA
+  // ==========================================================
+  function actuallyStartGame() {
+    // --- 1) Ajustar perfiles UI ---
+    syncProfilesUI();
 
-  // --- 2) Salud y puntuación inicial ---
-  maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
-  currentHealth = { ...maxHealth };
+    // --- 2) Salud y puntuación inicial ---
+    maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
+    currentHealth = { ...maxHealth };
 
-  scores = { w: 0, b: 0 };
-  updateScores();
-  updateHealthBar();
+    scores = { w: 0, b: 0 };
+    updateScores();
+    updateHealthBar();
 
-  // --- 3) Tiempo: fallback a infinito si no se seleccionó ---
-  if (selectedTime == null || isNaN(selectedTime)) {
-    selectedTime = Infinity;
-    console.log("Tiempo no seleccionado → modo infinito");
-  }
-
-  timers = { w: selectedTime, b: selectedTime };
-
-  // --- 4) Crear tablero ANTES de iniciar timers ---
-  setupInitialBoard();
-  renderBoard();
-
-  // --- 5) Mostrar tiempos ---
-  updateTimersDisplay();
-
-  // --- 6) Iniciar temporizador solo si hay un tiempo finito ---
-  if (Number.isFinite(timers[currentTurn])) {
-    startTimer(currentTurn);
-  }
-}
-
-if (playButton) {
-  playButton.addEventListener("pointerup", () => {
-    // --- 1) Tiempo por defecto: infinito si no se ha seleccionado ---
+    // --- 3) Tiempo: fallback a infinito si no se seleccionó ---
     if (selectedTime == null || isNaN(selectedTime)) {
       selectedTime = Infinity;
       console.log("Tiempo no seleccionado → modo infinito");
     }
 
-    const gameContainer = document.getElementById("gameContainer");
-    const gameSetup = document.getElementById("gameSetup");
-    const mainHeader = document.querySelector("header");
+    timers = { w: selectedTime, b: selectedTime };
 
-    // ⚠️ IMPORTANTE:
-    // Ya NO paramos la música del menú ni arrancamos la de juego aquí.
-    // Eso se hará cuando realmente entremos en la partida.
+    // --- 4) Crear tablero ANTES de iniciar timers ---
+    setupInitialBoard();
+    renderBoard();
 
-    // Aseguramos contenedores visibles detrás del overlay
-    if (gameContainer) gameContainer.classList.remove("hidden");
-    if (chessContainer) chessContainer.classList.remove("hidden");
+    // --- 5) Mostrar tiempos ---
+    updateTimersDisplay();
 
-    // Si NO hubiera overlay de carga, empezamos directamente
-    if (!pregameOverlay) {
-      playButton.classList.add("hidden");
-
-      if (gameSetup) {
-        gameSetup.style.display = "none";
-        gameSetup.classList.add("hidden");
-      }
-      if (mainHeader) {
-        mainHeader.classList.add("hidden");
-      }
-
-      document.body.classList.add("game-active");
-
-      // Paramos música menú y arrancamos música de juego
-      menuMusic.pause();
-      playGameMusic();
-
-      if (!hasGameStartedFromMenu) {
-        hasGameStartedFromMenu = true;
-        actuallyStartGame();
-      }
-      return;
+    // --- 6) Iniciar temporizador solo si hay un tiempo finito ---
+    if (Number.isFinite(timers[currentTurn])) {
+      startTimer(currentTurn);
     }
+  }
 
-    // --- 2) Mostrar overlay de carga pre-partida ---
-    pregameOverlay.style.opacity = 1;
-    pregameOverlay.style.display = "flex";
-    pregameProgress.style.width = "0%";
-    pregamePercent.textContent = "0%";
+  if (playButton) {
+    playButton.addEventListener("pointerup", () => {
+      // --- 1) Tiempo por defecto: infinito si no se ha seleccionado ---
+      if (selectedTime == null || isNaN(selectedTime)) {
+        selectedTime = Infinity;
+        console.log("Tiempo no seleccionado → modo infinito");
+      }
 
-    let progress = 0;
+      const gameContainer = document.getElementById("gameContainer");
+      const gameSetup = document.getElementById("gameSetup");
+      const mainHeader = document.querySelector("header");
 
-    const interval = setInterval(() => {
-      // Simulación de progreso
-      progress += Math.random() * 12;
-      if (progress > 100) progress = 100;
+      // ⚠️ IMPORTANTE:
+      // Ya NO paramos la música del menú ni arrancamos la de juego aquí.
+      // Eso se hará cuando realmente entremos en la partida.
 
-      pregameProgress.style.width = progress + "%";
-      pregamePercent.textContent = Math.floor(progress) + "%";
+      // Aseguramos contenedores visibles detrás del overlay
+      if (gameContainer) gameContainer.classList.remove("hidden");
+      if (chessContainer) chessContainer.classList.remove("hidden");
 
-      if (progress >= 100) {
-        clearInterval(interval);
+      // Si NO hubiera overlay de carga, empezamos directamente
+      if (!pregameOverlay) {
+        playButton.classList.add("hidden");
 
-        // --- 3) Inicializar la partida MIENTRAS el overlay todavía está encima ---
-        // Así el tablero y toda la lógica se preparan "por detrás"
-        if (!hasGameStartedFromMenu) {
-          hasGameStartedFromMenu = true;
-          actuallyStartGame();
-        }
-
-        // Ocultamos menú y header ya, aún cubiertos por el overlay → sin flash
         if (gameSetup) {
           gameSetup.style.display = "none";
           gameSetup.classList.add("hidden");
@@ -2563,76 +2583,119 @@ if (playButton) {
 
         document.body.classList.add("game-active");
 
-        // --- 4) Pequeña transición de fade del overlay ---
-        setTimeout(() => {
-          pregameOverlay.style.opacity = 0;
+        // Paramos música menú y arrancamos música de juego
+        menuMusic.pause();
+        playGameMusic();
 
-          setTimeout(() => {
-            pregameOverlay.style.display = "none";
-            playButton.classList.add("hidden");
-
-            if (isOnlineGame) {
-              onlineChoice?.classList.add("hidden");
-              onlineLobby?.classList.add("hidden");
-            }
-
-            if (gameContainer) gameContainer.classList.remove("hidden");
-            if (chessContainer) chessContainer.classList.remove("hidden");
-
-            // --- 5) AHORA sí: cambiamos la música ---
-            // Se ejecuta cuando el tablero ya está visible.
-            menuMusic.pause();
-            playGameMusic();
-          }, 400); // tiempo del fade-out
-        }, 300); // pausa breve tras llegar al 100%
+        if (!hasGameStartedFromMenu) {
+          hasGameStartedFromMenu = true;
+          actuallyStartGame();
+        }
+        return;
       }
-    }, 150);
-  });
-}
 
+      // --- 2) Mostrar overlay de carga pre-partida ---
+      pregameOverlay.style.opacity = 1;
+      pregameOverlay.style.display = "flex";
+      pregameProgress.style.width = "0%";
+      pregamePercent.textContent = "0%";
 
+      let progress = 0;
 
-function resetGame(skipConfirm = false) {
-  if (!skipConfirm) {
-    if (!confirm("¿Reiniciar partida?")) return;
+      const interval = setInterval(() => {
+        // Simulación de progreso
+        progress += Math.random() * 12;
+        if (progress > 100) progress = 100;
+
+        pregameProgress.style.width = progress + "%";
+        pregamePercent.textContent = Math.floor(progress) + "%";
+
+        if (progress >= 100) {
+          clearInterval(interval);
+
+          // --- 3) Inicializar la partida MIENTRAS el overlay todavía está encima ---
+          // Así el tablero y toda la lógica se preparan "por detrás"
+          if (!hasGameStartedFromMenu) {
+            hasGameStartedFromMenu = true;
+            actuallyStartGame();
+          }
+
+          // Ocultamos menú y header ya, aún cubiertos por el overlay → sin flash
+          if (gameSetup) {
+            gameSetup.style.display = "none";
+            gameSetup.classList.add("hidden");
+          }
+          if (mainHeader) {
+            mainHeader.classList.add("hidden");
+          }
+
+          document.body.classList.add("game-active");
+
+          // --- 4) Pequeña transición de fade del overlay ---
+          setTimeout(() => {
+            pregameOverlay.style.opacity = 0;
+
+            setTimeout(() => {
+              pregameOverlay.style.display = "none";
+              playButton.classList.add("hidden");
+
+              if (isOnlineGame) {
+                onlineChoice?.classList.add("hidden");
+                onlineLobby?.classList.add("hidden");
+              }
+
+              if (gameContainer) gameContainer.classList.remove("hidden");
+              if (chessContainer) chessContainer.classList.remove("hidden");
+
+              // --- 5) AHORA sí: cambiamos la música ---
+              // Se ejecuta cuando el tablero ya está visible.
+              menuMusic.pause();
+              playGameMusic();
+            }, 400); // tiempo del fade-out
+          }, 300); // pausa breve tras llegar al 100%
+        }
+      }, 150);
+    });
   }
 
-  stopTimer("w");
-  stopTimer("b");
+  function resetGame(skipConfirm = false) {
+    if (!skipConfirm) {
+      if (!confirm("¿Reiniciar partida?")) return;
+    }
 
-  menuMusic.play().catch(() => {});
-  gameMusic.pause();
+    stopTimer("w");
+    stopTimer("b");
 
-  isOnlineGame = false;
-  currentRoomId = null;
+    menuMusic.play().catch(() => {});
+    gameMusic.pause();
 
-  selectedTime = null;
+    isOnlineGame = false;
+    currentRoomId = null;
 
-  const mainHeader = document.querySelector("header");
-  if (mainHeader) {
-    mainHeader.classList.remove("hidden");
+    selectedTime = null;
+
+    const mainHeader = document.querySelector("header");
+    if (mainHeader) {
+      mainHeader.classList.remove("hidden");
+    }
+    document.body.classList.remove("game-active");
+
+    if (mainSection) mainSection.style.display = "block";
+    if (chessContainer) chessContainer.classList.add("hidden");
+
+    const history = document.querySelector(".move-history");
+    history.innerHTML = "";
+
+    setupInitialBoard();
+    renderBoard();
+    updateKingStatus();
   }
-  document.body.classList.remove("game-active");
 
-  if (mainSection) mainSection.style.display = "block";
-  if (chessContainer) chessContainer.classList.add("hidden");
+  // ==========================================================
+  // INICIO
+  // ==========================================================
 
-  const history = document.querySelector(".move-history");
-  history.innerHTML = "";
-
-  setupInitialBoard();
-  renderBoard();
-  updateKingStatus();
-}
-
-
-
-// ==========================================================
-// INICIO
-// ==========================================================
-
-
-window.addEventListener("beforeunload", () => {
-  socket.close();
+  window.addEventListener("beforeunload", () => {
+    socket?.close?.();
   });
 });
