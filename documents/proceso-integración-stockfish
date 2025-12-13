@@ -1,0 +1,19 @@
+El proceso implicará:
+
+1. Obtener Stockfish compilado a JavaScript/WebAssembly:
+Utilizarás una versión como stockfish.js que se ejecute en el navegador, idealmente en un Web Worker para evitar bloquear la interfaz.
+
+2. Configurar un Web Worker para Stockfish:
+Crearás un archivo worker (por ejemplo, stockfish-worker.js) que se encargue de iniciar y gestionar el motor Stockfish. Esto permitirá que la comunicación sea asíncrona.
+
+3. Adaptar la representación del tablero:
+Stockfish trabaja con el formato FEN. Necesitarás implementar funciones que conviertan tu representación interna del tablero a una cadena FEN y, posiblemente, también interpretar las respuestas de Stockfish.
+
+4. Comunicación con Stockfish mediante el protocolo UCI:
+En el worker, enviarás comandos UCI (como position fen ... y go depth ...) y recibirás la respuesta con el mejor movimiento en formato UCI (por ejemplo, "e2e4"). Luego, deberás traducir ese movimiento a tu lógica interna (coordenadas de tu tablero).
+
+5. Integrar el movimiento del robot en la lógica de juego:
+Reemplazarás o complementarás la función actual que usa el algoritmo minimax por una que invoque al worker de Stockfish para que te devuelva el movimiento óptimo. Una vez recibido el movimiento, lo aplicarás en tu tablero y ejecutarás las animaciones correspondientes.
+
+6. Realizar pruebas y ajustes:
+Debido a la conversión entre representaciones y la comunicación asíncrona, será importante depurar y probar el sistema para asegurar que Stockfish reciba correctamente la posición y que sus movimientos se traduzcan sin errores en el tablero.
