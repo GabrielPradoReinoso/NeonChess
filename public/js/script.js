@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 8) MÚSICA Y SONIDOS
   // ==========================================================
-  const menuMusic = new Audio("assets/sounds/game-music(10).mp");
+  const menuMusic = new Audio("assets/sounds/retro-main-theme.mp3");
   menuMusic.loop = true;
   menuMusic.volume = 0.6;
   menuMusic.play().catch(() => {});
