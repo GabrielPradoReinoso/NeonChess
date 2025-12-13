@@ -103,3 +103,5 @@ env.yaml
 # Quitar sonidos y videos por peso
 public/assets/sounds/
 public/assets/videos/
+
+*.mp3
