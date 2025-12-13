@@ -100,8 +100,5 @@ Thumbs.db
 # Environment / deployment config
 env.yaml
 
-# Quitar sonidos y videos por peso
-public/assets/sounds/
-public/assets/videos/
-
-*.mp3
+# Block GitHub >100MB file
+public/assets/sounds/game-music(20).mp3
