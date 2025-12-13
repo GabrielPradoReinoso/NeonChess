@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Página en desarrollo</title>
+  <!-- Enlaza tu CSS principal o copia sólo las reglas de .loading-overlay y .spinner -->
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Si prefieres aislarlo, puedes copiar sólo estas dos clases: */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #0f0d0a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: rgb(79, 246, 255);
+      font-family: "FrancoisOne", sans-serif;
+      text-shadow: 0 0 5px rgb(79, 246, 255);
+    }
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 10px solid rgb(33, 58, 74);
+      border-top-color: rgb(79, 246, 255);
+      box-shadow: 0px 0px 10px rgb(79, 246, 255);
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+      border-radius: 50%;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-overlay p {
+      font-size: 1.5rem;
+      text-align: center;
+      margin: 0 20px;
+    }
+  </style>
+</head>
+<body class="loading-overlay">
+  <div class="spinner"></div>
+  <p>Página en proceso de desarrollo</p>
+</body>
+</html>

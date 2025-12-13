@@ -1,0 +1,24 @@
+# Ignorar dependencias locales (Cloud Build las instala solo)
+node_modules/
+
+# Repositorio y cachés
+.git/
+.gitignore
+.firebase/
+firebase-debug.log
+*.log
+
+# SDKs/herramientas grandes que no hacen falta en el contenedor
+emsdk/
+
+# Solo backend en Cloud Run (el front va por Firebase Hosting)
+public/
+fonts/
+
+# Otros binarios/pesados si los hubiera
+*.mp3
+*.wav
+*.png
+*.jpg
+*.jpeg
+*.webp

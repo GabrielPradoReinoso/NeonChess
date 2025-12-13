@@ -1,0 +1,2081 @@
+/*-------------------------------*/
+/*--- VARIABLES Y TIPOGRAFÍAS ---*/
+/*-------------------------------*/
+
+/* Tipografías __________________________________________*/
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Merriweather:wght@300;400;700&display=swap");
+@font-face {
+  font-family: "FrancoisOne";
+  src: url(../assets/fonts/FrancoisOne-Regular.ttf);
+}
+/* ______________________________________________________*/
+
+/*----------------------------------*/
+/*---- ESTILOS BÁSICOS DE LA WEB ---*/
+/*----------------------------------*/
+
+/* Configuración básica ________________________________ */
+
+/* HTML y body___________________________________________*/
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background-color: rgb(19, 55, 80);
+}
+
+body{
+  box-shadow: 0px 0px 10px var(--cycle-border-color) inset;
+}
+
+/* Cuando el juego esté activo, bloquea todo scroll */
+body.game-active {
+  overflow: hidden;      /* ni vertical ni horizontal */
+  height: 100vh;         /* fuerza la altura exacta de la ventana */
+}
+
+/* evita scroll en el contenedor que muestra el tablero */
+#gameContainer {
+  overflow: hidden;      /* quita cualquier scroll interno */
+  height: 100vh;
+}
+
+
+/*________________________________________________________*/
+
+/* General________________________________________________*/
+* {
+  box-sizing: border-box;
+  user-select: none;
+  font-family: "FrancoisOne";
+}
+/* _______________________________________________________*/
+
+/* Header y footer ________________________________________*/
+header,
+footer {
+  flex-shrink: 1;
+}
+/* ________________________________________________________*/
+
+/* Secciones principales __________________________________*/
+.main-section,
+.game-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.game-container {
+  width: 100% !important;
+  animation: changeLights 10s linear infinite;
+  -webkit-animation: changeLights 10s linear infinite;
+  transition: all 300ms linear;
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+}
+
+body.game-active {
+  background-image: none;
+  background-color: #0f0d0a;
+}
+
+/* ____________________________________________________________*/
+
+/* Estilos para la cabecera de la web _________________________*/
+
+/*Estilos del contenedor del header*/
+.header {
+  display: grid;
+  grid-template-columns: 100px auto 100px !important;
+  background-color: #0f0d0a;
+  border-bottom: 3px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 30px var(--cycle-border-color) inset;
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+  padding: 10px;
+}
+
+/* Estilo para el logo de la web*/
+.logo {
+  width: 100%;
+  max-height: 120px;
+  border-top: 3px solid var(--cycle-border-color);
+  border-left: 3px solid var(--cycle-border-color);
+  border-bottom: 3px solid var(--cycle-border-color);
+
+  animation: changeLights 10s linear infinite;
+  -webkit-animation: changeLights 10s linear infinite;
+  border-radius: 10px 0px 0px 10px;
+  -webkit-border-radius: 10px 0px 0px 10px;
+  -moz-border-radius: 10px 0px 0px 10px;
+  -ms-border-radius: 10px 0px 0px 10px;
+  -o-border-radius: 10px 0px 0px 10px;
+}
+
+#logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px 0px 0px 10px;
+  -webkit-border-radius: 10px 0px 0px 10px;
+  -moz-border-radius: 10px 0px 0px 10px;
+  -ms-border-radius: 10px 0px 0px 10px;
+  -o-border-radius: 10px 0px 0px 10px;
+}
+
+/* Estilos para el titulo principal de la web */
+.main-title {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  height: 120px;
+  padding: 0 10px;
+  background-color: rgb(12 39 58);
+  border: 3px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 10px var(--cycle-border-color) inset;
+  animation: changeColorBackground 6s linear infinite;
+  -webkit-animation: changeColorBackground 6s linear infinite;
+}
+
+@keyframes changeColorBackground {
+  0% {
+    background-color: rgb(12 39 58);
+  }
+  50% {
+    background-color: rgb(46, 12, 58);
+  }
+  100% {
+    background-color: rgb(12 39 58);
+  }
+}
+
+.main-title a {
+  
+  height: 100%;
+  width: 100%;
+  line-height: 1;   
+  font-size: clamp(1.5rem, 8vw, 6rem);
+  letter-spacing: clamp(0.1em, 0.5vw, 0.5em);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: font-size 200ms ease, letter-spacing 200ms ease;
+  text-shadow: 0px 0px 5px var(--cycle-border-color);
+  color: rgb(79, 246, 255);
+  animation: changeColorText 6s linear infinite;
+  -webkit-animation: changeColorText 6s linear infinite;
+
+  font-size: clamp(1.2rem, 5vw, 3rem) !important;
+  letter-spacing: clamp(0.05em, 0.2vw, 0.2em) !important;
+  transition: font-size 200ms, letter-spacing 200ms !important;
+
+  -webkit-transition: font-size 200ms, letter-spacing 200ms !important;
+  -moz-transition: font-size 200ms, letter-spacing 200ms !important;
+  -ms-transition: font-size 200ms, letter-spacing 200ms !important;
+  -o-transition: font-size 200ms, letter-spacing 200ms !important;
+
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes changeColorText {
+  0% {
+    text-shadow: 0px 0px 5px var(--cycle-border-color);
+}
+  50% {
+    text-shadow: 0px 0px 20px #ff71ea;
+    color: #f6d6ff;
+  }
+  100% {
+    text-shadow: 0px 0px 5px var(--cycle-border-color);
+  }
+}
+
+/* Botón del menú del header*/
+.menu-dropdown {
+  position: relative;
+}
+
+/*Menú*/
+.menu-button {
+  width: 100%;
+  height: 120px;
+  border: none;
+  font-size: 2rem;
+
+  margin: 0px;
+  padding: 1px 1px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-top: 3px solid var(--cycle-border-color);
+  border-right: 3px solid var(--cycle-border-color);
+  border-bottom: 3px solid var(--cycle-border-color);
+
+  color: rgb(79, 246, 255);
+  background-color: rgb(12 39 58);
+  touch-action: manipulation;
+  animation: changeLights 10s linear infinite;
+  -webkit-animation: changeLights 10s linear infinite;
+  border-radius: 0px 10px 10px 0px;
+  -webkit-border-radius: 0px 10px 10px 0px;
+  -moz-border-radius: 0px 10px 10px 0px;
+  -ms-border-radius: 0px 10px 10px 0px;
+  -o-border-radius: 0px 10px 10px 0px;
+  
+}
+
+.dropdown-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  background-color: rgb(12 39 58);
+  border: 3px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 15px var(--cycle-border-color);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  padding-top: 20px;
+  box-shadow: 0 0 10px rgb(79, 246, 255) inset;
+}
+
+.dropdown-menu.show {
+  transform: translateX(0);
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-top: 100px;
+}
+
+.dropdown-menu a{
+  text-decoration: none;
+}
+
+.dropdown-menu a:hover{
+  background-color: #00dfff;
+}
+
+.dropdown-menu li {
+  padding: 25px 20px;
+  border-bottom: 3px solid var(--cycle-border-color);
+  cursor: pointer;
+  transition: background 0.3s;
+  color: rgb(79, 246, 255);
+  font-weight: bold;
+  font-size: 20px;
+  box-shadow: 0 0 10px rgb(79, 246, 255) inset;
+}
+
+.dropdown-menu li:hover {
+  background-color: var(--highlight-color);
+}
+
+/* Botón de cierre ("X") */
+.menu-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 2rem;
+  color: rgb(79, 246, 255);
+  cursor: pointer;
+  transition: transform 0.3s;
+  border: 2px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px var(--cycle-border-color);
+  padding: 0px 16px;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.menu-close:hover {
+  transform: scale(1.1);
+}
+/* ____________________________________________________________*/
+
+/* Main de la web ______________________________________________*/
+.main-section {
+  padding: 40px 20px;
+  text-align: center;
+  
+  background-size: 100% 100%;
+}
+
+.start-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.btn {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  color: #0f0d0a;
+  text-shadow: 0px 0px 2px var(--cycle-border-color);
+  background-color: rgb(41, 244, 255);
+  border: 3px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 30px var(--cycle-border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+  touch-action: manipulation;
+  animation: efectoBoton 1s linear;
+  -webkit-animation: efectoBoton 1s linear;
+  padding: 10px;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+
+@keyframes efectoBoton {
+  0% {
+    background-color: #0f0d0a;
+    color: rgb(79, 246, 255);
+  }
+  100% {
+    background-color: rgb(79, 246, 255);
+    color: #0f0d0a;
+    box-shadow: 0px 0px 30px var(--cycle-border-color);
+    text-shadow: 0px 0px 2px var(--cycle-border-color);
+  }
+}
+
+
+#btnOnline,
+#btnLocal
+{
+  font-size: 100%;
+  width: 220px;
+  padding: 20px;
+  border: 3px solid rgb(79, 246, 255);
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  background-color: rgb(12 39 58);
+  color: rgb(79, 246, 255);
+  animation: flashLight 5s linear infinite;
+  -webkit-animation: flashLight 5s linear infinite;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 300ms linear;
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+}
+
+#btnLocal{
+  animation: none;
+  -webkit-animation: none;
+}
+
+
+@keyframes flashLight {
+  0% {
+    box-shadow: 0px 0px 0px var(--cycle-border-color);
+  }
+  50% {
+    box-shadow: 0px 0px 30px rgb(255, 79, 246);
+    text-shadow: 0px 0px 30px rgb(255, 255, 255);
+    background-color: #0f5a7a;
+    border: 3px solid rgb(255, 202, 252);
+    color: rgb(246, 174, 255);
+}
+  100% {
+    box-shadow: 0px 0px 0px var(--cycle-border-color);
+  }
+}
+
+#btnOnline:hover,
+#btnLocal:hover {
+  background-color: rgb(52, 116, 162);
+  color: rgb(79, 246, 255);
+  box-shadow: 0px 0px 30px var(--cycle-border-color);
+}
+
+/*----PRINCIPIO PANEL DEL BOTÓN MENÚ ONLINE--------------------------------------*/
+.online-choice { 
+  margin: 1.5rem auto; max-width: 520px; 
+  padding: 16px; border-radius: 14px; 
+  background: rgba(15,13,10,.75); 
+  backdrop-filter: blur(6px); 
+  color: rgb(79,246,255);
+  box-shadow: 0 0 12px rgba(79,246,255,.15);
+  border: 2px solid rgb(79,246,255);
+  box-shadow: 0px 0px 30px var(--cycle-border-color);
+}
+.online-choice.hidden { 
+  display:none; 
+}
+.online-choice h3 { 
+  margin: 0 0 .8rem; 
+  font-family: "FrancoisOne", sans-serif; 
+  text-align: center;
+  border-bottom: 1px solid rgb(79,246,255);
+  padding-bottom: 10px;
+
+}
+
+.online-info{
+  border-bottom: 1px solid rgb(79,246,255);
+  padding-bottom: 10px;
+}
+
+.marked-text{
+  color: rgb(228, 97, 221);
+}
+
+.created-room { 
+  margin-top: 14px; 
+}
+
+.created-room.hidden { 
+  display:none; 
+}
+.code-line { 
+  display:flex; 
+  gap:8px; 
+  align-items:center; 
+}
+
+.code-line code { 
+  font-size: 1.2rem; 
+  padding:6px 10px; 
+  border-radius:8px; 
+  background:#081219; 
+  border:1px solid rgb(33,58,74); 
+  color:#4ff6ff; 
+  text-shadow: 0 0 5px rgb(79,246,255);
+}
+
+.btn.small { 
+  padding:6px 10px; 
+  font-size:.9rem; 
+}
+.btn.ghost { 
+  background: transparent; 
+  border:1px solid rgb(33,58,74); 
+}
+.btn.primary { 
+  box-shadow: 0 0 10px rgba(79,246,255,.35); 
+}
+.muted { 
+  opacity:.8; 
+  font-size:.9rem; 
+}
+/*----FIN PANEL DEL BOTÓN MENÚ ONLINE--------------------------------------*/
+
+/*----------------------------------------------------------------*/
+/* ____________________________________________________________*/
+
+/* Estilos footer ______________________________________________*/
+footer {
+  background-color: rgb(12 39 58);
+  background-size: 100% 100%;
+  color: rgb(79, 246, 255);
+  text-shadow: 0px 0px 2px var(--cycle-border-color);
+  text-align: center;
+  padding: 20px 10px;
+  border-top: 3px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 15px var(--cycle-border-color) inset;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+footer a {
+  color: #eee;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+body.game-active footer {
+  display: none !important;
+}
+
+/* ____________________________________________________________*/
+
+/*--------------------------------------------------*/
+/*- ESTILOS DE LA PAGINA DE CONFIGURACIÓN DE JUEGO -*/
+/*--------------------------------------------------*/
+
+/* Contenedor de la pagina de configuración ____________________*/
+.game-container {
+  position: relative;
+  padding: 0px;
+  background-color: #0a1b24;
+}
+/* ____________________________________________________________*/
+
+
+/* Contenedor del menú de la configuración de juego ____________*/
+.game-setup {
+  position: relative !important;
+  z-index: 10 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-align: center;
+  height: 100%;
+  max-width: 680px;
+  padding: 10px 0px;
+  margin: auto;
+}
+/* ____________________________________________________________*/
+
+/* Título de la configuración de juego _________________________*/
+#game-setup-title {
+  color: rgb(79, 246, 255);
+  text-shadow: 0px 0px 30px rgb(79, 246, 255);
+  background-color: #0b496b;
+  box-shadow: 0px 0px 20px #860073 inset;
+  padding: 20px 5px;
+  margin: 0px 10px;
+  border: 2px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  border-radius: 10px 10px 0px 0px;
+  -webkit-border-radius: 10px 10px 0px 0px;
+  -moz-border-radius: 10px 10px 0px 0px;
+  -ms-border-radius: 10px 10px 0px 0px;
+  -o-border-radius: 10px 10px 0px 0px;
+}
+/* ____________________________________________________________*/
+
+/* Sección para la configuración del juego _____________________*/
+#config-options {
+  height: 70%;
+  max-height: 100%;
+  min-height: 350px;
+  margin: 0px 10px;
+  background-color: #02cdd47a;
+  border-left: 2px solid rgb(79, 246, 255);
+  border-bottom: 2px solid rgb(79, 246, 255);
+  border-right: 2px solid rgb(79, 246, 255);
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  border-radius: 0px 0px 10px 10px;
+  -webkit-border-radius: 0px 0px 10px 10px;
+  -moz-border-radius: 0px 0px 10px 10px;
+  -ms-border-radius: 0px 0px 10px 10px;
+  -o-border-radius: 0px 0px 10px 10px;
+}
+/* ____________________________________________________________*/
+
+/* Maquetación de las opciones de juego ________________________*/
+.plantilla-dos {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  align-items: center;
+  text-align: center;
+}
+/* ____________________________________________________________*/
+
+/* Estilo para los labels de las opciones ______________________*/
+#config-options label {
+  text-align: center;
+  color: rgb(79, 246, 255);
+  border-top: 3px solid rgb(79, 246, 255);
+  border-left: 3px solid rgb(79, 246, 255);
+  border-bottom: 3px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 15px var(--cycle-border-color);
+  padding: 5px 5px;
+  text-shadow: 0px 0px 1px rgb(79, 246, 255);
+  height: 50px;
+  line-height: 34px;
+  border-radius: 10px 0px 0px 10px;
+  -webkit-border-radius: 10px 0px 0px 10px;
+  -moz-border-radius: 10px 0px 0px 10px;
+  -ms-border-radius: 10px 0px 0px 10px;
+  -o-border-radius: 10px 0px 0px 10px;
+  background-color: #121c40;
+}
+/* ____________________________________________________________*/
+
+/* Estilos de los botones del modo de juego _____________________*/
+.buttons {
+  font-size: 1.1rem;
+  color: #0f0d0a;
+  background-color: rgb(79, 246, 255);
+  padding: 5px 5px;
+  height: 50px;
+  line-height: 34px;
+  box-shadow: 0px 0px 15px var(--cycle-border-color);
+  text-shadow: 0px 0px 2px var(--cycle-border-color);
+  outline: none;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 0px 10px 10px 0px;
+  -webkit-border-radius: 0px 10px 10px 0px;
+  -moz-border-radius: 0px 10px 10px 0px;
+  -ms-border-radius: 0px 10px 10px 0px;
+  -o-border-radius: 0px 10px 10px 0px;
+  border: 3px solid var(--cycle-border-color);
+}
+
+/* ____________________________________________________________*/
+
+#timeOptions {
+  position: fixed !important;
+  top: var(--header-height);
+  bottom: var(--footer-height);
+  left: 0;
+  width: 100%;
+  padding-top: 20%;
+  background: rgba(12, 39, 58, 0.95);
+  overflow-y: auto;
+  box-shadow: 0 0 30px var(--cycle-border-color);
+  z-index: 1000;
+  box-shadow: 0 0 20px var(--cycle-border-color) inset;
+}
+
+/* Estilos para las opciones de dificultad _____________________*/
+
+#difficultySelector .option {
+  list-style: none;
+  padding: 40px;
+  color: rgb(79, 246, 255);
+  background-color: rgba(12, 39, 58, 0.937);
+  text-shadow: 0px 0px 2px white;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  box-shadow: 0px 0px 15px var(--cycle-border-color);
+  transition: opacity 0.3s ease;
+  font-weight: 500;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  -o-transform: translateX(-50%);
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+}
+/* ____________________________________________________________*/
+
+/* Estilo para el botón de iniciar partida _____________________*/
+#playButton {
+  margin-bottom: 5px;
+  padding: 10px 70px;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  color: #001444e0;
+  border: 3px solid var(--cycle-border-color);
+}
+/* ____________________________________________________________*/
+
+/* ------------------------------------------------- */
+/* Layout flex para filas de opciones de configuración */
+/* ------------------------------------------------- */
+.plantilla-dos {
+  margin-top: 20px;
+}
+
+.plantilla-dos > label {
+  flex: 0 0 40%;
+  text-align: left;
+  color: rgb(79, 246, 255);
+}
+
+.plantilla-dos .buttons,
+.plantilla-dos .dropdown {
+  flex: 1 1 60%;
+}
+
+/* -------------------------------------------------- */
+/* Dropdown a pantalla completa (entre header/footer) */
+/* -------------------------------------------------- */
+
+/* Asegúrate de que el contenedor siempre esté en posición relativa */
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+/* Aplica a todos los .options dentro de .dropdown */
+.dropdown .options {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  position: fixed !important;
+  top: var(--header-height);
+  bottom: var(--footer-height);
+  left: 0;
+  width: 100%;
+  max-height: none;
+  height: auto;
+  margin: 0;
+  padding-top: 5px;
+  padding-left: 10%;
+  padding-right: 10%;
+  background-color: rgba(12, 39, 58, 0.937);
+  border-radius: 0;
+  box-shadow: 0 0 20px var(--cycle-border-color) inset;
+  overflow-y: auto;
+  z-index: 1000;
+  text-align: center;
+  list-style: none;
+  color: rgb(79, 246, 255);
+  border-left: 2px solid rgb(79, 246, 255);
+  border-right: 2px solid rgb(79, 246, 255);
+}
+
+.dropdown .options.open {
+  display: block !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+/* Mantén tu estilo neón en cada li */
+.dropdown .options li {
+  border-radius: 6px;
+  padding: 5px;
+  margin-top: 50px;
+  
+  border: 2px solid rgb(79, 246, 255);
+  box-shadow: 0 0 3px var(--cycle-border-color);
+  background-color: rgb(12 39 58);
+  transition: all 300ms linear;
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+  text-transform: uppercase;
+}
+
+.options li:hover {
+  background-color: rgba(201, 97, 218, 0.808);
+  border: 2px solid rgb(244, 172, 255);
+  box-shadow: 0px 0px 5px rgb(242, 154, 255);
+  color: rgb(244, 172, 255);
+}
+
+.dropdown button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#colorOptions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* centra los <li> horizontalmente */
+  gap: 20px;                 /* espacio vertical entre cada opción */
+  padding: 0;                /* opcional: elimina padding extra */
+  margin: 0 auto;            /* centra el contenedor en pantallas grandes */
+  list-style: none;          /* quita los “•” si los tuvieras */
+}
+
+#colorOptions li {
+  display: block;
+  font-weight: bold;
+  max-width: 200px;
+  max-height: 200px;
+  height: 200px;
+  text-align: center;
+  
+}
+
+/* 1) Cuando el dropdown de color está abierto, conviértelo en flexbox centrado */
+.dropdown .options.open#colorOptions {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0 !important;   /* separa un poco de header/footer */
+  height: auto !important;      /* que crezca según los items */
+}
+
+/* 2) Estilo de cada <li> dentro de ese flexbox */
+.dropdown .options.open#colorOptions li {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 0;    /* si quieres más espacio arriba/abajo */
+  width: 80%;            /* ocupe un % razonable del contenedor */
+  max-width: 220px;      /* y no se pase en pantallas anchas */
+  margin: 10px 0 !important;  
+  text-align: center;
+}
+
+
+#pinkColor {
+  background-color: rgba(201, 97, 218, 0.808);
+  border: 3px solid rgb(244, 172, 255) !important;
+  box-shadow: 0px 0px 10px rgb(242, 154, 255);
+  color: rgb(244, 172, 255);
+  transition: all 300ms linear;
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+  text-align: center;
+  align-items: center;
+}
+
+#pinkColor:hover {
+  background-color: rgba(245, 182, 255, 0.808);
+  border: 3px solid rgb(253, 240, 255);
+  box-shadow: 0px 0px 40px rgb(242, 154, 255);
+  color: rgb(253, 240, 255);
+}
+
+#blueColor {
+  background-color: rgba(69, 113, 153, 0.808);
+  border: 3px solid rgb(74, 255, 255);
+  box-shadow: 0px 0px 10px rgb(157, 211, 255);
+  color: rgb(74, 255, 255);
+  transition: all 300ms linear;
+}
+
+#blueColor:hover {
+  background-color: rgba(132, 204, 209, 0.808);
+  border: 3px solid rgb(74, 255, 255);
+  box-shadow: 0px 0px 40px rgb(199, 230, 255);
+  color: rgb(176, 255, 255);
+}
+
+#colorOptions img {
+  width: 70px;
+  margin-bottom: 5px;
+}
+.hidden {
+  display: none;
+}
+
+/*-------------------------------------------*/
+/*---- ESTILOS PARA LA PAGINA DE AJEDREZ ----*/
+/*-------------------------------------------*/
+
+/* Tablero y contenedor de ajedrez_____________________________*/
+.chess-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 70px);
+  grid-template-rows: repeat(8, 70px);
+  gap: 0;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  margin: 0;
+  padding: 0;
+  position: relative;
+  border-top: 3px  solid var(--cycle-border-color);
+  border-bottom: 3px  solid var(--cycle-border-color);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#chessBoard.flipped { transform: none; } /* o elimina la regla */
+
+
+
+/* ____________________________________________________________*/
+
+/* Estilos para las casillas y piezas del tablero ______________*/
+.cell {
+  position: relative;
+  box-shadow: 0px 0px 5px var(--cycle-border-color) inset;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  background-size: cover;
+  background-position: center;
+  touch-action: manipulation;
+}
+
+/* Casillas claras*/
+.cell.light {
+  background-color: rgba(79, 246, 255, 0.849);
+}
+
+/* Casillas oscuras*/
+.cell.dark {
+  background-color: #121c40e1;
+}
+
+/* Overlay para celdas seleccionadas*/
+.cell.selected::after,
+.cell.highlight::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(217, 133, 248, 0.453);
+  box-shadow: 0px 0px 5px rgb(242, 0, 197) inset;
+  z-index: 0;
+  pointer-events: none;
+  animation: moveLight 1s backwards;
+  -webkit-animation: moveLight 1s backwards;
+}
+
+/* Estilo para el indicador de movimiento válido */
+.move-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(217, 133, 248, 0.453);
+  box-shadow: 0px 0px 5px rgb(242, 0, 197) inset;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Iluminación para el rey en jaque */
+.cell.check::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(195, 226, 17, 0.545);
+  box-shadow: 0px 0px 10px rgb(242, 255, 0) inset;
+  border: none;
+  pointer-events: none;
+  z-index: 3;
+  transition: background 0.3s;
+}
+
+/* Iluminación para el rey en jaque mate */
+.cell.checkmate::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(255, 163, 163);
+  box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+  pointer-events: none;
+  z-index: 5;
+  transition: background 0.1s;
+  -webkit-transition: background 0.1s;
+  -moz-transition: background 0.1s;
+  -ms-transition: background 0.1s;
+  -o-transition: background 0.1s;
+}
+
+/*Iluminación para el indicador de movimiento incorrecto*/
+.blink-error {
+  animation: blinkError 300ms ease;
+  -webkit-animation: blinkError 300ms ease;
+}
+
+@keyframes blinkError {
+  0% {
+    background-color: black;
+  }
+  25% {
+    background: rgb(255, 163, 163);
+  box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+  }
+  50% {
+    background-color: black;
+  }
+  75% {
+    background: rgb(255, 163, 163);
+  box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+  
+  }
+  100% {
+    background-color: black;
+  }
+}
+
+/* Estilos de las imágenes de las piezas */
+
+.cell img {
+  opacity: 1 !important;
+  z-index: 9999 !important;
+  height: auto;
+  width: 76% !important;
+  touch-action: none;
+}
+
+/* Animación de las piezas */
+
+.clone-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 300;
+  will-change: transform, opacity, filter;
+  animation: cloneExplosion 1400ms steps(1, end) forwards;
+}
+
+/* CSS */
+.clone-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  /*tamañoinicial,ajústalosihacefalta*/
+  height: 40px;
+  pointer-events: none;
+  z-index: 300;
+  transform-origin: center center;
+  animation: cloneExplosion 1000ms ease-out forwards;
+  -webkit-animation: cloneExplosion 1000ms ease-out forwards;
+}
+
+@keyframes cloneExplosion {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(0);
+    opacity: 1;
+  }
+  100% {
+    /* var(--dx), var(--dy) inyectados desde JS */
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Mejora de estilo para coordenadas */
+.coord-label {
+  position: absolute;
+  font-family: "FrancoisOne";
+  font-size: 0.65rem;
+  font-weight: 100;
+  color: rgb(17, 255, 255);
+  text-shadow: 0px 0px 10px rgb(17, 255, 255);
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+}
+
+.coord-label.row {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+.coord-label.col {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+}
+
+/* ____________________________________________________________*/
+
+/* Estilos para los perfiles de los jugadores___________________*/
+
+/*Contenedor de los perfiles de los jugadores*/
+.player-profile {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 4px 3px;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  border: 3px solid var(--cycle-border-color);
+  width: 100%;
+  max-width: 360px;
+  height: 80px;
+  color: rgb(79, 246, 255);
+  background-color: #121c40e9;
+  background-size: 100% 100%;
+  text-shadow: 0px 0px 1px black;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+/*Margenes de los perfiles*/
+/*Perfil superior*/
+.player-profile.top {
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+/*------------------------------------------------*/
+/* MATRIX RAIN AS PAGE BACKGROUND                */
+/*------------------------------------------------*/
+
+/* 1) El profile debe ser contenedor relativo */
+#player1 {
+  position: relative;
+  overflow: hidden; /* recorta la lluvia fuera del perfil */
+}
+
+/* 2) El overlay cubre TODO #player1 */
+.matrix-overlay-player1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  -webkit-transition: opacity 0.2s ease;
+  -moz-transition: opacity 0.2s ease;
+  -ms-transition: opacity 0.2s ease;
+  -o-transition: opacity 0.2s ease;
+  z-index: 0;
+}
+
+/* 3) Cuando entra en “thinking” lo haces visible */
+#player1.thinking .matrix-overlay-player1.visible {
+  opacity: 1;
+}
+
+/* 4) Cada columna de 0/1 flota encima, animándose igual que antes */
+.matrix-overlay-player1 .matrix-col {
+  position: absolute;
+  bottom: 100%; /* arrancan fuera arriba */
+  font-family: monospace;
+  font-size: 19px;
+  font-weight: lighter;
+  line-height: 28px; /* coincide con tu cálculo */
+  color: rgba(79, 246, 255, 0.903);
+  text-shadow: 0px 0px 2px rgb(79, 246, 255);
+  animation-name: matrix-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  z-index: 0;
+}
+
+/* 5) Keyframes idénticos a los que tenías */
+@keyframes matrix-fall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+    -webkit-transform: translateY(100%);
+    -moz-transform: translateY(100%);
+    -ms-transform: translateY(100%);
+    -o-transform: translateY(100%);
+  }
+}
+
+/* 1) Asegúrate de que el overlay esté en z-index 0 */
+.matrix-overlay-player1 {
+  z-index: 0 !important;
+}
+
+.profile-info{
+  padding: 5px;
+  background-color: #000000;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  border: 2px solid var(--cycle-border-color);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+/* 2) Eleva explícitamente tanto la imagen como la info */
+#player1 .profile-image,
+#player1 .profile-info {
+  position: relative; /* para que z-index funcione */
+  z-index: 1 !important;
+}
+
+/*Perfil inferior*/
+.player-profile.bottom {
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+/*Estilos para las imágenes de los perfiles de los jugadores*/
+.profile-image img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  margin-right: 10px;
+  margin-left: 5px;
+  background-color: black;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  border: 2px solid var(--cycle-border-color);
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+/*Seccion para la información de los perfiles de los jugadores*/
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Estilos para el indicador del nivel del robot*/
+.robot-diff {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e5ff4f;
+  background-color: #0f0d0a;
+  padding: 2px 6px;
+  box-shadow: 0 0 6px #e5ff4f;
+  border: 3px solid #e5ff4f;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+/*Estilos para los nombres de los jugadores*/
+.player-name {
+  font-family: "FrancoisOne";
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0px 0px 2px black;
+  border: 1px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  background-color: #000000;
+  padding: 6px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+/*Estilos para los tiempos de los jugadores*/
+.player-timer {
+  background-color: black;
+  font-weight: bold;
+  color: rgb(79, 246, 255);
+  border: 1px solid var(--cycle-border-color);
+  box-shadow: 0px 0px 8px var(--cycle-border-color);
+  padding: 4px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+/* Estilos para los puntos de los jugadores*/
+.player-score {
+  background-color: var(--cycle-border-color);
+  box-shadow: 0px 0px 8px var(--cycle-border-color);
+  color: #080401;
+  padding: 5px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+/* ____________________________________________________________*/
+
+/* Barras de salud de los jugadores_____________________________*/
+
+/* Estilos para la barra de salud vacia*/
+.health-bar {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  width: 345px;
+  height: 20px;
+  background: #121c40cb;
+  box-shadow: 0px 0px 6px #263d8ff6 inset;
+  overflow: hidden;
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
+  border: 2px solid rgb(79, 246, 255);
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+/* Estilos para la barra de salud llena*/
+.health-progress {
+  height: 100%;
+  width: 100%;
+  background-color: hsl(210, 70%, 50%);
+  box-shadow: 0px 0px 10px white;
+  transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+  animation: colorTransitio 2s linear infinite;
+  -webkit-animation: colorTransitio 2s linear infinite;
+}
+
+/* Margen para la barra de salud superior */
+.health-bar-top {
+  top: -15px;
+  margin-top: 20px;
+}
+
+/* Margen para la barra de salud inferior */
+.health-bar-bottom {
+  margin-bottom: 15px;
+}
+/* Estilos para botones de control de juego______________________*/
+
+/* Contenedor para los botones de control y navegación del juego*/
+#controlBar {
+  display: flex;
+  flex-direction: row;
+  height: 30px;
+  margin-bottom: 0;
+  gap: 10px;
+}
+
+/*Estilos para los botones de control y navegación del juego*/
+#controlBar button {
+  background: var(--cycle-border-color);
+  box-shadow: 0px 0px 8px var(--cycle-border-color);
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  border: 2px solid var(--cycle-border-color);
+  touch-action: manipulation;
+  font-family: "FrancoisOne";
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+/* Imagenes para los botones de control y navegación del juego*/
+#controlBar button img {
+  width: 20px;
+  height: auto;
+}
+/* ____________________________________________________________*/
+
+/* Estilos para el modal de promoción__________________________*/
+
+/*Estilos para el contenedor del modal de promoción*/
+#promotionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  color: rgb(79, 246, 255);
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
+  border: 3px solid rgb(79, 246, 255);
+  font-family: "FrancoisOne";
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* Estilos para el contenido general del modal de promoción*/
+#promotionModal .modal-content {
+  background-color: #121c40e9;
+  padding: 30px 30px;
+  color: rgb(79, 246, 255);
+  border: 3px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
+  text-align: center;
+}
+
+/* Estilos para las opciones de modal de promoción*/
+#promotionModal .promotion-options {
+  gap: 20px;
+  margin-top: 20px;
+  padding: 20px;
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
+  border: 3px solid rgb(79, 246, 255);
+}
+
+/* Estilos de las imagenes de las opciones de la promoción*/
+#promotionModal .promotion-options img {
+  width: 55px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 3px solid rgb(79, 246, 255);
+  margin: 5px;
+  padding: 10px;
+}
+
+#promotionModal .promotion-options img:hover {
+  transform: translateY(-4px);
+}
+/* ____________________________________________________________*/
+
+/* Estilos para el modal de fin de partida _____________________*/
+
+/* Estilos de la ventana de fin de partida */
+#endGameModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #121c4095;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2100;
+  color: rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+}
+
+/* Estilos para el contenedor de la ventana de fin de partida */
+#endGameModal .modal-content {
+  width: 80%;
+  max-width: 500px;
+  height: 400px;
+  background: #121c40;
+  padding: 20px;
+  text-align: center;
+  margin: 10px;
+  border: 2px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+/* Estilos para el titulo de la ventana */
+#endGameModal h2 {
+  font-family: "FrancoisOne";
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  text-shadow: 0px 0px 9px rgb(79, 246, 255);
+}
+
+/* Estilos para el parrafo de la ventana*/
+#endGameModal p {
+  font-family: "FrancoisOne";
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  text-shadow: 0px 0px 5px rgb(79, 246, 255);
+}
+
+/* Estilos para los botones de la ventana*/
+#endGameModal .modal-btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/*Estilos para las imagenes de la ventana */
+#endGameModal .endgame-imgs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+#endGameModal .endgame-imgs img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin: 0 8px;
+  border: 3px solid var(--cycle-border-color);
+  box-shadow: 0 0 10px var(--cycle-border-color);
+}
+/* ____________________________________________________________*/
+
+/* Estilos para la pantalla de carga principal__________________*/
+
+/* Estilos de la pagina completa de carga*/
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0d0a;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: rgb(79, 246, 255);
+  font-family: "FrancoisOne", sans-serif;
+  text-shadow: 0 0 5px rgb(79, 246, 255);
+}
+
+/* Estilos y animación para el spinner de carga_________________*/
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 10px solid rgb(33, 58, 74);
+  border-top-color: rgb(79, 246, 255);
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ____________________________________________________________*/
+
+/*-----------------------------------------*/
+/*------- ESTILOS PÁGINAS DE CARGAS -------*/
+/*-----------------------------------------*/
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(20, 20, 20);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  flex-direction: column;
+  color: rgb(79, 246, 255);
+  font-family: "FrancoisOne", sans-serif;
+  text-shadow: 0 0 5px rgb(79, 246, 255);
+}
+.overlay.hidden {
+  display: none;
+}
+
+/* Precarga pre-partida */
+.progress-bar {
+  width: 300px;
+  height: 40px;
+  background: #121c40;
+  border: 2px solid rgb(79, 246, 255);
+  border-radius: 4px;
+  box-shadow: 0px 0px 10px rgb(79, 246, 255);
+  overflow: hidden;
+  margin-top: 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: rgb(79, 246, 255);
+  transition: width 0.2s ease;
+}
+
+/* Cuenta regresiva */
+.countdown-number {
+  font-size: 6rem;
+  animation: pulse 1s infinite;
+  -webkit-animation: pulse 1s infinite;
+  border: 10px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 15px var(--cycle-border-color);
+  padding: 30px 60px;
+  scale: 2;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+@keyframes pulse {
+  0% {
+    border: 10px solid rgb(79, 246, 255);
+    transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -o-transform: scale(0.5);
+  }
+
+  50% {
+    border: 10px solid rgb(226, 79, 255);
+    box-shadow: 0px 0px 40px rgb(226, 79, 255);
+    color: rgb(226, 79, 255);
+    text-shadow: 0px 0px 5px rgb(226, 79, 255);
+    transform: scale(1);
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+  }
+
+  100% {
+    border: 10px solid rgb(79, 246, 255);
+    transform: scale(0.5);
+    -webkit-transform: scale(0.5);
+    -moz-transform: scale(0.5);
+    -ms-transform: scale(0.5);
+    -o-transform: scale(0.5);
+  }
+}
+
+/* 2) Solo cuando el cuerpo tenga la clase .game-active (es decir, tras la intro y la carga), muestra el contenedor */
+body.game-active .chess-container {
+  display: flex !important;
+  height: 100%;
+  background-size: 100% 100%;
+  
+}
+
+
+
+/* Animación para el texto ¡JAQUE! */
+@keyframes checkAnimation {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 1;
+    -webkit-transform: translate(-50%, -50%) scale(2);
+    -moz-transform: translate(-50%, -50%) scale(2);
+    -ms-transform: translate(-50%, -50%) scale(2);
+    -o-transform: translate(-50%, -50%) scale(2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.1);
+    opacity: 0;
+    -webkit-transform: translate(-50%, -50%) scale(3.1);
+    -moz-transform: translate(-50%, -50%) scale(3.1);
+    -ms-transform: translate(-50%, -50%) scale(3.1);
+    -o-transform: translate(-50%, -50%) scale(3.1);
+  }
+}
+
+.check-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(190, 69, 203);
+  text-shadow: 0 0 5px rgb(248, 168, 255), 0 0 20px rgb(248, 168, 255),
+    0 0 30px rgb(248, 168, 255);
+  pointer-events: none;
+  z-index: 3000;
+  animation: checkAnimation 1.3s linear;
+  -webkit-animation: checkAnimation 1.3s linear;
+}
+
+/* Animación para el texto ¡JAQUE MATE! */
+@keyframes checkmateAnimation {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+    -moz-transform: translate(-50%, -50%) scale(1.5);
+    -ms-transform: translate(-50%, -50%) scale(1.5);
+    -o-transform: translate(-50%, -50%) scale(1.5);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+    -moz-transform: translate(-50%, -50%) scale(1.5);
+    -ms-transform: translate(-50%, -50%) scale(1.5);
+    -o-transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+.checkmate-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(239, 81, 81);
+  text-shadow: 0 0 5px rgb(255, 0, 0), 0 0 20px rgb(255, 0, 0),
+    0 0 30px rgb(255, 0, 0);
+  pointer-events: none;
+  z-index: 3000;
+  animation: checkmateAnimation 1.6s linear;
+  -webkit-animation: checkmateAnimation 1.6s linear;
+}
+
+/* Estilo para centrar y redondear la imagen del ganador */
+.modal-content .modal-winner-avatar {
+  display: block;
+  margin: 10px auto;
+  width: 100px;
+  height: auto;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  border: 3px solid var(--cycle-border-color);
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+/* Asegura que el contenedor tenga posición relativa */
+.endgame-content {
+  position: relative;
+}
+
+/* Botón de cerrar */
+.modal-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  background-color: #00ddff5d;
+  line-height: 0.8;
+  cursor: pointer;
+  color: var(--cycle-border-color);
+  border: 1px solid var(--cycle-border-color);
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  padding: 0px 8px;
+  text-align: center;
+}
+
+/* Opcional: hover */
+.modal-close-btn:hover {
+  color: #ff3333;
+}
+
+/* 
+==========================
+1) Estilos para “amenaza” (versión “debug”)
+========================== */
+
+/* Lo ponemos lo más abajo posible en el CSS, justo antes de cerrar </style> o final de styles.css */
+.cell.threat-highlight {
+  background-color: #ff0000c5;
+  box-shadow: 0px 0px 10px rgb(255, 255, 255) inset;
+  animation: threat-pulse 300ms linear;
+  -webkit-animation: threat-pulse 300ms linear;
+  transition: all 100ms linear;
+  -webkit-transition: all 100ms linear;
+  -moz-transition: all 100ms linear;
+  -ms-transition: all 100ms linear;
+  -o-transition: all 100ms linear;
+}
+
+@keyframes threat-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.7);
+    -webkit-transform: scale(1.7);
+    -moz-transform: scale(1.7);
+    -ms-transform: scale(1.7);
+    -o-transform: scale(1.7);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ——————————————————————————
+   Historial de movimientos
+   —————————————————————————— */
+
+
+.move-history-wrapper {
+  display: flex;
+  width: 100%;
+  height: 33px; 
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid #0ff;
+}
+
+/* Botones sin gaps y altura completa */
+.history-btn {
+  flex: 0 0 50px; /* ancho fijo igual al alto para un rectángulo cuadrado */
+  height: 100%;
+  border: none;
+  background: #001a1a; /* fondo oscuro, ajusta color */
+  color: #0ff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+/* El scroll central ocupa todo lo que sobra */
+.move-history {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0 0.5rem; /* interno: si quieres espacio entre las entradas */
+  background: #002a2a; /* fondo ligeramente distinto */
+  overflow-x: hidden; /* nada de scroll manual horizontal */
+  overflow-y: hidden; /* nada de scroll vertical */
+  white-space: nowrap; /* los move-entry en línea */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.move-history::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Cada movimiento */
+.move-entry {
+  display: flex;
+  align-items: center;
+  margin-right: 0.75rem; /* separación entre entradas */
+}
+
+/* Historial de movimientos */
+.move-history .move-entry {
+  counter-increment: move;
+  display: inline-flex;
+  align-items: center;
+  margin: 0; /* quitamos márgenes laterales */
+  padding: 0 4px; /* espacio interno para separar mejor */
+}
+
+.move-history .move-entry img {
+  width: 20px; /* o el tamaño que prefieras */
+  height: 20px;
+  margin-right: 4px;
+}
+
+.move-history .move-entry span {
+  /* usa un azul neón similar al de tu UI */
+  color: #00dfff;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+/* 1) Reinicia el contador en el contenedor del historial */
+.move-history {
+  counter-reset: move;
+}
+
+/* 4) Barra separadora “|” tras cada entrada (menos la última) */
+.move-history .move-entry:not(:last-child)::after {
+  content: " | ";
+  margin-left: 4px;
+  color: #00dfff;
+  font-size: 25px;
+}
+
+/* ————————————————————
+   Dropdown full-screen genérico
+   ———————————————————— */
+/* Variables ___________________________________________*/
+:root {
+  --header-height: 145px !important;
+  --footer-height: 68px !important;
+  --cycle-border-color: rgb(79, 246, 255) !important;
+}
+
+/* DEFAULT: dropdown cerrado */
+.dropdown .options {
+  position: fixed !important;
+  top: var(--header-height) !important;
+  bottom: var(--footer-height) !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 20px 10% !important;
+  margin: 0 !important;
+  list-style: none !important;
+  background: rgba(12, 39, 58, 0.95) !important;
+  box-shadow: inset 0 0 20px var(--cycle-border-color) !important;
+  overflow-y: auto !important;
+  z-index: 2000 !important;
+  display: none !important; /* aquí ocultamos siempre */
+}
+
+/* ABIERTO: cuando tenga la clase `.open` */
+.dropdown .options.open {
+  display: block !important;
+}
+.dropdown > .options li {
+  margin: 8px 0 !important;
+  padding: 8px !important;
+  border: 2px solid rgb(79, 246, 255) !important;
+  border-radius: 6px !important;
+  text-transform: uppercase;
+  transition: all 0.3s !important;
+  -webkit-border-radius: 6px !important;
+  -moz-border-radius: 6px !important;
+  -ms-border-radius: 6px !important;
+  -o-border-radius: 6px !important;
+  -webkit-transition: all 0.3s !important;
+  -moz-transition: all 0.3s !important;
+  -ms-transition: all 0.3s !important;
+  -o-transition: all 0.3s !important;
+}
+.dropdown > .options li:hover {
+  background-color: rgba(201, 97, 218, 0.8) !important;
+  box-shadow: 0 0 5px rgb(242, 154, 255) !important;
+}
+
+.coord-label.row {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+}
+
+.coord-label.col {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+}
+
+/* por defecto el <br> está oculto */
+.mobile-only {
+  display: none;
+}
+
+/*--------------------------------*/
+/*----------RESPONSIVE------------*/
+/*--------------------------------*/
+
+@media (max-width: 650px) {
+
+  .mobile-only { 
+    display: inline; /*Salto de linea del main title*/
+  }
+  .main-title a {
+    font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
+    letter-spacing: clamp(0.1em, 1vw, 0.3em) !important;
+    line-height: 1 !important;
+    white-space: normal;  
+  }
+  .game-container {
+    padding: 0px;
+  }
+  .chess-board {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    grid-template-columns: repeat(8, calc(100vw / 8));
+    grid-template-rows: repeat(8, calc(100vw / 8));
+  }
+  .cell {
+    width: auto;
+    height: auto;
+    font-size: 1.2rem;
+  }
+  .promotion-options {
+    flex-direction: column;
+  }
+  footer {
+    font-size: 1rem;
+  }
+}
+
+@media (max-height: 667px) {
+  .player-profile {
+    display: flex;
+    align-items: center;
+    box-shadow: 0px 0px 20px var(--cycle-border-color);
+    border: 2px solid var(--cycle-border-color);
+    width: 100%;
+    height: 60px;
+    color: rgb(79, 246, 255);
+    background-size: 100% 100%;
+    text-shadow: 0px 0px 1px black;
+  }
+  .player-profile img {
+    height: 50px;
+    width: 50px;
+    border: 2px solid var(--cycle-border-color);
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .robot-diff {
+    height: 30px;
+    border: 1px solid;
+    margin: 0px 10px;
+  }
+  /*Margenes de los perfiles*/
+  /*Perfil superior*/
+  .player-profile.top {
+    margin-bottom: 3px;
+  }
+  /*Perfil inferior*/
+  .player-profile.bottom {
+    margin-top: 3px;
+  }
+}
+
+
+/* Ajuste responsivo extra para móviles muy estrechos */
+@media (max-width: 400px) {
+  .header {
+    padding: 4px;
+  }
+  .main-title a {
+    font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
+  }
+}
+

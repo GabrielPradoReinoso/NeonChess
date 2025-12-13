@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>NEON CHESS</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" href="assets/images/logo-neon-chess.png" />
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Cargando NEON CHESS…</p>
+    </div>
+
+    <!-- Cabecera -->
+    <header class="header">
+      <div class="logo">
+        <a href="index.html">
+          <img
+            src="assets/images/logo-neon-chess.png"
+            alt="Chess Logo"
+            id="logo"
+          />
+        </a>
+      </div>
+
+      <div class="main-title">
+        <h1>
+          <a href="index.html">
+            NEON
+            <br class="mobile-only" />
+            CHESS
+          </a>
+        </h1>
+      </div>
+
+      <div class="menu-dropdown">
+        <button id="menuButton" class="menu-button">☰</button>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+          <div class="menu-close">x</div>
+          <ul>
+            <a href="pagina-carga.html"><li>Ajustes</li></a>
+            <a href="pagina-carga.html"><li>Tablero y piezas</li></a>
+            <a href="pagina-carga.html"><li>Videos</li></a>
+            <a href="pagina-carga.html"><li>Campeonatos presenciales</li></a>
+            <a href="pagina-carga.html"><li>Sobre este proyecto</li></a>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sección principal -->
+    <main class="main-section" id="mainSection">      
+      <button id="btnOnline" class="btn">Jugar online</button> 
+      <br> <br>
+      <button id="btnLocal" class="btn">Jugar contra el robot</button> 
+    </main>
+
+    <!-- Panel elección online -->
+    <section id="onlineChoice" class="online-choice hidden">
+      <h3>Juega online contra un amig@ </h3>
+      <p class="online-info">Uno de los jugadores debe generar el código de la partida pulsando el botón <b class="marked-text">"Obtener código"</b>  y posteriormente compartir el código con el amig@ que desea unirse, después este deberá introducir el código en el campo indicado y una vez introducido el código correctamente en el campo, deberá pulsar el botón de <b class="marked-text">"Unirse"</b> , automaticamente se conectará la partida y aparecera la página de juego y se podrá comenzar a jugar. ¡Buena suerte!</p>
+      
+      <div class="online-actions">
+        <button id="btnCreateRoom" class="btn primary">Obtener código</button> <p></p> 
+        <div class="join-box">
+          <input id="joinCodeInput" type="text" placeholder="Introduce código" maxlength="8" />
+          <button id="btnJoinRoom" class="btn">Unirse</button>
+        </div>
+      </div>
+
+      <div id="createdRoom" class="created-room hidden">
+        <p>Comparte este código con tu rival:</p>
+        <div class="code-line">
+          <code id="roomCodeText">—</code>
+          <button id="copyRoomCode" class="btn small">Copiar</button>
+        </div>
+        <p class="muted">Esperando oponente…</p>
+      </div>
+
+      <button id="cancelOnlineChoice" class="btn ghost">Cancelar</button>
+    </section>
+
+    <div id="onlineLobby" class="hidden">
+      <p>Tu código de sala: <strong id="roomCode"></strong></p>
+      <p>Esperando rival…</p>
+    </div>
+
+    <!-- Contenedor del juego (oculto al inicio) -->
+    <div id="gameContainer" class="game-container hidden">
+      <!-- Sección de configuración de juego -->
+      <div id="gameSetup" class="game-setup hidden">
+        <h2 id="game-setup-title">ELIGE TU MODO DE JUEGO</h2>
+        <div id="config-options">
+          <!-- Dificultad -->
+          <div class="plantilla-dos">
+            <label for="difficultyButton">Nivel de dificultad</label>
+            <div class="dropdown">
+              <button id="difficultyButton" class="buttons">Nivel 1</button>
+              <ul id="difficultyOptions" class="options hidden">
+                <li data-level="1">Nivel 1</li>
+                <li data-level="2">Nivel 2</li>
+                <li data-level="3">Nivel 3</li>
+                <li data-level="4">Nivel 4</li>
+                <li data-level="5">Nivel 5</li>
+                <li data-level="6">Nivel 6</li>
+                <li data-level="7">Nivel 7</li>
+                <li data-level="8">Nivel 8</li>
+                <li data-level="9">Nivel 9</li>
+                <li data-level="10">Nivel 10</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Tiempo por jugador -->
+          <div class="plantilla-dos">
+            <label for="timeConfigButton">Tiempo por jugador</label>
+            <div class="dropdown">
+              <button id="timeConfigButton" class="buttons">∞</button>
+              <ul id="timeOptions" class="options hidden">
+                <li data-time="1">1 min</li>
+                <li data-time="3">3 min</li>
+                <li data-time="5">5 min</li>
+                <li data-time="10">10 min</li>
+                <li data-time="30">30 min</li>
+                <li data-time="60">1 hora</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Color de piezas -->
+          <div class="plantilla-dos">
+            <label for="colorButton">Color de tus piezas</label>
+            <div class="dropdown">
+              <button id="colorButton" class="buttons">Rosas</button>
+
+              <ul id="colorOptions" class="options hidden">
+                <li data-color="w" data-label="Rosas" id="pinkColor">
+                  <img
+                    src="assets/images/pink-neon-pawn.png"
+                    alt="pink pawn (first player)"
+                  />
+                  <br />
+                  Rosas
+                  <br />
+                  (mueven primero)
+                </li>
+
+                <li data-color="b" data-label="Azules" id="blueColor">
+                  <img
+                    src="assets/images/blue-neon-pawn.png"
+                    alt="blue pawn (second player)"
+                  />
+                  <br />
+                  Azules
+                  <br />
+                  (mueven después)
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Botón empezar -->
+          <button id="playButton" class="btn">Empezar partida</button>
+        </div>
+      </div>
+
+      <!-- 0) HISTORIAL DE MOVIMIENTOS -->
+      <div class="move-history-wrapper">
+        <button id="undoBtn" class="history-btn back" aria-label="Retroceder">
+          ◀
+        </button>
+        <div id="moveHistory" class="move-history"></div>
+        <button id="redoBtn" class="history-btn next" aria-label="Avanzar">
+          ▶
+        </button>
+      </div>
+
+      <div class="chess-container">
+        <div class="health-bar health-bar-top">
+          <div class="health-progress" id="health-black"></div>
+        </div>
+
+        <div id="player1" class="player-profile top thinking">
+          <div class="matrix-overlay-player1"></div>
+
+          <div class="profile-image">
+            <img src="assets/images/gpr-robotic-img.jpg" alt="Jugador 1" />
+          </div>
+
+          <div class="profile-info">
+            <span class="player-name">GPR robot</span>
+            <span class="player-timer active-clock">00:00</span> &nbsp;
+            <span class="player-score">Puntos: 0</span>
+            <span id="robotDifficulty" class="robot-diff"></span>
+          </div>
+        </div>
+
+        <div id="chessBoard" class="chess-board">
+          <!-- Las celdas se generan con JS -->
+        </div>
+
+        <div id="player2" class="player-profile bottom">
+          <div class="profile-image">
+            <img src="assets/images/human-img-profile.jpg" alt="Jugador 2" />
+          </div>
+
+          <div class="profile-info">
+            <span class="player-name">Jugador humano</span>
+            <span class="player-timer active-clock">00:00</span> &nbsp;
+            <span class="player-score">Puntos: 0</span>
+          </div>
+        </div>
+
+        <div class="health-bar health-bar-bottom">
+          <div class="health-progress" id="health-white"></div>
+        </div>
+
+        <div id="controlBar">
+          <button id="btnPrev">
+            <img
+              src="assets/images/left-arrow.svg"
+              alt="Retroceder movimientos"
+            />
+          </button>
+          <button id="btnSurrender">
+            <img src="assets/images/flag-button.png" alt="" />
+          </button>
+          <button id="btnNext">
+            <img
+              src="assets/images/right-arrow.svg"
+              alt="Avance hacia adelante"
+            />
+          </button>
+
+          <div id="musicPlayer" class="control-bar-item">
+            <button id="prevTrack" title="Pista anterior">⏮️</button>
+            <button id="toggleMute" title="Silenciar/Activar sonido">🔊</button>
+            <button id="nextTrack" title="Siguiente pista">⏭️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>&copy; 2025 Gabriel Prado (GPR Studio). All rights reserved.
+</footer>
+
+    <!-- Overlay de precarga pre-partida -->
+    <div id="pregameLoadingOverlay" class="overlay hidden">
+      <div class="overlay-content">
+        <p>Cargando partida... <span id="pregamePercent">0%</span></p>
+        <div class="progress-bar">
+          <div id="pregameProgress" class="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay de cuenta regresiva -->
+    <div id="countdownOverlay" class="overlay hidden">
+      <div class="overlay-content">
+        <div id="countdownNumber" class="countdown-number">3</div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
+    <!--<script src="/socket.io/socket.io.js"></script>--> 
+    <script type="module" src="js/script.js"></script>
+    
+  </body>
+</html>
