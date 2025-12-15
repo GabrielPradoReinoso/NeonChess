@@ -40,28 +40,35 @@ document.addEventListener("DOMContentLoaded", function () {
   let stockfishWorker = null;
 
   function initStockfish() {
-    if (stockfishWorker) stockfishWorker.terminate();
+  if (stockfishWorker) stockfishWorker.terminate();
 
-    // Ruta robusta: funciona en local y en GitHub Pages
-    const base = location.pathname.includes("/NeonChess/")
-      ? "/NeonChess/"
-      : "/";
+  const workerUrl = new URL("./stockfish-worker.js", import.meta.url);
+  console.log("[SF] workerUrl =", workerUrl.href);
 
-    stockfishWorker = new Worker(base + "js/stockfish-worker.js");
-
-    stockfishWorker.onmessage = (e) => {
-      console.log("[SF]", e.data); // 👈 añade esto para ver si responde
-      const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
-      if (typeof msg === "string" && msg.startsWith("bestmove")) {
-        const best = msg.split(" ")[1];
-        processBestMove(best);
-      }
-    };
-
-    stockfishWorker.onerror = (err) => {
-      console.error("[SF] Worker error:", err);
-    };
+  try {
+    stockfishWorker = new Worker(workerUrl);
+  } catch (e) {
+    console.error("[SF] new Worker() FAILED:", e);
+    return;
   }
+
+  stockfishWorker.onmessage = (e) => {
+    console.log("[SF]", e.data);
+    const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
+    if (typeof msg === "string" && msg.startsWith("bestmove")) {
+      processBestMove(msg.split(" ")[1]);
+    }
+  };
+
+  stockfishWorker.onerror = (err) => {
+    console.error("[SF] Worker error:", err);
+  };
+
+  stockfishWorker.onmessageerror = (err) => {
+    console.error("[SF] Worker message error:", err);
+  };
+}
+
 
   // ==========================================================
   // 2) MULTIJUGADOR ONLINE (Socket.IO + salas)
