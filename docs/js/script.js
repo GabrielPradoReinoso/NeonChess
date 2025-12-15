@@ -45,6 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const workerUrl = new URL("./stockfish-worker.js", import.meta.url);
   console.log("[SF] workerUrl =", workerUrl.href);
 
+  // 👇 Worker CLÁSICO (sin type: "module")
+  stockfishWorker = new Worker(workerUrl);
+
+
   try {
     stockfishWorker = new Worker(workerUrl);
   } catch (e) {
