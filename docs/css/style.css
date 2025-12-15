@@ -927,7 +927,7 @@ body.game-active footer {
 
 /* Casillas claras*/
 .cell.light {
-  background-color: rgba(79, 246, 255, 0.849);
+  background-color: rgb(91 118 224 / 85%);
 }
 
 /* Casillas oscuras*/
