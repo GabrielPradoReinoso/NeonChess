@@ -897,8 +897,8 @@ body.game-active footer {
   margin: 0;
   padding: 0;
   position: relative;
-  border-top: 3px  solid var(--cycle-border-color);
-  border-bottom: 3px  solid var(--cycle-border-color);
+  border-top: 1px  solid var(--cycle-border-color);
+  border-bottom: 1px  solid var(--cycle-border-color);
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -911,8 +911,9 @@ body.game-active footer {
 
 /* Estilos para las casillas y piezas del tablero ______________*/
 .cell {
+  border: 1px solid var(--cycle-border-color);
   position: relative;
-  box-shadow: 0px 0px 5px var(--cycle-border-color) inset;
+  box-shadow: 0px 0px 4px var(--cycle-border-color) inset;
   width: 70px;
   height: 70px;
   display: flex;
