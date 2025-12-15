@@ -41,7 +41,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function initStockfish() {
     if (stockfishWorker) stockfishWorker.terminate();
-    stockfishWorker = new Worker("js/stockfish-worker.js");
+    stockfishWorker = new Worker(
+    new URL("./stockfish-worker.js", import.meta.url),
+    { type: "module" }
+  );
+
 
     stockfishWorker.onmessage = (e) => {
       const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
