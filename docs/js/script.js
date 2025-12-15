@@ -41,22 +41,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function initStockfish() {
     if (stockfishWorker) stockfishWorker.terminate();
-    stockfishWorker = new Worker(
-    new URL("./stockfish-worker.js", import.meta.url),
-    { type: "module" }
-  );
 
+    // Ruta robusta: funciona en local y en GitHub Pages
+    const base = location.pathname.includes("/NeonChess/")
+      ? "/NeonChess/"
+      : "/";
+
+    stockfishWorker = new Worker(base + "js/stockfish-worker.js");
 
     stockfishWorker.onmessage = (e) => {
+      console.log("[SF]", e.data); // 👈 añade esto para ver si responde
       const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
       if (typeof msg === "string" && msg.startsWith("bestmove")) {
         const best = msg.split(" ")[1];
         processBestMove(best);
       }
     };
-  }
 
-  initStockfish();
+    stockfishWorker.onerror = (err) => {
+      console.error("[SF] Worker error:", err);
+    };
+  }
 
   // ==========================================================
   // 2) MULTIJUGADOR ONLINE (Socket.IO + salas)
@@ -82,9 +87,10 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("[ON] opponentMove", move);
     movePiece(move.from, move.to, false);
   });
+  */
 
   let onlineMoveQueue = [];
-  let processingQueue = false; */
+  let processingQueue = false; 
 
   const isHosting =
     location.hostname.endsWith(".web.app") ||
