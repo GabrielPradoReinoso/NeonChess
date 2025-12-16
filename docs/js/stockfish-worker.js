@@ -1,30 +1,21 @@
 // docs/js/stockfish-worker.js
-// Wrapper que funciona tanto si stockfish.js exporta Stockfish() como si es un worker en sí.
-
 let engine = null;
 
-const STOCKFISH_URL = new URL("./stockfish.js", self.location).toString();
-
-// 1) Intento: build que expone la función Stockfish()
+// 1) Build que expone Stockfish()
 try {
-  importScripts(STOCKFISH_URL);
+  importScripts("stockfish.js"); // ✅ relativo al propio worker (/NeonChess/js/)
   if (typeof Stockfish === "function") {
-    engine = Stockfish(); // crea el “pseudo-worker”
+    engine = Stockfish();
   }
-} catch (e) {
-  // ignoramos, probamos la otra vía
-}
+} catch (e) {}
 
-// 2) Fallback: build donde stockfish.js ya es un Worker script
+// 2) Fallback: build donde stockfish.js ya es un worker script
 if (!engine) {
   try {
-    engine = new Worker(STOCKFISH_URL);
-  } catch (e) {
-    // seguimos sin engine
-  }
+    engine = new Worker("stockfish.js"); // ✅ relativo también
+  } catch (e) {}
 }
 
-// 3) Si no hay engine, avisamos sin romper el hilo principal
 if (!engine) {
   self.postMessage("error:stockfish_init_failed");
 } else {
