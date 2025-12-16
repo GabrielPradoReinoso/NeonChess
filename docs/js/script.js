@@ -40,39 +40,37 @@ document.addEventListener("DOMContentLoaded", function () {
   let stockfishWorker = null;
 
   function initStockfish() {
-  if (stockfishWorker) stockfishWorker.terminate();
+    if (stockfishWorker) stockfishWorker.terminate();
 
-  const workerUrl = new URL("./stockfish-worker.js", import.meta.url);
-  console.log("[SF] workerUrl =", workerUrl.href);
+    const workerUrl = new URL("./stockfish-worker.js", import.meta.url);
+    console.log("[SF] workerUrl =", workerUrl.href);
 
-  // 👇 Worker CLÁSICO (sin type: "module")
-  stockfishWorker = new Worker(workerUrl);
-
-
-  try {
+    // 👇 Worker CLÁSICO (sin type: "module")
     stockfishWorker = new Worker(workerUrl);
-  } catch (e) {
-    console.error("[SF] new Worker() FAILED:", e);
-    return;
-  }
 
-  stockfishWorker.onmessage = (e) => {
-    console.log("[SF]", e.data);
-    const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
-    if (typeof msg === "string" && msg.startsWith("bestmove")) {
-      processBestMove(msg.split(" ")[1]);
+    try {
+      stockfishWorker = new Worker(workerUrl);
+    } catch (e) {
+      console.error("[SF] new Worker() FAILED:", e);
+      return;
     }
-  };
 
-  stockfishWorker.onerror = (err) => {
-    console.error("[SF] Worker error:", err);
-  };
+    stockfishWorker.onmessage = (e) => {
+      console.log("[SF]", e.data);
+      const msg = typeof e.data === "string" ? e.data : e.data?.bestmove;
+      if (typeof msg === "string" && msg.startsWith("bestmove")) {
+        processBestMove(msg.split(" ")[1]);
+      }
+    };
 
-  stockfishWorker.onmessageerror = (err) => {
-    console.error("[SF] Worker message error:", err);
-  };
-}
+    stockfishWorker.onerror = (err) => {
+      console.error("[SF] Worker error:", err);
+    };
 
+    stockfishWorker.onmessageerror = (err) => {
+      console.error("[SF] Worker message error:", err);
+    };
+  }
 
   // ==========================================================
   // 2) MULTIJUGADOR ONLINE (Socket.IO + salas)
@@ -101,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
   */
 
   let onlineMoveQueue = [];
-  let processingQueue = false; 
+  let processingQueue = false;
 
   const isHosting =
     location.hostname.endsWith(".web.app") ||
@@ -526,10 +524,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gameMusic.loop = true;
   gameMusic.volume = 0.6;
 
-  const playlist = [
-    "assets/sounds/music-2.mp3",
-    "assets/sounds/music-1.mp3"
-  ];
+  const playlist = ["assets/sounds/music-2.mp3", "assets/sounds/music-1.mp3"];
   let currentTrack = 0;
 
   function loadTrack(idx) {
@@ -879,27 +874,31 @@ document.addEventListener("DOMContentLoaded", function () {
   // 15) GENERACIÓN Y RENDERIZADO DEL TABLERO
   // ==========================================================
   function setupInitialBoard() {
-    const boardEl = document.getElementById("chessBoard");
-    boardEl.classList.remove("flipped");
-    if (humanColor === "b") {
-      boardEl.classList.add("flipped");
-    }
+  const boardEl = document.getElementById("chessBoard");
 
-    generateEmptyBoard();
+  // Flip según color humano
+  boardEl.classList.toggle("flipped", humanColor === "b");
 
-    board[0] = ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"];
-    board[1] = Array(8).fill("bp");
-    board[6] = Array(8).fill("wp");
-    board[7] = ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"];
+  // Genera 64 celdas (y reinicia board)
+  generateEmptyBoard();
 
-    enPassantTarget = null;
-    positionHistory = [];
-    currentHistoryIndex = 0;
-    isReviewMode = false;
+  // Ahora sí: pinta coordenadas sobre celdas ya existentes
+  renderCoordinates();
 
-    renderBoard();
-    updatePositionHistory();
-  }
+  // Coloca piezas iniciales en board[][]
+  board[0] = ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"];
+  board[1] = Array(8).fill("bp");
+  board[6] = Array(8).fill("wp");
+  board[7] = ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"];
+
+  enPassantTarget = null;
+  positionHistory = [];
+  currentHistoryIndex = 0;
+  isReviewMode = false;
+
+  renderBoard();
+  updatePositionHistory();
+}
 
   function generateEmptyBoard() {
     const boardEl = document.getElementById("chessBoard");
@@ -999,6 +998,69 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
+  function renderCoordinates() {
+  const boardEl = document.getElementById("chessBoard");
+  if (!boardEl) return;
+
+  const isFlipped = boardEl.classList.contains("flipped");
+
+  // borrar coords previas
+  boardEl.querySelectorAll(".coord-label").forEach((n) => n.remove());
+
+  const files = "abcdefgh";
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = boardEl.children[r * 8 + c];
+      if (!cell) continue;
+
+      // asegura stacking correcto
+      cell.style.position = "relative";
+
+      const rank = isFlipped ? (1 + r) : (8 - r);
+      const file = isFlipped ? files[7 - c] : files[c];
+
+      if (c === 0) {
+        const lab = document.createElement("div");
+        lab.className = "coord-label row";
+        lab.textContent = rank;
+
+        // inline para que NADA lo oculte
+        lab.style.cssText = `
+          position:absolute; top:3px; left:3px;
+          font-family:FrancoisOne, sans-serif;
+          font-size:12px; line-height:12px;
+          color:rgb(17,255,255);
+          text-shadow:0 0 10px rgb(17,255,255);
+          z-index:999999;
+          pointer-events:none;
+          user-select:none;
+        `;
+        cell.appendChild(lab);
+      }
+
+      if (r === 7) {
+        const lab = document.createElement("div");
+        lab.className = "coord-label col";
+        lab.textContent = file;
+
+        lab.style.cssText = `
+          position:absolute; bottom:3px; right:3px;
+          font-family:FrancoisOne, sans-serif;
+          font-size:12px; line-height:12px;
+          color:rgb(17,255,255);
+          text-shadow:0 0 10px rgb(17,255,255);
+          z-index:999999;
+          pointer-events:none;
+          user-select:none;
+        `;
+        cell.appendChild(lab);
+      }
+    }
+  }
+}
+
 
   // ==========================================================
   // 16) ANIMACIONES DE AMENAZA AL REY

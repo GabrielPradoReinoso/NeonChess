@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "mensaje claro del cambio"
+git commit -m "Incluyo coordenadas en las casillas"
 git push
 
 

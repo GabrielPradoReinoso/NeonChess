@@ -358,7 +358,6 @@ body.game-active {
   }
 }
 
-
 #btnOnline,
 #btnLocal
 {
@@ -1089,7 +1088,7 @@ body.game-active footer {
   text-shadow: 0px 0px 10px rgb(17, 255, 255);
   pointer-events: none;
   user-select: none;
-  z-index: 2;
+  z-index: 10001;
 }
 
 .coord-label.row {
