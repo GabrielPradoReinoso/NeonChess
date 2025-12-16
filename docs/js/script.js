@@ -567,13 +567,13 @@ document.addEventListener("DOMContentLoaded", function () {
   countdownSound.volume = 0.7;
 
   const soundVolumes = {
-    move: 0.9,
+    move: 0.7,
     capture: 0.6,
     check: 0.6,
     checkmate: 0.6,
-    promotion: 0.9,
-    select: 0.9,
-    error: 0.9,
+    promotion: 0.6,
+    select: 0.8,
+    error: 0.7,
   };
 
   function setSoundVolume(name, value) {
