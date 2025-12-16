@@ -46,6 +46,7 @@ npx serve public -l 5500
 
 start http://localhost:5500
 ```
+👉 npx http-server docs -p 5500 -c-1
 
 ---
 

@@ -527,9 +527,8 @@ document.addEventListener("DOMContentLoaded", function () {
   gameMusic.volume = 0.8;
 
   const playlist = [
-    "assets/sounds/game-music(9).mp3",
-    "assets/sounds/muisc-1.mpeg",
-    "assets/sounds/game-music(20).mp3",
+    "assets/sounds/music-1.mp3",
+    "assets/sounds/music-2.mp3"
   ];
   let currentTrack = 0;
 
