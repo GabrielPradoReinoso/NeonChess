@@ -2598,38 +2598,38 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 26) INICIO Y RESETEO DE PARTIDA
   // ==========================================================
-  function actuallyStartGame() {
-    // --- 1) Ajustar perfiles UI ---
-    syncProfilesUI();
+ function actuallyStartGame() {
+  syncProfilesUI();
 
-    // --- 2) Salud y puntuación inicial ---
-    maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
-    currentHealth = { ...maxHealth };
+  maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
+  currentHealth = { ...maxHealth };
 
-    scores = { w: 0, b: 0 };
-    updateScores();
-    updateHealthBar();
+  scores = { w: 0, b: 0 };
+  updateScores();
+  updateHealthBar();
 
-    // --- 3) Tiempo: fallback a infinito si no se seleccionó ---
-    if (selectedTime == null || isNaN(selectedTime)) {
-      selectedTime = Infinity;
-      console.log("Tiempo no seleccionado → modo infinito");
-    }
-
-    timers = { w: selectedTime, b: selectedTime };
-
-    // --- 4) Crear tablero ANTES de iniciar timers ---
-    setupInitialBoard();
-    renderBoard();
-
-    // --- 5) Mostrar tiempos ---
-    updateTimersDisplay();
-
-    // --- 6) Iniciar temporizador solo si hay un tiempo finito ---
-    if (Number.isFinite(timers[currentTurn])) {
-      startTimer(currentTurn);
-    }
+  if (selectedTime == null || isNaN(selectedTime)) {
+    selectedTime = Infinity;
   }
+
+  timers = { w: selectedTime, b: selectedTime };
+
+  setupInitialBoard();
+  renderBoard();
+  updateTimersDisplay();
+
+  if (Number.isFinite(timers[currentTurn])) {
+    startTimer(currentTurn);
+  }
+
+  // ⭐ CLAVE
+  if (!isOnlineGame && humanColor === "b") {
+    setTimeout(() => {
+      requestStockfishMove();
+    }, 300);
+  }
+}
+
 
   if (playButton) {
     playButton.addEventListener("pointerup", () => {
