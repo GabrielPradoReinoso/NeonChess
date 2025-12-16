@@ -145,6 +145,11 @@ git push
 ```
 
 ---
+## subir cambios en github
+git add .
+git commit -m "mensaje claro del cambio"
+git push
+
 
 ## Orden típico “día siguiente”
 1) Abres VS Code ➜ terminal:
