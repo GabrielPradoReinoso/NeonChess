@@ -524,11 +524,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const gameMusic = new Audio();
   gameMusic.loop = true;
-  gameMusic.volume = 0.8;
+  gameMusic.volume = 0.6;
 
   const playlist = [
-    "assets/sounds/music-1.mp3",
-    "assets/sounds/music-2.mp3"
+    "assets/sounds/music-2.mp3",
+    "assets/sounds/music-1.mp3"
   ];
   let currentTrack = 0;
 
@@ -568,9 +568,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const soundVolumes = {
     move: 0.9,
-    capture: 0.9,
-    check: 0.9,
-    checkmate: 0.9,
+    capture: 0.6,
+    check: 0.6,
+    checkmate: 0.6,
     promotion: 0.9,
     select: 0.9,
     error: 0.9,
