@@ -576,8 +576,21 @@ document.addEventListener("DOMContentLoaded", function () {
     soundVolumes[name] = Math.max(0, Math.min(1, value));
   }
 
+  const audioPools = new Map();
+
   function playSound(audioObj, type) {
-    const snd = audioObj.cloneNode();
+    const key = audioObj.src + "|" + type;
+    let pool = audioPools.get(key);
+    if (!pool) {
+      pool = {
+        idx: 0,
+        items: Array.from({ length: 4 }, () => audioObj.cloneNode()),
+      };
+      audioPools.set(key, pool);
+    }
+
+    const snd = pool.items[pool.idx++ % pool.items.length];
+    snd.currentTime = 0;
     snd.volume = soundVolumes[type] ?? 0.9;
     snd.play().catch(() => {});
   }
@@ -874,31 +887,31 @@ document.addEventListener("DOMContentLoaded", function () {
   // 15) GENERACIÓN Y RENDERIZADO DEL TABLERO
   // ==========================================================
   function setupInitialBoard() {
-  const boardEl = document.getElementById("chessBoard");
+    const boardEl = document.getElementById("chessBoard");
 
-  // Flip según color humano
-  boardEl.classList.toggle("flipped", humanColor === "b");
+    // Flip según color humano
+    boardEl.classList.toggle("flipped", humanColor === "b");
 
-  // Genera 64 celdas (y reinicia board)
-  generateEmptyBoard();
+    // Genera 64 celdas (y reinicia board)
+    generateEmptyBoard();
 
-  // Ahora sí: pinta coordenadas sobre celdas ya existentes
-  renderCoordinates();
+    // Ahora sí: pinta coordenadas sobre celdas ya existentes
+    renderCoordinates();
 
-  // Coloca piezas iniciales en board[][]
-  board[0] = ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"];
-  board[1] = Array(8).fill("bp");
-  board[6] = Array(8).fill("wp");
-  board[7] = ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"];
+    // Coloca piezas iniciales en board[][]
+    board[0] = ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"];
+    board[1] = Array(8).fill("bp");
+    board[6] = Array(8).fill("wp");
+    board[7] = ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"];
 
-  enPassantTarget = null;
-  positionHistory = [];
-  currentHistoryIndex = 0;
-  isReviewMode = false;
+    enPassantTarget = null;
+    positionHistory = [];
+    currentHistoryIndex = 0;
+    isReviewMode = false;
 
-  renderBoard();
-  updatePositionHistory();
-}
+    renderBoard();
+    updatePositionHistory();
+  }
 
   function generateEmptyBoard() {
     const boardEl = document.getElementById("chessBoard");
@@ -1000,34 +1013,34 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderCoordinates() {
-  const boardEl = document.getElementById("chessBoard");
-  if (!boardEl) return;
+    const boardEl = document.getElementById("chessBoard");
+    if (!boardEl) return;
 
-  const isFlipped = boardEl.classList.contains("flipped");
+    const isFlipped = boardEl.classList.contains("flipped");
 
-  // borrar coords previas
-  boardEl.querySelectorAll(".coord-label").forEach((n) => n.remove());
+    // borrar coords previas
+    boardEl.querySelectorAll(".coord-label").forEach((n) => n.remove());
 
-  const files = "abcdefgh";
+    const files = "abcdefgh";
 
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      const cell = boardEl.children[r * 8 + c];
-      if (!cell) continue;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cell = boardEl.children[r * 8 + c];
+        if (!cell) continue;
 
-      // asegura stacking correcto
-      cell.style.position = "relative";
+        // asegura stacking correcto
+        cell.style.position = "relative";
 
-      const rank = isFlipped ? (1 + r) : (8 - r);
-      const file = isFlipped ? files[7 - c] : files[c];
+        const rank = isFlipped ? 1 + r : 8 - r;
+        const file = isFlipped ? files[7 - c] : files[c];
 
-      if (c === 0) {
-        const lab = document.createElement("div");
-        lab.className = "coord-label row";
-        lab.textContent = rank;
+        if (c === 0) {
+          const lab = document.createElement("div");
+          lab.className = "coord-label row";
+          lab.textContent = rank;
 
-        // inline para que NADA lo oculte
-        lab.style.cssText = `
+          // inline para que NADA lo oculte
+          lab.style.cssText = `
           position:absolute; top:3px; left:3px;
           font-family:FrancoisOne, sans-serif;
           font-size:12px; line-height:12px;
@@ -1037,15 +1050,15 @@ document.addEventListener("DOMContentLoaded", function () {
           pointer-events:none;
           user-select:none;
         `;
-        cell.appendChild(lab);
-      }
+          cell.appendChild(lab);
+        }
 
-      if (r === 7) {
-        const lab = document.createElement("div");
-        lab.className = "coord-label col";
-        lab.textContent = file;
+        if (r === 7) {
+          const lab = document.createElement("div");
+          lab.className = "coord-label col";
+          lab.textContent = file;
 
-        lab.style.cssText = `
+          lab.style.cssText = `
           position:absolute; bottom:3px; right:3px;
           font-family:FrancoisOne, sans-serif;
           font-size:12px; line-height:12px;
@@ -1055,12 +1068,11 @@ document.addEventListener("DOMContentLoaded", function () {
           pointer-events:none;
           user-select:none;
         `;
-        cell.appendChild(lab);
+          cell.appendChild(lab);
+        }
       }
     }
   }
-}
-
 
   // ==========================================================
   // 16) ANIMACIONES DE AMENAZA AL REY
@@ -1991,7 +2003,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   function createCapturedPieceExplosion(capturedCode, to) {
     const src = pieceImages[capturedCode];
-    const count = 15;
+    const count = LOW_END ? 7 : 15;
     const cell = getCell(to.row, to.col);
     const rect = cell.getBoundingClientRect();
     const originX = rect.left + rect.width / 2;
@@ -2187,14 +2199,15 @@ document.addEventListener("DOMContentLoaded", function () {
       playSound(checkmateSound, "checkmate");
       showCheckmateAnimation();
       setTimeout(() => {
-        // modalOpenSound no está definido en este snippet,
-        // se asume que existe en tu código original.
-        playSound(modalOpenSound, "select");
+        if (typeof modalOpenSound !== "undefined") {
+          playSound(modalOpenSound, "select");
+        }
         showEndGameModal(
           (currentTurn === "w" ? "Jugador humano" : "GPR robot") +
             " gana por jaque mate"
         );
-      }, 1200);
+      }, 1000);
+
       return;
     }
 
@@ -2598,38 +2611,37 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 26) INICIO Y RESETEO DE PARTIDA
   // ==========================================================
- function actuallyStartGame() {
-  syncProfilesUI();
+  function actuallyStartGame() {
+    syncProfilesUI();
 
-  maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
-  currentHealth = { ...maxHealth };
+    maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
+    currentHealth = { ...maxHealth };
 
-  scores = { w: 0, b: 0 };
-  updateScores();
-  updateHealthBar();
+    scores = { w: 0, b: 0 };
+    updateScores();
+    updateHealthBar();
 
-  if (selectedTime == null || isNaN(selectedTime)) {
-    selectedTime = Infinity;
+    if (selectedTime == null || isNaN(selectedTime)) {
+      selectedTime = Infinity;
+    }
+
+    timers = { w: selectedTime, b: selectedTime };
+
+    setupInitialBoard();
+    renderBoard();
+    updateTimersDisplay();
+
+    if (Number.isFinite(timers[currentTurn])) {
+      startTimer(currentTurn);
+    }
+
+    // ⭐ CLAVE
+    if (!isOnlineGame && humanColor === "b") {
+      setTimeout(() => {
+        requestStockfishMove();
+      }, 300);
+    }
   }
-
-  timers = { w: selectedTime, b: selectedTime };
-
-  setupInitialBoard();
-  renderBoard();
-  updateTimersDisplay();
-
-  if (Number.isFinite(timers[currentTurn])) {
-    startTimer(currentTurn);
-  }
-
-  // ⭐ CLAVE
-  if (!isOnlineGame && humanColor === "b") {
-    setTimeout(() => {
-      requestStockfishMove();
-    }, 300);
-  }
-}
-
 
   if (playButton) {
     playButton.addEventListener("pointerup", () => {

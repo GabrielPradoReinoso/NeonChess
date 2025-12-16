@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "Resuelvo problematica de las partidas con piezas azules"
+git commit -m "Prueba de rendimiento"
 git push
 
 
