@@ -1599,16 +1599,28 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    if (isCapture) {
-      createCapturedPieceExplosion(target, to);
-      playSound(captureSound, "capture");
-    } else {
-      playSound(moveSound, "move");
+    try {
+      if (isCapture) {
+        createCapturedPieceExplosion(target, to);
+        playSound(captureSound, "capture");
+      } else {
+        playSound(moveSound, "move");
+      }
+    } catch (err) {
+      console.error("[CAPTURE] error:", err);
     }
 
     const fromCellElem = getCell(from.row, from.col);
     const movingPieceElem = fromCellElem.querySelector("img");
     const toCellElem = getCell(to.row, to.col);
+
+    // ✅ Si por lo que sea no existe la imagen, no animamos (pero la partida sigue)
+    if (!movingPieceElem || !fromCellElem || !toCellElem) {
+      renderBoard();
+      finishMove();
+      isAnimating = false;
+      return;
+    }
 
     animatePieceMove(movingPieceElem, fromCellElem, toCellElem, () => {
       const isPromotion =
@@ -2170,9 +2182,10 @@ document.addEventListener("DOMContentLoaded", function () {
     rep.textContent = "Repetir partida";
     rep.classList.add("btn");
     rep.addEventListener("pointerup", () => {
-      overlay.remove();
-      resetGame(true);
-    });
+    overlay.remove();
+    repeatGame();
+  });
+
 
     const volver = document.createElement("button");
     volver.textContent = "Volver al menú";
@@ -2755,6 +2768,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function resetGame(skipConfirm = false) {
+    const gameContainerEl = document.getElementById("gameContainer");
+    const gameSetupEl = document.getElementById("gameSetup");
+    
+    hasGameStartedFromMenu = false;
+
+    if (gameContainerEl) gameContainerEl.classList.add("hidden");
+    if (gameSetupEl) gameSetupEl.classList.remove("hidden");
+
     if (!skipConfirm) {
       if (!confirm("¿Reiniciar partida?")) return;
     }
@@ -2786,6 +2807,58 @@ document.addEventListener("DOMContentLoaded", function () {
     renderBoard();
     updateKingStatus();
   }
+
+  function repeatGame() {
+  // Para timers
+  stopTimer("w");
+  stopTimer("b");
+
+  // Limpia flags / estados
+  isReviewMode = false;
+  isAnimating = false;
+  isNavigating = false;
+  selectedCell = null;
+  removeMoveIndicators?.();
+  removeLastMoveHighlights?.();
+
+  // Resetea enroques y en passant
+  kingMoved = { w: false, b: false };
+  rookMoved = { w: { left: false, right: false }, b: { left: false, right: false } };
+  enPassantTarget = null;
+
+  // Salud y score
+  maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
+  currentHealth = { ...maxHealth };
+  scores = { w: 0, b: 0 };
+  updateScores();
+  updateHealthBar();
+
+  // Limpia historial UI
+  document.querySelector(".move-history").innerHTML = "";
+  positionHistory = [];
+  currentHistoryIndex = 0;
+
+  // Turno inicial (blancas siempre)
+  currentTurn = "w";
+
+  // Tiempo
+  if (selectedTime == null || isNaN(selectedTime)) selectedTime = Infinity;
+  timers = { w: selectedTime, b: selectedTime };
+  updateTimersDisplay();
+
+  // Reinicia tablero
+  setupInitialBoard();
+  renderBoard();
+  updateKingStatus();
+
+  // Arranca reloj solo si es finito
+  if (Number.isFinite(timers[currentTurn])) startTimer(currentTurn);
+
+  // Si humano juega AZULES (b), el robot (blancas) debe mover primero
+  if (!isOnlineGame && humanColor === "b") {
+    requestStockfishMove();
+  }
+}
 
   // ==========================================================
   // INICIO
