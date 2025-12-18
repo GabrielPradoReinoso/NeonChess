@@ -2003,8 +2003,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   function createCapturedPieceExplosion(capturedCode, to) {
     const src = pieceImages[capturedCode];
-    const count = LOW_END ? 7 : 15;
+    if (!src) return; // ✅ si no hay imagen, no hacemos nada
+
+    const count = 15;
     const cell = getCell(to.row, to.col);
+    if (!cell) return;
+
     const rect = cell.getBoundingClientRect();
     const originX = rect.left + rect.width / 2;
     const originY = rect.top + rect.height / 2;
@@ -2018,6 +2022,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const img = document.createElement("img");
       img.src = src;
+
       Object.assign(img.style, {
         position: "fixed",
         left: `${originX}px`,
@@ -2030,6 +2035,7 @@ document.addEventListener("DOMContentLoaded", function () {
         opacity: "1",
         zIndex: "1000",
       });
+
       document.body.appendChild(img);
 
       img.animate(
@@ -2043,11 +2049,7 @@ document.addEventListener("DOMContentLoaded", function () {
             opacity: 0,
           },
         ],
-        {
-          duration: 400,
-          easing: "ease-out",
-          fill: "forwards",
-        }
+        { duration: 400, easing: "ease-out", fill: "forwards" }
       ).onfinish = () => img.remove();
     }
   }

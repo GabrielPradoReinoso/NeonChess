@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "Prueba de rendimiento"
+git commit -m "corrección del bug en capturas de piezas"
 git push
 
 
