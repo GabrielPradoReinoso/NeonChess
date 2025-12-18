@@ -1088,7 +1088,6 @@ body.game-active footer {
   text-shadow: 0px 0px 10px rgb(17, 255, 255);
   pointer-events: none;
   user-select: none;
-  z-index: 10001;
 }
 
 .coord-label.row {
@@ -1115,25 +1114,34 @@ body.game-active footer {
   padding: 4px 3px;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 3px solid var(--cycle-border-color);
-  width: 100%;
-  max-width: 360px;
-  height: 80px;
+  width: 400px;
+  height: 75px;
   color: rgb(79, 246, 255);
   background-color: #121c40e9;
   background-size: 100% 100%;
   text-shadow: 0px 0px 1px black;
-  border-radius: 10px;
-  -webkit-border-radius: 10px;
-  -moz-border-radius: 10px;
-  -ms-border-radius: 10px;
-  -o-border-radius: 10px;
 }
 
-/*Margenes de los perfiles*/
 /*Perfil superior*/
 .player-profile.top {
-  margin-bottom: 20px;
-  margin-top: 5px;
+   margin-bottom: 10px;
+   border-radius: 0px 0px 10px 10px;
+   -webkit-border-radius: 0px 0px 10px 10px;
+   -moz-border-radius: 0px 0px 10px 10px;
+   -ms-border-radius: 0px 0px 10px 10px;
+   -o-border-radius: 0px 0px 10px 10px;
+   border-top: none;
+}
+
+/*Perfil inferior*/
+.player-profile.bottom {
+  margin-top: 10px;
+  border-radius: 10px 10px 0px 0px;
+  -webkit-border-radius: 10px 10px 0px 0px;
+  -moz-border-radius: 10px 10px 0px 0px;
+  -ms-border-radius: 10px 10px 0px 0px;
+  -o-border-radius: 10px 10px 0px 0px;
+  border-bottom: none;
 }
 
 /*------------------------------------------------*/
@@ -1204,7 +1212,8 @@ body.game-active footer {
 }
 
 .profile-info{
-  padding: 5px;
+  max-width: 100%;
+  padding: 10px;
   background-color: #000000;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 2px solid var(--cycle-border-color);
@@ -1220,12 +1229,6 @@ body.game-active footer {
 #player1 .profile-info {
   position: relative; /* para que z-index funcione */
   z-index: 1 !important;
-}
-
-/*Perfil inferior*/
-.player-profile.bottom {
-  margin-top: 20px;
-  margin-bottom: 5px;
 }
 
 /*Estilos para las imágenes de los perfiles de los jugadores*/
@@ -1323,20 +1326,13 @@ body.game-active footer {
 
 /* Estilos para la barra de salud vacia*/
 .health-bar {
-  margin-top: 2px;
-  margin-bottom: 2px;
-  width: 345px;
+  width: 400px;
   height: 20px;
   background: #121c40cb;
   box-shadow: 0px 0px 6px #263d8ff6 inset;
   overflow: hidden;
   box-shadow: 0px 0px 20px rgb(79, 246, 255);
   border: 2px solid rgb(79, 246, 255);
-  border-radius: 3px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  -ms-border-radius: 3px;
-  -o-border-radius: 3px;
 }
 
 /* Estilos para la barra de salud llena*/

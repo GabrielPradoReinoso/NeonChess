@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "corrección del bug en capturas de piezas"
+git commit -m "mejoras en los botones de la ventana pospartida, ajustes en las reglas de las tablas, probando ajustes visuales en los perfiles de jugadores"
 git push
 
 

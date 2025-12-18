@@ -45,9 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const workerUrl = new URL("./stockfish-worker.js", import.meta.url);
     console.log("[SF] workerUrl =", workerUrl.href);
 
-    // 👇 Worker CLÁSICO (sin type: "module")
-    stockfishWorker = new Worker(workerUrl);
-
     try {
       stockfishWorker = new Worker(workerUrl);
     } catch (e) {
@@ -475,7 +472,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const skillMapping = [0, 4, 8, 12, 14, 16, 18, 19, 20, 20];
   const movetimeMapping = [
-    1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
+    500, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
   ];
 
   function getSkillForLevel(level) {
@@ -488,15 +485,32 @@ document.addEventListener("DOMContentLoaded", function () {
     return movetimeMapping[level - 1];
   }
 
+  function getCastlingRights() {
+    let rights = "";
+
+    // Blancas
+    if (!kingMoved.w) {
+      if (!rookMoved.w.right) rights += "K";
+      if (!rookMoved.w.left) rights += "Q";
+    }
+
+    // Negras
+    if (!kingMoved.b) {
+      if (!rookMoved.b.right) rights += "k";
+      if (!rookMoved.b.left) rights += "q";
+    }
+
+    return rights || "-";
+  }
+
   function boardToFEN() {
     let fen = "";
     for (let i = 0; i < 8; i++) {
       let empty = 0;
       for (let j = 0; j < 8; j++) {
         const cell = board[i][j];
-        if (!cell) {
-          empty++;
-        } else {
+        if (!cell) empty++;
+        else {
           if (empty > 0) {
             fen += empty;
             empty = 0;
@@ -508,14 +522,39 @@ document.addEventListener("DOMContentLoaded", function () {
       if (empty > 0) fen += empty;
       if (i < 7) fen += "/";
     }
-    fen += " " + (currentTurn === "w" ? "w" : "b") + " KQkq - 0 1";
+
+    const side = currentTurn === "w" ? "w" : "b";
+    const castling = getCastlingRights();
+
+    // enPassantTarget opcional (de momento lo dejamos “-”)
+    fen += ` ${side} ${castling} - 0 1`;
     return fen;
+  }
+
+  const repetitionCount = new Map();
+
+  function repetitionKey() {
+    // piezas + turno + enroques + en-passant (si lo implementas)
+    // IMPORTANTE: sin contadores de movimientos
+    let s = "";
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        s += board[r][c] ? board[r][c] : "0";
+        s += ",";
+      }
+    }
+    const turn = currentTurn;
+    const castling = getCastlingRights ? getCastlingRights() : "KQkq"; // si ya lo arreglaste
+    const ep = enPassantTarget
+      ? `ep:${enPassantTarget.row}${enPassantTarget.col}`
+      : "ep:-";
+    return `${s}|t:${turn}|c:${castling}|${ep}`;
   }
 
   // ==========================================================
   // 8) MÚSICA Y SONIDOS
   // ==========================================================
-  const menuMusic = new Audio("assets/sounds/retro-main-theme.mp3");
+  const menuMusic = new Audio("assets/sounds/music-1.mp3");
   menuMusic.loop = true;
   menuMusic.volume = 0.6;
   menuMusic.play().catch(() => {});
@@ -524,7 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
   gameMusic.loop = true;
   gameMusic.volume = 0.6;
 
-  const playlist = ["assets/sounds/music-2.mp3", "assets/sounds/music-1.mp3"];
+  const playlist = ["assets/sounds/music-2.mp3"];
   let currentTrack = 0;
 
   function loadTrack(idx) {
@@ -723,34 +762,37 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function isInsufficientMaterial() {
-    let pieces = { w: [], b: [] };
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        const p = board[i][j];
-        if (p && p[1] !== "k") pieces[p[0]].push(p[1]);
+    const pieces = { w: [], b: [] };
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = board[r][c];
+        if (!p) continue;
+        const color = p[0];
+        const type = p[1];
+        if (type !== "k") pieces[color].push({ type, r, c });
       }
     }
+
+    // Solo reyes
     if (pieces.w.length === 0 && pieces.b.length === 0) return true;
 
-    if (
-      (pieces.w.length === 0 &&
-        pieces.b.length === 1 &&
-        (pieces.b[0] === "b" || pieces.b[0] === "n")) ||
-      (pieces.b.length === 0 &&
-        pieces.w.length === 1 &&
-        (pieces.w[0] === "b" || pieces.w[0] === "n"))
-    ) {
-      return true;
+    // Rey + (alfil o caballo) vs rey
+    const minorOnly = (arr) =>
+      arr.length === 1 && (arr[0].type === "b" || arr[0].type === "n");
+
+    if (pieces.w.length === 0 && minorOnly(pieces.b)) return true;
+    if (pieces.b.length === 0 && minorOnly(pieces.w)) return true;
+
+    // Rey + alfil vs Rey + alfil (solo si ambos tienen un único alfil)
+    const oneBishopOnly = (arr) => arr.length === 1 && arr[0].type === "b";
+    if (oneBishopOnly(pieces.w) && oneBishopOnly(pieces.b)) {
+      // color de casilla: (r+c)%2
+      const wColor = (pieces.w[0].r + pieces.w[0].c) % 2;
+      const bColor = (pieces.b[0].r + pieces.b[0].c) % 2;
+      if (wColor === bColor) return true; // mismo color => tablas
     }
 
-    if (
-      pieces.w.length === 1 &&
-      pieces.b.length === 1 &&
-      (pieces.w[0] === "b" || pieces.w[0] === "n") &&
-      (pieces.b[0] === "b" || pieces.b[0] === "n")
-    ) {
-      return true;
-    }
     return false;
   }
 
@@ -2182,10 +2224,9 @@ document.addEventListener("DOMContentLoaded", function () {
     rep.textContent = "Repetir partida";
     rep.classList.add("btn");
     rep.addEventListener("pointerup", () => {
-    overlay.remove();
-    repeatGame();
-  });
-
+      overlay.remove();
+      repeatGame();
+    });
 
     const volver = document.createElement("button");
     volver.textContent = "Volver al menú";
@@ -2203,56 +2244,55 @@ document.addEventListener("DOMContentLoaded", function () {
     updateKingStatus();
     const opp = currentTurn === "w" ? "b" : "w";
 
-    if (isKingInCheck(opp) && !isCheckmate(opp)) {
-      showCheckAnimation();
-      playSound(checkSound, "check");
-    }
-
+    // 1) Jaque / mate
     if (isKingInCheck(opp) && isCheckmate(opp)) {
       currentHealth[opp] = 0;
       updateHealthBar();
       playSound(checkmateSound, "checkmate");
       showCheckmateAnimation();
       setTimeout(() => {
-        if (typeof modalOpenSound !== "undefined") {
-          playSound(modalOpenSound, "select");
-        }
         showEndGameModal(
           (currentTurn === "w" ? "Jugador humano" : "GPR robot") +
             " gana por jaque mate"
         );
-      }, 1000);
-
+      }, 1200);
       return;
     }
 
-    if (updatePositionHistory()) {
-      stopTimer(currentTurn);
-      showEndGameModal("Empate");
-      return;
+    if (isKingInCheck(opp)) {
+      showCheckAnimation();
+      playSound(checkSound, "check");
     }
 
+    // 2) Tablas: stalemate
     if (!isKingInCheck(opp) && isStalemate(opp)) {
       stopTimer(currentTurn);
-      showEndGameModal("Empate por rey ahogado");
+      showEndGameModal("Tablas por rey ahogado");
       return;
     }
 
-    if (isReviewMode) {
-      isReviewMode = false;
+    // 3) Tablas: insuficiencia de material
+    if (isInsufficientMaterial()) {
+      stopTimer(currentTurn);
+      showEndGameModal("Tablas por insuficiencia de material");
+      return;
     }
+
+    // 4) Guardar snapshot UNA sola vez
     updatePositionHistory();
+
+    const key = repetitionKey();
+    repetitionCount.set(key, (repetitionCount.get(key) || 0) + 1);
+
+    if (repetitionCount.get(key) >= 3) {
+      stopTimer(currentTurn);
+      showEndGameModal("Tablas por triple repetición");
+      return;
+    }
+
+    // 5) Cambiar turno
     switchTurn();
   }
-
-  addEventMulti(btnSurrender, ["pointerup"], function (e) {
-    e.preventDefault();
-    showEndGameModal(
-      currentTurn === "w"
-        ? "Rosas se rinden. Azules ganan."
-        : "Azules se rinden. Rosas ganan."
-    );
-  });
 
   // ==========================================================
   // 23) TIMERS
@@ -2421,11 +2461,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const files = "abcdefgh";
     const fromCol = files.indexOf(uciMove[0]);
-    const fromRow = 8 - parseInt(uciMove[1]);
+    const fromRow = 8 - parseInt(uciMove[1], 10);
     const toCol = files.indexOf(uciMove[2]);
-    const toRow = 8 - parseInt(uciMove[3]);
+    const toRow = 8 - parseInt(uciMove[3], 10);
 
-    movePiece({ row: fromRow, col: fromCol }, { row: toRow, col: toCol });
+    const from = { row: fromRow, col: fromCol };
+    const to = { row: toRow, col: toCol };
+
+    // ✅ Si Stockfish propone algo ilegal para tu motor, no lo ejecutes
+    if (!isValidMove(from, to)) {
+      console.warn(
+        "[SF] Movimiento ilegal propuesto:",
+        uciMove,
+        "FEN:",
+        boardToFEN()
+      );
+      // Reintento rápido
+      setTimeout(() => forceRobotThinkNow(), 50);
+      return;
+    }
+
+    movePiece(from, to);
   }
 
   function forceRobotThinkNow() {
@@ -2770,7 +2826,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetGame(skipConfirm = false) {
     const gameContainerEl = document.getElementById("gameContainer");
     const gameSetupEl = document.getElementById("gameSetup");
-    
+
     hasGameStartedFromMenu = false;
 
     if (gameContainerEl) gameContainerEl.classList.add("hidden");
@@ -2806,59 +2862,64 @@ document.addEventListener("DOMContentLoaded", function () {
     setupInitialBoard();
     renderBoard();
     updateKingStatus();
+    repetitionCount.clear();
   }
 
   function repeatGame() {
-  // Para timers
-  stopTimer("w");
-  stopTimer("b");
+    // Para timers
+    stopTimer("w");
+    stopTimer("b");
 
-  // Limpia flags / estados
-  isReviewMode = false;
-  isAnimating = false;
-  isNavigating = false;
-  selectedCell = null;
-  removeMoveIndicators?.();
-  removeLastMoveHighlights?.();
+    // Limpia flags / estados
+    isReviewMode = false;
+    isAnimating = false;
+    isNavigating = false;
+    selectedCell = null;
+    removeMoveIndicators?.();
+    removeLastMoveHighlights?.();
 
-  // Resetea enroques y en passant
-  kingMoved = { w: false, b: false };
-  rookMoved = { w: { left: false, right: false }, b: { left: false, right: false } };
-  enPassantTarget = null;
+    // Resetea enroques y en passant
+    kingMoved = { w: false, b: false };
+    rookMoved = {
+      w: { left: false, right: false },
+      b: { left: false, right: false },
+    };
+    enPassantTarget = null;
 
-  // Salud y score
-  maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
-  currentHealth = { ...maxHealth };
-  scores = { w: 0, b: 0 };
-  updateScores();
-  updateHealthBar();
+    // Salud y score
+    maxHealth = { w: 39 + kingBaseHealth, b: 39 + kingBaseHealth };
+    currentHealth = { ...maxHealth };
+    scores = { w: 0, b: 0 };
+    updateScores();
+    updateHealthBar();
 
-  // Limpia historial UI
-  document.querySelector(".move-history").innerHTML = "";
-  positionHistory = [];
-  currentHistoryIndex = 0;
+    // Limpia historial UI
+    document.querySelector(".move-history").innerHTML = "";
+    positionHistory = [];
+    currentHistoryIndex = 0;
 
-  // Turno inicial (blancas siempre)
-  currentTurn = "w";
+    // Turno inicial (blancas siempre)
+    currentTurn = "w";
 
-  // Tiempo
-  if (selectedTime == null || isNaN(selectedTime)) selectedTime = Infinity;
-  timers = { w: selectedTime, b: selectedTime };
-  updateTimersDisplay();
+    // Tiempo
+    if (selectedTime == null || isNaN(selectedTime)) selectedTime = Infinity;
+    timers = { w: selectedTime, b: selectedTime };
+    updateTimersDisplay();
 
-  // Reinicia tablero
-  setupInitialBoard();
-  renderBoard();
-  updateKingStatus();
+    // Reinicia tablero
+    setupInitialBoard();
+    renderBoard();
+    updateKingStatus();
 
-  // Arranca reloj solo si es finito
-  if (Number.isFinite(timers[currentTurn])) startTimer(currentTurn);
+    // Arranca reloj solo si es finito
+    if (Number.isFinite(timers[currentTurn])) startTimer(currentTurn);
 
-  // Si humano juega AZULES (b), el robot (blancas) debe mover primero
-  if (!isOnlineGame && humanColor === "b") {
-    requestStockfishMove();
+    // Si humano juega AZULES (b), el robot (blancas) debe mover primero
+    if (!isOnlineGame && humanColor === "b") {
+      requestStockfishMove();
+    }
+    repetitionCount.clear();
   }
-}
 
   // ==========================================================
   // INICIO
