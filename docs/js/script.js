@@ -151,6 +151,12 @@ document.addEventListener("DOMContentLoaded", function () {
       actuallyStartGame();
     });
 
+    socket.on("opponentResigned", () => {
+      stopTimer("w");
+      stopTimer("b");
+      showEndGameModal("Tu rival se ha rendido.");
+    });
+
     socket.on("invalidMove", (mv) => console.warn("Movimiento inválido:", mv));
     socket.on("gameOver", (result) => alert("Fin de la partida: " + result));
 
@@ -688,6 +694,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const navPrevBtn = document.getElementById("btnPrev");
   const navNextBtn = document.getElementById("btnNext");
   const btnSurrender = document.getElementById("btnSurrender");
+  btnSurrender?.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    showResignConfirmModal();
+  });
+
   const undoBtn = document.getElementById("undoBtn");
   const redoBtn = document.getElementById("redoBtn");
   const historyContainer = document.getElementById("moveHistory");
@@ -2205,6 +2216,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const profileImg = document
       .getElementById(winnerId)
       ?.querySelector(".profile-image img");
+
     if (profileImg) {
       const img = document.createElement("img");
       img.src = profileImg.src;
@@ -2234,6 +2246,80 @@ document.addEventListener("DOMContentLoaded", function () {
     volver.addEventListener("pointerup", () => window.location.reload());
 
     btns.append(rep, volver);
+    content.appendChild(btns);
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+  }
+
+  function showResignConfirmModal() {
+    const overlay = document.createElement("div");
+    overlay.id = "resignConfirmModal";
+    overlay.style.cssText = `
+    position: fixed; inset: 0;
+    background: #121c4095;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999999;
+  `;
+
+    const content = document.createElement("div");
+    content.classList.add("modal-content", "endgame-content");
+    content.style.cssText = `
+    width: 80%;
+    max-width: 520px;
+    background: #121c40;
+    padding: 20px;
+    text-align: center;
+    margin: 10px;
+    border: 2px solid rgb(79, 246, 255);
+    box-shadow: 0px 0px 10px rgb(79, 246, 255);
+    border-radius: 6px;
+    position: relative;
+  `;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.classList.add("modal-close-btn");
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("pointerup", () => overlay.remove());
+    content.appendChild(closeBtn);
+
+    const title = document.createElement("h2");
+    title.textContent = "¿CONFIRMAR RENDICIÓN?";
+    content.appendChild(title);
+
+    const msg = document.createElement("p");
+    msg.textContent = "Si confirmas, la partida terminará por rendición.";
+    content.appendChild(msg);
+
+    const btns = document.createElement("div");
+    btns.classList.add("modal-btn-container");
+
+    const cancel = document.createElement("button");
+    cancel.textContent = "Cancelar";
+    cancel.classList.add("btn");
+    cancel.addEventListener("pointerup", () => overlay.remove());
+
+    const confirm = document.createElement("button");
+    confirm.textContent = "Rendirse";
+    confirm.classList.add("btn");
+    confirm.addEventListener("pointerup", () => {
+      overlay.remove();
+
+      const winner =
+        humanColor === "w"
+          ? "Azules ganan por rendición."
+          : "Rosas ganan por rendición.";
+
+      if (isOnlineGame && currentRoomId) {
+        ensureSocket()?.emit("resign", { roomId: currentRoomId });
+      }
+
+      stopTimer("w");
+      stopTimer("b");
+      showEndGameModal(winner);
+    });
+
+    btns.append(cancel, confirm);
     content.appendChild(btns);
 
     overlay.appendChild(content);

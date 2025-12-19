@@ -1114,7 +1114,7 @@ body.game-active footer {
   padding: 4px 3px;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 3px solid var(--cycle-border-color);
-  width: 400px;
+  width: 370px;
   height: 75px;
   color: rgb(79, 246, 255);
   background-color: #121c40e9;
@@ -1326,7 +1326,7 @@ body.game-active footer {
 
 /* Estilos para la barra de salud vacia*/
 .health-bar {
-  width: 400px;
+  width: 370px;
   height: 20px;
   background: #121c40cb;
   box-shadow: 0px 0px 6px #263d8ff6 inset;
@@ -1348,13 +1348,23 @@ body.game-active footer {
 
 /* Margen para la barra de salud superior */
 .health-bar-top {
-  top: -15px;
   margin-top: 20px;
+  border-radius: 5px 5px 0px 0px;
+  -webkit-border-radius: 5px 5px 0px 0px;
+  -moz-border-radius: 5px 5px 0px 0px;
+  -ms-border-radius: 5px 5px 0px 0px;
+  -o-border-radius: 5px 5px 0px 0px;
 }
 
 /* Margen para la barra de salud inferior */
 .health-bar-bottom {
-  margin-bottom: 15px;
+   margin-bottom: 10px;
+  border-radius: 0px 0px 5px 5px;
+  -webkit-border-radius: 0px 0px 5px 5px;
+  -moz-border-radius: 0px 0px 5px 5px;
+  -ms-border-radius: 0px 0px 5px 5px;
+  -o-border-radius: 0px 0px 5px 5px;
+ 
 }
 /* Estilos para botones de control de juego______________________*/
 
@@ -1449,6 +1459,74 @@ body.game-active footer {
 /* Estilos para el modal de fin de partida _____________________*/
 
 /* Estilos de la ventana de fin de partida */
+/* ===== MODALES GENERALES ===== */
+#endGameModal,
+#resignConfirmModal {
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Caja principal */
+.modal-content.endgame-content {
+  background: radial-gradient(circle at top, #16245a, #0b1028);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow:
+    0 0 20px rgba(79, 246, 255, 0.4),
+    inset 0 0 10px rgba(79, 246, 255, 0.2);
+  color: #e8faff;
+  animation: popIn 0.3s ease-out;
+}
+
+/* Título */
+.modal-content h2 {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4ff6ff;
+  text-shadow: 0 0 12px #4ff6ff;
+}
+
+/* Texto */
+.modal-content p {
+  opacity: 0.9;
+  font-size: 1.05rem;
+  color: #4ff6ff;
+}
+
+/* Botones */
+.modal-btn-container .btn {
+  background: transparent;
+  border: 2px solid #4ff6ff;
+  color: #4ff6ff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn-container .btn:hover {
+  background: #4ff6ff;
+  color: #0b1028;
+  box-shadow: 0 0 12px #4ff6ff;
+}
+
+/* Botón cerrar */
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #4ff6ff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  transform: scale(1.2) rotate(5deg);
+}
+
 #endGameModal {
   position: fixed;
   top: 0;

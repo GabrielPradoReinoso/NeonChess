@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "mejoras en los botones de la ventana pospartida, ajustes en las reglas de las tablas, probando ajustes visuales en los perfiles de jugadores"
+git commit -m "Mejoras en la funcionalidad del endGameModal"
 git push
 
 
