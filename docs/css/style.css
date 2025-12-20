@@ -992,7 +992,7 @@ body.game-active footer {
   background: rgba(255, 64, 64, 0.438);
   box-shadow: 0px 0px 30px rgb(235, 42, 42) inset;
   pointer-events: none;
-  z-index: 5;
+  z-index: 1;
   transition: background 0.1s;
   -webkit-transition: background 0.1s;
   -moz-transition: background 0.1s;
@@ -1110,11 +1110,11 @@ body.game-active footer {
 .player-profile {
   display: flex;
   align-items: center;
-  margin: 0;
+  
   padding: 4px 3px;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 3px solid var(--cycle-border-color);
-  width: 380px;
+  width: 370px;
   height: 75px;
   color: rgb(79, 246, 255);
   background-color: #121c40e9;
@@ -1253,17 +1253,18 @@ body.game-active footer {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 30px;
 }
 
 /* Estilos para el indicador del nivel del robot*/
 .robot-diff {
   display: inline-block;
-  font-size: 1rem;
+  font-size: 13px;
   font-weight: 500;
   color: #e5ff4f;
   background-color: #0f0d0a;
   padding: 2px 6px;
-  margin-left: 5px;
+  margin-left: 4px;
   box-shadow: 0 0 6px #e5ff4f;
   border: 3px solid #e5ff4f;
   border-radius: 3px;
@@ -1272,12 +1273,13 @@ body.game-active footer {
   -ms-border-radius: 3px;
   -o-border-radius: 3px;
   z-index: 1;
+  line-height: 25px;
 }
 
 /*Estilos para los nombres de los jugadores*/
 .player-name {
   font-family: "FrancoisOne";
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-shadow: 0px 0px 2px black;
   border: 1px solid rgb(79, 246, 255);
@@ -1299,7 +1301,7 @@ body.game-active footer {
   border: 1px solid var(--cycle-border-color);
   box-shadow: 0px 0px 8px var(--cycle-border-color);
   padding: 4px;
-  font-size: 15px;
+  font-size: 12px;
   margin-bottom: 10px;
   border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -1314,7 +1316,7 @@ body.game-active footer {
   box-shadow: 0px 0px 8px var(--cycle-border-color);
   color: #080401;
   padding: 5px;
-  font-size: 15px;
+  font-size: 12px;
   margin-bottom: 10px;
   border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -1328,7 +1330,7 @@ body.game-active footer {
 
 /* Estilos para la barra de salud vacia*/
 .health-bar {
-  width: 380px;
+  width: 370px;
   height: 20px;
   background: #121c40cb;
   box-shadow: 0px 0px 6px #263d8ff6 inset;
@@ -2130,18 +2132,10 @@ body.game-active .chess-container {
 
   .robot-diff {
     height: 30px;
-    border: 1px solid;
+    border: 2px solid;
     margin: 0px 10px;
   }
-  /*Margenes de los perfiles*/
-  /*Perfil superior*/
-  .player-profile.top {
-    margin-bottom: 3px;
-  }
-  /*Perfil inferior*/
-  .player-profile.bottom {
-    margin-top: 3px;
-  }
+  
 }
 
 

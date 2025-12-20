@@ -1099,7 +1099,7 @@ document.addEventListener("DOMContentLoaded", function () {
           font-size:12px; line-height:12px;
           color:rgb(17,255,255);
           text-shadow:0 0 10px rgb(17,255,255);
-          z-index:999999;
+          z-index:1;
           pointer-events:none;
           user-select:none;
         `;
@@ -1117,7 +1117,7 @@ document.addEventListener("DOMContentLoaded", function () {
           font-size:12px; line-height:12px;
           color:rgb(17,255,255);
           text-shadow:0 0 10px rgb(17,255,255);
-          z-index:999999;
+          z-index:1;
           pointer-events:none;
           user-select:none;
         `;
@@ -1682,7 +1682,7 @@ document.addEventListener("DOMContentLoaded", function () {
           (piece[0] === "b" && to.row === 7));
 
       if (isPromotion) {
-        showPromotionModal(piece[0], to.row, to.col, (promoted) => {
+        const finishPromotion = (promoted) => {
           board[to.row][to.col] = promoted;
           playSound(promotionSound, "promotion");
           renderBoard();
@@ -1697,9 +1697,17 @@ document.addEventListener("DOMContentLoaded", function () {
             currentHealth[promoted[0]] + val
           );
           updateHealthBar();
+
           finishMove();
           isAnimating = false;
-        });
+        };
+
+        // ✅ Robot/rival: autopromoción a reina
+        if (autoPromoteIfRobot(piece[0], to.row, to.col, finishPromotion))
+          return;
+
+        // Humano: modal como siempre
+        showPromotionModal(piece[0], to.row, to.col, finishPromotion);
       } else {
         renderBoard();
 
@@ -1741,7 +1749,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return ok;
   }
 
-  function movePieceNoAnim(from, to, isHumanMove = false) {
+  function NoAnim(from, to, isHumanMove = false) {
     isReviewMode = false;
 
     const piece = board[from.row][from.col];
@@ -1810,7 +1818,7 @@ document.addEventListener("DOMContentLoaded", function () {
         (piece[0] === "b" && to.row === 7));
 
     if (isPromotion) {
-      showPromotionModal(piece[0], to.row, to.col, function (promoted) {
+      const finishPromotion = (promoted) => {
         board[to.row][to.col] = promoted;
         playSound(promotionSound, "promotion");
         renderBoard();
@@ -1826,15 +1834,16 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         updateHealthBar();
 
-        if (isHumanMove && isOnlineGame && currentRoomId) {
-          socket.emit("playerMove", {
-            roomId: currentRoomId,
-            move: { from, to },
-          });
-        }
+        if (isHumanMove) emitOnlineMove(from, to);
 
         finishMove();
-      });
+      };
+
+      // ✅ Robot/rival: autopromoción a reina
+      if (autoPromoteIfRobot(piece[0], to.row, to.col, finishPromotion)) return;
+
+      // Humano: modal
+      showPromotionModal(piece[0], to.row, to.col, finishPromotion);
       return;
     }
 
@@ -2160,6 +2169,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 22) FINALIZAR MOVIMIENTO Y MODALES DE PARTIDA
   // ==========================================================
+  function autoPromoteIfRobot(color, row, col, callback) {
+    // Si el color que promociona NO es el humano, es robot/rival → reina automática
+    if (color !== humanColor) {
+      callback(color + "q");
+      return true; // indica que ya se resolvió
+    }
+    return false;
+  }
+
   function showPromotionModal(color, row, col, callback) {
     const overlay = document.createElement("div");
     overlay.id = "promotionModal";
@@ -2338,7 +2356,7 @@ document.addEventListener("DOMContentLoaded", function () {
       showCheckmateAnimation();
       setTimeout(() => {
         showEndGameModal(
-          (currentTurn === "w" ? "Jugador humano" : "GPR robot") +
+          (currentTurn === "w" ? "Humano" : "GPR robot") +
             " gana por jaque mate"
         );
       }, 1200);
@@ -2503,7 +2521,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       p1Name.textContent = "GPR robot";
       p1Img.src = "assets/images/gpr-robotic-img.jpg";
-      p2Name.textContent = "Jugador humano";
+      p2Name.textContent = "Humano";
       p2Img.src = "assets/images/human-img-profile.jpg";
       if (robotBadge) robotBadge.textContent = `Nivel ${difficultyLevel}`;
     }
@@ -2676,73 +2694,175 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function handleHistoryStep(direction) {
     if (isNavigating) return;
+
     isNavigating = true;
     navPrevBtn.disabled = navNextBtn.disabled = true;
 
-    const atStart = currentHistoryIndex <= 0;
-    const atEnd = currentHistoryIndex >= positionHistory.length - 1;
-    if ((direction === -1 && atStart) || (direction === 1 && atEnd)) {
+    const endNavigation = () => {
       isNavigating = false;
       navPrevBtn.disabled = navNextBtn.disabled = false;
-      return;
-    }
+    };
 
-    const oldBoard = getBoardPositionSnapshot();
-    currentHistoryIndex += direction;
-    syncHistoryFromSnapshot(currentHistoryIndex);
-    const newBoard = getBoardPositionSnapshot();
-
-    board = oldBoard;
-    renderBoard();
-    const diffs = diffSnapshotsAll(oldBoard, newBoard);
-
-    if (direction === -1) {
-      if (historyContainer.lastElementChild) {
-        historyContainer.removeChild(historyContainer.lastElementChild);
-      }
-      if (diffs.length > 2 && historyContainer.lastElementChild) {
-        historyContainer.removeChild(historyContainer.lastElementChild);
-      }
-    } else if (direction === 1 && diffs.length === 2) {
-      const mover = positionHistory[currentHistoryIndex].lastMoveBy;
-      const fromDiff = diffs.find((d) => d.from !== null);
-      const toDiff = diffs.find((d) => d.from === null);
-      const file = "abcdefgh"[toDiff.col];
-      const rank = 8 - toDiff.row;
-      logMove({ color: mover, type: fromDiff.from[1] }, file + rank);
-    }
-
-    if (diffs.length === 2) {
-      const fromDiff = diffs.find((d) => d.from !== null);
-      const toDiff = diffs.find((d) => d !== fromDiff);
-      const fromCell = getCell(fromDiff.row, fromDiff.col);
-      const toCell = getCell(toDiff.row, toDiff.col);
-      const img = fromCell.querySelector("img");
-      if (img) {
-        playSound(moveSound, "move");
-        animatePieceMove(img, fromCell, toCell, () => {
-          board = newBoard;
-          renderBoard();
-          updateKingStatus();
-          removeMoveIndicators();
-          removeLastMoveHighlights();
-          syncHistoryScroll(currentHistoryIndex);
-          isNavigating = false;
-          navPrevBtn.disabled = navNextBtn.disabled = false;
-        });
+    try {
+      const atStart = currentHistoryIndex <= 0;
+      const atEnd = currentHistoryIndex >= positionHistory.length - 1;
+      if ((direction === -1 && atStart) || (direction === 1 && atEnd)) {
+        endNavigation();
         return;
       }
+
+      const prevIndex = currentHistoryIndex;
+      const oldBoard = getBoardPositionSnapshot();
+
+      currentHistoryIndex += direction;
+      syncHistoryFromSnapshot(currentHistoryIndex);
+      const newBoard = getBoardPositionSnapshot();
+
+      // Render old para animar desde esa posición
+      board = oldBoard;
+      renderBoard();
+
+      const diffs = diffSnapshotsAll(oldBoard, newBoard);
+
+      // mover calculado UNA vez y válido para avanzar y retroceder
+      const mover =
+        direction === 1
+          ? positionHistory[currentHistoryIndex].lastMoveBy
+          : positionHistory[prevIndex].lastMoveBy;
+
+      // Retroceder: ajustar UI del historial
+      if (direction === -1) {
+        if (historyContainer?.lastElementChild) {
+          historyContainer.removeChild(historyContainer.lastElementChild);
+        }
+        if (diffs.length > 2 && historyContainer?.lastElementChild) {
+          historyContainer.removeChild(historyContainer.lastElementChild);
+        }
+      } else if (
+        direction === 1 &&
+        (diffs.length === 2 || diffs.length === 3)
+      ) {
+        const { fromDiff, toDiff } = pickMoveDiffs(diffs, mover);
+        if (fromDiff && toDiff) {
+          const file = "abcdefgh"[toDiff.col];
+          const rank = 8 - toDiff.row;
+          logMove({ color: mover, type: fromDiff.from?.[1] }, file + rank);
+        }
+      }
+
+      // Animación para normal + captura (incluye en-passant)
+      if (diffs.length === 2 || diffs.length === 3) {
+        const { fromDiff, toDiff } = pickMoveDiffs(diffs, mover);
+
+        if (fromDiff && toDiff) {
+          const fromCell = getCell(fromDiff.row, fromDiff.col);
+          const toCell = getCell(toDiff.row, toDiff.col);
+          const moverImg = fromCell?.querySelector("img");
+
+          if (moverImg && fromCell && toCell) {
+            const capDiff = findCaptureDiff(diffs, mover); // puede ser null
+            const isCapture = !!capDiff;
+
+            // --- AVANZAR: explosión de la capturada antes de mover ---
+            if (direction === 1 && isCapture) {
+              createCapturedPieceExplosion(capDiff.from, {
+                row: capDiff.row,
+                col: capDiff.col,
+              });
+              playSound(captureSound, "capture");
+
+              // Oculta la víctima en la casilla destino (si la hubiera) mientras animas
+              const victimImg = toCell.querySelector("img");
+              if (victimImg) victimImg.style.visibility = "hidden";
+            } else {
+              playSound(moveSound, "move");
+            }
+
+            animatePieceMove(moverImg, fromCell, toCell, () => {
+              // Consolidar estado final después de la animación
+              board = newBoard;
+              renderBoard();
+              updateKingStatus();
+              removeMoveIndicators();
+              removeLastMoveHighlights();
+              updateScores();
+              syncHistoryScroll(currentHistoryIndex);
+
+              // --- RETROCEDER: “revivir” la capturada después de renderizar ---
+              if (direction === -1) {
+                const revivedDiff = diffs.find(
+                  (d) => d.from == null && d.to && d.to[0] !== mover
+                );
+                if (revivedDiff) {
+                  const revivedCell = getCell(revivedDiff.row, revivedDiff.col);
+                  const revivedImg = revivedCell?.querySelector("img");
+                  animatePieceAppear(revivedImg);
+                }
+              }
+
+              endNavigation();
+            });
+
+            return; // evita doble render + evita liberar navegación antes de tiempo
+          }
+        }
+      }
+
+      // Fallback sin animación
+      board = newBoard;
+      renderBoard();
+      updateKingStatus();
+      removeMoveIndicators();
+      removeLastMoveHighlights();
+      updateScores();
+      syncHistoryScroll(currentHistoryIndex);
+    } catch (err) {
+      console.error("[HISTORY] error avanzando/retrocediendo:", err);
+    } finally {
+      isNavigating = false;
+      navPrevBtn.disabled = navNextBtn.disabled = false;
+    }
+  }
+
+  function findCaptureDiff(diffs, moverColor) {
+    const isMover = (code) => code && code[0] === moverColor;
+    const isOpp = (code) => code && code[0] !== moverColor;
+
+    // 1) Captura normal: en la casilla destino se reemplaza rival por mover
+    const normal = diffs.find((d) => isOpp(d.from) && isMover(d.to));
+    if (normal) return { ...normal, kind: "normal" };
+
+    // 2) En-passant: la pieza rival desaparece en otra casilla (to === null)
+    const ep = diffs.find((d) => isOpp(d.from) && d.to == null);
+    if (ep) return { ...ep, kind: "ep" };
+
+    return null;
+  }
+
+  function animatePieceAppear(img) {
+    if (!img) return;
+    img.animate(
+      [
+        { transform: "scale(0.2)", opacity: 0 },
+        { transform: "scale(1.05)", opacity: 1 },
+        { transform: "scale(1)", opacity: 1 },
+      ],
+      { duration: 200, easing: "ease-out", fill: "both" }
+    );
+  }
+
+  function pickMoveDiffs(diffs, moverColor) {
+    const isMover = (code) => code && code[0] === moverColor;
+
+    let fromDiff = null;
+    let toDiff = null;
+
+    for (const d of diffs) {
+      if (isMover(d.from) && !isMover(d.to)) fromDiff = d;
+      if (!isMover(d.from) && isMover(d.to)) toDiff = d;
     }
 
-    board = newBoard;
-    renderBoard();
-    updateKingStatus();
-    removeMoveIndicators();
-    removeLastMoveHighlights();
-    updateScores();
-    syncHistoryScroll(currentHistoryIndex);
-    isNavigating = false;
-    navPrevBtn.disabled = navNextBtn.disabled = false;
+    return { fromDiff, toDiff };
   }
 
   navPrevBtn?.addEventListener("click", (e) => {

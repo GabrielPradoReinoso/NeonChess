@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "ajustes en el contenedor de info de los jugadores"
+git commit -m "Correción y mejora en funcionalidad y animacion en botones de retroceder y avanzar movimientos de piezas"
 git push
 
 
