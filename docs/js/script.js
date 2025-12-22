@@ -35,6 +35,10 @@
 
 document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
+  // INICIALIZACIÓN DE UI
+  // ==========================================================
+  initSetupDropdowns();
+  // ==========================================================
   // 1) MOTOR STOCKFISH (worker + helpers UCI)
   // ==========================================================
   let stockfishWorker = null;
@@ -224,7 +228,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const roomCodeText = document.getElementById("roomCodeText");
   const copyRoomCode = document.getElementById("copyRoomCode");
   const cancelOnlineChoice = document.getElementById("cancelOnlineChoice");
-
   const btnOnline = document.getElementById("btnOnline");
   const btnLocal = document.getElementById("btnLocal"); // BOTÓN REAL
 
@@ -377,21 +380,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  setupDropdown("difficultyButton", "difficultyOptions", ({ level }) => {
-    difficultyLevel = parseInt(level);
-    updateRobotDifficultyBadge(difficultyLevel);
-  });
+  function initSetupDropdowns() {
+    setupDropdown("difficultyButton", "difficultyOptions", ({ level }) => {
+      difficultyLevel = parseInt(level);
+      updateRobotDifficultyBadge(difficultyLevel);
+    });
 
-  setupDropdown("colorButton", "colorOptions", ({ color }) => {
-    console.log("color seleccionado:", color);
-    humanColor = color;
-    setupInitialBoard();
-  });
+    setupDropdown("colorButton", "colorOptions", ({ color }) => {
+      humanColor = color;
+      setupInitialBoard();
+    });
 
-  setupDropdown("timeConfigButton", "timeOptions", ({ time }) => {
-    selectedTime = parseInt(time) * 60;
-    playButton.classList.remove("hidden");
-  });
+    setupDropdown("timeConfigButton", "timeOptions", ({ time }) => {
+      selectedTime = parseInt(time) * 60;
+      playButton.classList.remove("hidden");
+    });
+  }
 
   // ==========================================================
   // 4) LOADING OVERLAY (página completa)
@@ -685,15 +689,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const timeConfigBtn = document.getElementById("timeConfigButton");
   const playButton = document.getElementById("playButton");
   const chessBoard = document.getElementById("chessBoard");
-
   const player1TimerEl = document.querySelector("#player1 .player-timer");
   const player2TimerEl = document.querySelector("#player2 .player-timer");
   const player1ScoreEl = document.querySelector("#player1 .player-score");
   const player2ScoreEl = document.querySelector("#player2 .player-score");
-
   const navPrevBtn = document.getElementById("btnPrev");
   const navNextBtn = document.getElementById("btnNext");
   const btnSurrender = document.getElementById("btnSurrender");
+
   btnSurrender?.addEventListener("pointerup", (e) => {
     e.preventDefault();
     showResignConfirmModal();
@@ -1749,7 +1752,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return ok;
   }
 
-  function NoAnim(from, to, isHumanMove = false) {
+  function movePieceNoAnim(from, to, isHumanMove = false) {
     isReviewMode = false;
 
     const piece = board[from.row][from.col];
