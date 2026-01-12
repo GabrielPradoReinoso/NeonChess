@@ -17,6 +17,10 @@
 /* Configuración básica ________________________________ */
 
 /* HTML y body___________________________________________*/
+body.game-active header,
+body.game-active footer {
+  display: none !important;
+}
 html,
 body {
   margin: 0;
@@ -28,7 +32,7 @@ body {
   background-color: #081729;
 }
 
-body{
+body {
   box-shadow: 0px 0px 10px var(--cycle-border-color) inset;
   background-image: url(../assets/images/retro-chess-background-pc.png);
   background-size: 100% 100%;
@@ -36,16 +40,15 @@ body{
 
 /* Cuando el juego esté activo, bloquea todo scroll */
 body.game-active {
-  overflow: hidden;      /* ni vertical ni horizontal */
-  height: 100vh;         /* fuerza la altura exacta de la ventana */
+  overflow: hidden; /* ni vertical ni horizontal */
+  height: 100vh; /* fuerza la altura exacta de la ventana */
 }
 
 /* evita scroll en el contenedor que muestra el tablero */
 #gameContainer {
-  overflow: hidden;      /* quita cualquier scroll interno */
+  overflow: hidden; /* quita cualquier scroll interno */
   height: 100vh;
 }
-
 
 /*________________________________________________________*/
 
@@ -84,7 +87,7 @@ footer {
 
 body.game-active {
   background-image: none;
-  background-color: #081729;;
+  background-color: #081729;
 }
 
 /* ____________________________________________________________*/
@@ -158,10 +161,9 @@ body.game-active {
 }
 
 .main-title a {
-  
   height: 100%;
   width: 100%;
-  line-height: 1;   
+  line-height: 1;
   font-size: clamp(1.5rem, 8vw, 6rem);
   letter-spacing: clamp(0.1em, 0.5vw, 0.5em);
   white-space: nowrap;
@@ -189,7 +191,7 @@ body.game-active {
 @keyframes changeColorText {
   0% {
     text-shadow: 0px 0px 5px var(--cycle-border-color);
-}
+  }
   50% {
     text-shadow: 0px 0px 20px #ff71ea;
     color: #f6d6ff;
@@ -229,7 +231,6 @@ body.game-active {
   -moz-border-radius: 0px 10px 10px 0px;
   -ms-border-radius: 0px 10px 10px 0px;
   -o-border-radius: 0px 10px 10px 0px;
-  
 }
 
 .dropdown-menu {
@@ -260,11 +261,11 @@ body.game-active {
   margin-top: 100px;
 }
 
-.dropdown-menu a{
+.dropdown-menu a {
   text-decoration: none;
 }
 
-.dropdown-menu a:hover{
+.dropdown-menu a:hover {
   background-color: #00dfff;
 }
 
@@ -311,7 +312,7 @@ body.game-active {
 .main-section {
   padding: 40px 20px;
   text-align: center;
-  
+
   background-size: 100% 100%;
 }
 
@@ -346,7 +347,6 @@ body.game-active {
   -o-border-radius: 5px;
 }
 
-
 @keyframes efectoBoton {
   0% {
     background-color: #0f0d0a;
@@ -361,8 +361,7 @@ body.game-active {
 }
 
 #btnOnline,
-#btnLocal
-{
+#btnLocal {
   font-size: 100%;
   width: 220px;
   padding: 20px;
@@ -385,11 +384,10 @@ body.game-active {
   -o-transition: all 300ms linear;
 }
 
-#btnLocal{
+#btnLocal {
   animation: none;
   -webkit-animation: none;
 }
-
 
 @keyframes flashLight {
   0% {
@@ -401,7 +399,7 @@ body.game-active {
     background-color: #0f5a7a;
     border: 3px solid rgb(255, 202, 252);
     color: rgb(246, 174, 255);
-}
+  }
   100% {
     box-shadow: 0px 0px 0px var(--cycle-border-color);
   }
@@ -415,74 +413,75 @@ body.game-active {
 }
 
 /*----PRINCIPIO PANEL DEL BOTÓN MENÚ ONLINE--------------------------------------*/
-.online-choice { 
-  margin: 1.5rem auto; max-width: 520px; 
-  padding: 16px; border-radius: 14px; 
-  background: rgba(15,13,10,.75); 
-  backdrop-filter: blur(6px); 
-  color: rgb(79,246,255);
-  box-shadow: 0 0 12px rgba(79,246,255,.15);
-  border: 2px solid rgb(79,246,255);
+.online-choice {
+  margin: 1.5rem auto;
+  max-width: 520px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(15, 13, 10, 0.75);
+  backdrop-filter: blur(6px);
+  color: rgb(79, 246, 255);
+  box-shadow: 0 0 12px rgba(79, 246, 255, 0.15);
+  border: 2px solid rgb(79, 246, 255);
   box-shadow: 0px 0px 30px var(--cycle-border-color);
 }
-.online-choice.hidden { 
-  display:none; 
+.online-choice.hidden {
+  display: none;
 }
-.online-choice h3 { 
-  margin: 0 0 .8rem; 
-  font-family: "FrancoisOne", sans-serif; 
+.online-choice h3 {
+  margin: 0 0 0.8rem;
+  font-family: "FrancoisOne", sans-serif;
   text-align: center;
-  border-bottom: 1px solid rgb(79,246,255);
-  padding-bottom: 10px;
-
-}
-
-.online-info{
-  border-bottom: 1px solid rgb(79,246,255);
+  border-bottom: 1px solid rgb(79, 246, 255);
   padding-bottom: 10px;
 }
 
-.marked-text{
+.online-info {
+  border-bottom: 1px solid rgb(79, 246, 255);
+  padding-bottom: 10px;
+}
+
+.marked-text {
   color: rgb(228, 97, 221);
 }
 
-.created-room { 
-  margin-top: 14px; 
+.created-room {
+  margin-top: 14px;
 }
 
-.created-room.hidden { 
-  display:none; 
+.created-room.hidden {
+  display: none;
 }
-.code-line { 
-  display:flex; 
-  gap:8px; 
-  align-items:center; 
-}
-
-.code-line code { 
-  font-size: 1.2rem; 
-  padding:6px 10px; 
-  border-radius:8px; 
-  background:#081219; 
-  border:1px solid rgb(33,58,74); 
-  color:#4ff6ff; 
-  text-shadow: 0 0 5px rgb(79,246,255);
+.code-line {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.btn.small { 
-  padding:6px 10px; 
-  font-size:.9rem; 
+.code-line code {
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #081219;
+  border: 1px solid rgb(33, 58, 74);
+  color: #4ff6ff;
+  text-shadow: 0 0 5px rgb(79, 246, 255);
 }
-.btn.ghost { 
-  background: transparent; 
-  border:1px solid rgb(33,58,74); 
+
+.btn.small {
+  padding: 6px 10px;
+  font-size: 0.9rem;
 }
-.btn.primary { 
-  box-shadow: 0 0 10px rgba(79,246,255,.35); 
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgb(33, 58, 74);
 }
-.muted { 
-  opacity:.8; 
-  font-size:.9rem; 
+.btn.primary {
+  box-shadow: 0 0 10px rgba(79, 246, 255, 0.35);
+}
+.muted {
+  opacity: 0.8;
+  font-size: 0.9rem;
 }
 /*----FIN PANEL DEL BOTÓN MENÚ ONLINE--------------------------------------*/
 
@@ -529,7 +528,6 @@ body.game-active footer {
   background-color: #081729;
 }
 /* ____________________________________________________________*/
-
 
 /* Contenedor del menú de la configuración de juego ____________*/
 .game-setup {
@@ -762,7 +760,7 @@ body.game-active footer {
   border-radius: 6px;
   padding: 5px;
   margin-top: 50px;
-  
+
   border: 2px solid rgb(79, 246, 255);
   box-shadow: 0 0 3px var(--cycle-border-color);
   background-color: rgb(12 39 58);
@@ -789,11 +787,11 @@ body.game-active footer {
 #colorOptions {
   display: flex;
   flex-direction: column;
-  align-items: center;      /* centra los <li> horizontalmente */
-  gap: 20px;                 /* espacio vertical entre cada opción */
-  padding: 0;                /* opcional: elimina padding extra */
-  margin: 0 auto;            /* centra el contenedor en pantallas grandes */
-  list-style: none;          /* quita los “•” si los tuvieras */
+  align-items: center; /* centra los <li> horizontalmente */
+  gap: 20px; /* espacio vertical entre cada opción */
+  padding: 0; /* opcional: elimina padding extra */
+  margin: 0 auto; /* centra el contenedor en pantallas grandes */
+  list-style: none; /* quita los “•” si los tuvieras */
 }
 
 #colorOptions li {
@@ -803,19 +801,16 @@ body.game-active footer {
   max-height: 200px;
   height: 200px;
   text-align: center;
-  
 }
-
 
 .dropdown .options.open#colorOptions {
   display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 0 !important;   
-  height: auto !important;      
+  padding: 20px 0 !important;
+  height: auto !important;
 }
-
 
 .dropdown .options.open#colorOptions li {
   display: flex !important;
@@ -823,13 +818,12 @@ body.game-active footer {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 20px 0;    
-  width: 80%;           
-  max-width: 220px;      
-  margin: 10px 0 !important;  
+  padding: 20px 0;
+  width: 80%;
+  max-width: 220px;
+  margin: 10px 0 !important;
   text-align: center;
 }
-
 
 #pinkColor {
   background-color: rgba(201, 97, 218, 0.808);
@@ -898,15 +892,15 @@ body.game-active footer {
   margin: 0;
   padding: 0;
   position: relative;
-  border-top: 1px  solid var(--cycle-border-color);
-  border-bottom: 1px  solid var(--cycle-border-color);
+  border-top: 1px solid var(--cycle-border-color);
+  border-bottom: 1px solid var(--cycle-border-color);
   max-width: 100%;
   box-sizing: border-box;
 }
 
-#chessBoard.flipped { transform: none; } /* o elimina la regla */
-
-
+#chessBoard.flipped {
+  transform: none;
+} /* o elimina la regla */
 
 /* ____________________________________________________________*/
 
@@ -1014,15 +1008,14 @@ body.game-active footer {
   }
   25% {
     background: rgb(255, 163, 163);
-  box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+    box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
   }
   50% {
     background-color: black;
   }
   75% {
     background: rgb(255, 163, 163);
-  box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
-  
+    box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
   }
   100% {
     background-color: black;
@@ -1112,10 +1105,9 @@ body.game-active footer {
 .player-profile {
   display: flex;
   align-items: center;
-  
   padding: 4px 3px;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
-  border: 3px solid var(--cycle-border-color);
+  border: 2px solid var(--cycle-border-color) !important;
   width: 370px;
   height: 75px;
   color: rgb(79, 246, 255);
@@ -1126,24 +1118,24 @@ body.game-active footer {
 
 /*Perfil superior*/
 .player-profile.top {
-   margin-bottom: 10px;
-   border-radius: 0px 0px 10px 10px;
-   -webkit-border-radius: 0px 0px 10px 10px;
-   -moz-border-radius: 0px 0px 10px 10px;
-   -ms-border-radius: 0px 0px 10px 10px;
-   -o-border-radius: 0px 0px 10px 10px;
-   border-top: none;
+  margin-bottom: 10px;
+  border-radius: 0px 0px 3px 3px;
+  -webkit-border-radius: 0px 0px 3px 3px;
+  -moz-border-radius: 0px 0px 3px 3px;
+  -ms-border-radius: 0px 0px 3px 3px;
+  -o-border-radius: 0px 0px 3px 3px;
+  border-top: none !important;
 }
 
 /*Perfil inferior*/
 .player-profile.bottom {
   margin-top: 10px;
-  border-radius: 10px 10px 0px 0px;
-  -webkit-border-radius: 10px 10px 0px 0px;
-  -moz-border-radius: 10px 10px 0px 0px;
-  -ms-border-radius: 10px 10px 0px 0px;
-  -o-border-radius: 10px 10px 0px 0px;
-  border-bottom: none;
+  border-radius: 3px 3px 0px 0px;
+  -webkit-border-radius: 3px 3px 0px 0px;
+  -moz-border-radius: 3px 3px 0px 0px;
+  -ms-border-radius: 3px 3px 0px 0px;
+  -o-border-radius: 3px 3px 0px 0px;
+  border-bottom: none !important;
 }
 
 /*------------------------------------------------*/
@@ -1213,17 +1205,17 @@ body.game-active footer {
   z-index: 0 !important;
 }
 
-.profile-info{
+.profile-info {
   max-width: 100%;
   padding: 10px;
   background-color: #000000;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 2px solid var(--cycle-border-color);
-  border-radius: 5px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -ms-border-radius: 5px;
-  -o-border-radius: 5px;
+  border-radius: 5px !important;
+  -webkit-border-radius: 5px !important;
+  -moz-border-radius: 5px !important;
+  -ms-border-radius: 5px !important;
+  -o-border-radius: 5px !important;
 }
 
 /* 2) Eleva explícitamente tanto la imagen como la info */
@@ -1243,11 +1235,11 @@ body.game-active footer {
   background-color: black;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 2px solid var(--cycle-border-color);
-  border-radius: 10px;
-  -webkit-border-radius: 10px;
-  -moz-border-radius: 10px;
-  -ms-border-radius: 10px;
-  -o-border-radius: 10px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
 }
 
 /*Seccion para la información de los perfiles de los jugadores*/
@@ -1256,6 +1248,11 @@ body.game-active footer {
   flex-direction: column;
   align-items: flex-start;
   height: 30px;
+  border-radius: 3px !important;
+  -webkit-border-radius: 3px !important;
+  -moz-border-radius: 3px !important;
+  -ms-border-radius: 3px !important;
+  -o-border-radius: 3px !important;
 }
 
 /* Estilos para el indicador del nivel del robot*/
@@ -1265,19 +1262,19 @@ body.game-active footer {
   font-weight: 500;
   color: #e5ff4f;
   background-color: #0f0d0a;
-  padding: 2px 6px;
+  padding: 20px 6px;
   margin-left: 4px;
   box-shadow: 0 0 6px #e5ff4f;
-  border: 3px solid #e5ff4f;
+  border: 2px solid #e5ff4f;
   border-radius: 3px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   -ms-border-radius: 3px;
   -o-border-radius: 3px;
   z-index: 1;
-  line-height: 25px;
+  height: 30px;
+  line-height: 5px;
 }
-
 /*Estilos para los nombres de los jugadores*/
 .player-name {
   font-family: "FrancoisOne";
@@ -1302,7 +1299,7 @@ body.game-active footer {
   color: rgb(79, 246, 255);
   border: 1px solid var(--cycle-border-color);
   box-shadow: 0px 0px 8px var(--cycle-border-color);
-  padding: 4px;
+  padding: 6px 8px;
   font-size: 12px;
   margin-bottom: 10px;
   border-radius: 3px;
@@ -1317,9 +1314,10 @@ body.game-active footer {
   background-color: var(--cycle-border-color);
   box-shadow: 0px 0px 8px var(--cycle-border-color);
   color: #080401;
-  padding: 5px;
+  padding: 6px 8px;
   font-size: 12px;
   margin-bottom: 10px;
+  margin-left: -6px;
   border-radius: 3px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -1355,22 +1353,21 @@ body.game-active footer {
 /* Margen para la barra de salud superior */
 .health-bar-top {
   margin-top: 20px;
-  border-radius: 5px 5px 0px 0px;
-  -webkit-border-radius: 5px 5px 0px 0px;
-  -moz-border-radius: 5px 5px 0px 0px;
-  -ms-border-radius: 5px 5px 0px 0px;
-  -o-border-radius: 5px 5px 0px 0px;
+  border-radius: 3px 3px 0px 0px;
+  -webkit-border-radius: 3px 3px 0px 0px;
+  -moz-border-radius: 3px 3px 0px 0px;
+  -ms-border-radius: 3px 3px 0px 0px;
+  -o-border-radius: 3px 3px 0px 0px;
 }
 
 /* Margen para la barra de salud inferior */
 .health-bar-bottom {
-   margin-bottom: 10px;
-  border-radius: 0px 0px 5px 5px;
-  -webkit-border-radius: 0px 0px 5px 5px;
-  -moz-border-radius: 0px 0px 5px 5px;
-  -ms-border-radius: 0px 0px 5px 5px;
-  -o-border-radius: 0px 0px 5px 5px;
- 
+  margin-bottom: 10px;
+  border-radius: 0px 0px 3px 3px;
+  -webkit-border-radius: 0px 0px 3px 3px;
+  -moz-border-radius: 0px 0px 3px 3px;
+  -ms-border-radius: 0px 0px 3px 3px;
+  -o-border-radius: 0px 0px 3px 3px;
 }
 /* Estilos para botones de control de juego______________________*/
 
@@ -1432,9 +1429,16 @@ body.game-active footer {
   background-color: #121c40e9;
   padding: 30px 30px;
   color: rgb(79, 246, 255);
-  border: 3px solid rgb(79, 246, 255);
+  border: 2px solid rgb(79, 246, 255);
   box-shadow: 0px 0px 20px rgb(79, 246, 255);
   text-align: center;
+}
+
+#promotionModal h2{
+  border: 2px solid rgb(79, 246, 255);
+  padding: 20px 20px;
+  background-color: #121c40;
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
 }
 
 /* Estilos para las opciones de modal de promoción*/
@@ -1443,16 +1447,19 @@ body.game-active footer {
   margin-top: 20px;
   padding: 20px;
   box-shadow: 0px 0px 20px rgb(79, 246, 255);
-  border: 3px solid rgb(79, 246, 255);
+  background-color:  rgba(193, 89, 214, 0.521);
+  border: 2px solid rgb(79, 246, 255);
 }
 
 /* Estilos de las imagenes de las opciones de la promoción*/
 #promotionModal .promotion-options img {
   width: 55px;
   height: auto;
+  background-color:  rgb(91 118 224 / 85%);
   cursor: pointer;
   transition: transform 0.2s;
-  border: 3px solid rgb(79, 246, 255);
+  border: 2px solid rgb(79, 246, 255);
+  box-shadow: 0px 0px 20px rgb(79, 246, 255);
   margin: 5px;
   padding: 10px;
 }
@@ -1477,8 +1484,7 @@ body.game-active footer {
   background: radial-gradient(circle at top, #16245a, #0b1028);
   border-radius: 12px;
   padding: 24px;
-  box-shadow:
-    0 0 20px rgba(79, 246, 255, 0.4),
+  box-shadow: 0 0 20px rgba(79, 246, 255, 0.4),
     inset 0 0 10px rgba(79, 246, 255, 0.2);
   color: #e8faff;
   animation: popIn 0.3s ease-out;
@@ -1746,10 +1752,7 @@ body.game-active .chess-container {
   display: flex !important;
   height: 100%;
   background-size: 100% 100%;
-  
 }
-
-
 
 /* Animación para el texto ¡JAQUE! */
 @keyframes checkAnimation {
@@ -1916,11 +1919,10 @@ body.game-active .chess-container {
    Historial de movimientos
    —————————————————————————— */
 
-
 .move-history-wrapper {
   display: flex;
   width: 100%;
-  height: 33px; 
+  height: 33px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -1941,7 +1943,6 @@ body.game-active .chess-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  
 }
 
 /* El scroll central ocupa todo lo que sobra */
@@ -2079,15 +2080,14 @@ body.game-active .chess-container {
 /*--------------------------------*/
 
 @media (max-width: 650px) {
-
-  .mobile-only { 
+  .mobile-only {
     display: inline; /*Salto de linea del main title*/
   }
   .main-title a {
     font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
     letter-spacing: clamp(0.1em, 1vw, 0.3em) !important;
     line-height: 1 !important;
-    white-space: normal;  
+    white-space: normal;
   }
   .game-container {
     padding: 0px;
@@ -2137,13 +2137,11 @@ body.game-active .chess-container {
     border: 2px solid;
     margin: 0px 10px;
   }
-  
 }
-
 
 /* Ajuste responsivo extra para móviles muy estrechos */
 @media (max-width: 450px) {
-  body{
+  body {
     background-image: url(../assets/images/retro-chess-background.webp);
   }
   .header {
@@ -2153,4 +2151,3 @@ body.game-active .chess-container {
     font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
   }
 }
-

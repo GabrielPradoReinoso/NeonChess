@@ -98,18 +98,37 @@ document.addEventListener("DOMContentLoaded", function () {
     movePiece(move.from, move.to, false);
   });
   */
-
+  const DEBUG = false;
   let onlineMoveQueue = [];
   let processingQueue = false;
+
+  // ================================
+  // DEDUPE DE MOVIMIENTOS ONLINE
+  // ================================
+  const seenMoveIds = new Set();
+  const MAX_SEEN = 100;
+
+  function rememberMoveId(id) {
+    if (!id) return;
+    seenMoveIds.add(id);
+
+    if (seenMoveIds.size > MAX_SEEN) {
+      const first = seenMoveIds.values().next().value;
+      seenMoveIds.delete(first);
+    }
+  }
 
   const isHosting =
     location.hostname.endsWith(".web.app") ||
     location.hostname.endsWith(".firebaseapp.com");
 
+  const onlineLobby = document.getElementById("onlineLobby");
+  const gameContainer = document.getElementById("gameContainer");
+
   const CLOUD_RUN_URL = "https://chess-socket-mbzdrwz7ga-ew.a.run.app";
   const LOCAL_SOCKET_URL = "http://localhost:8080";
 
-  // 👇 NUEVO
+  // GitHub Pages: no hay servidor
   const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
 
   let socket = null;
@@ -132,11 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("[io] error", err.message)
     );
 
-    socket.on("opponentMove", (move) => {
-      console.log("[ON] opponentMove", move);
-      movePiece(move.from, move.to, false);
-    });
-
     socket.on("gameCreated", (roomId) => {
       currentRoomId = roomId;
       if (roomCodeText && createdRoomBox) {
@@ -146,13 +160,60 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     socket.on("startGame", ({ roomId, color }) => {
+      console.log("[ON] startGame", roomId, color);
+
       currentRoomId = roomId;
       humanColor = color;
       currentTurn = "w";
-      onlineChoice.classList.add("hidden");
-      onlineLobby.classList.add("hidden");
-      gameContainer.classList.remove("hidden");
+
+      // ✅ Oculta UI de menú / lobby
+      mainSection && (mainSection.style.display = "none");
+      onlineChoice?.classList.add("hidden");
+      onlineLobby?.classList.add("hidden");
+
+      // ✅ Oculta setup/menu si existe
+      const gameSetup = document.getElementById("gameSetup");
+      gameSetup?.classList.add("hidden");
+      gameSetup && (gameSetup.style.display = "none");
+
+      // ✅ Oculta header/footer usando tu misma lógica de partida
+      const mainHeader = document.querySelector("header");
+      mainHeader?.classList.add("hidden");
+      document.body.classList.add("game-active");
+
+      // ✅ Muestra el tablero/contenedor de juego
+      gameContainer?.classList.remove("hidden");
+      chessContainer?.classList.remove("hidden");
+
+      // ✅ Música (igual que en playButton)
+      menuMusic.pause();
+      playGameMusic();
+
+      // ✅ Arranca juego
       actuallyStartGame();
+    });
+
+    socket.on("opponentMove", (payload) => {
+      console.log("[ON] opponentMove", payload);
+
+      // soporta {from,to} o {move:{from,to}}
+      const mv = payload?.move ? payload.move : payload;
+
+      if (!mv?.from || !mv?.to) {
+        DEBUG && console.log("[ON] opponentMove", payload);
+        return;
+      }
+
+      // id si viene; si no, una clave razonable (mejor que nada)
+      const moveId = mv.id || `${mv.from}-${mv.to}-t:${currentTurn}`;
+
+      if (seenMoveIds.has(moveId)) {
+        console.warn("[ON] opponentMove duplicado ignorado:", moveId);
+        return;
+      }
+      rememberMoveId(moveId);
+
+      enqueueOnlineMove(mv);
     });
 
     socket.on("opponentResigned", () => {
@@ -191,32 +252,40 @@ document.addEventListener("DOMContentLoaded", function () {
     const to = typeof next.to === "string" ? algebraicToRC(next.to) : next.to;
 
     const prevFinishMove = finishMove;
+
     finishMove = function wrappedFinishMove() {
-      prevFinishMove();
-      processingQueue = false;
-      setTimeout(processOnlineMoveQueue, 0);
+      try {
+        return prevFinishMove();
+      } finally {
+        finishMove = prevFinishMove; // 🔥 RESTAURA
+        processingQueue = false;
+        setTimeout(processOnlineMoveQueue, 0);
+      }
     };
 
     movePiece(from, to, false);
   }
 
-  function emitOnlineMove(from, to) {
-    if (isOnlineGame && currentRoomId) {
-      const payload = { roomId: currentRoomId, move: { from, to } };
-      const MAX_RETRY = 2;
-      let attempts = 0;
+  function rcToAlgebraic(pos) {
+    const files = "abcdefgh";
+    return files[pos.col] + (8 - pos.row);
+  }
 
-      const tryEmit = () => {
-        const s = ensureSocket();
-        if (!s) return;
-        s.timeout(3000).emit("playerMove", payload, (err, res) => {
-          if (err || !res?.ok) {
-            if (attempts++ < MAX_RETRY) setTimeout(tryEmit, 500);
-          }
-        });
-      };
-      tryEmit();
-    }
+  function emitOnlineMove(from, to) {
+    if (!isOnlineGame || !currentRoomId) return;
+
+    const s = ensureSocket();
+    if (!s) return;
+
+    // ✅ id único para dedupe (y futuro si lo implementas en server)
+    const id =
+      crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const payload = { roomId: currentRoomId, move: { from, to, id } };
+
+    // ✅ sin retries/timeout: evita duplicados
+    s.emit("playerMove", payload);
   }
 
   // ---- Flujo UI de online: crear / unirse a sala ----
@@ -243,7 +312,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (mainSection) mainSection.style.display = "none";
 
       // ⭐ MOSTRAR CONTENEDOR DEL JUEGO (menú)
-      const gameContainer = document.getElementById("gameContainer");
       const gameSetup = document.getElementById("gameSetup");
 
       if (gameContainer) gameContainer.classList.remove("hidden");
@@ -302,8 +370,23 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnCreateRoom) {
     btnCreateRoom.addEventListener("pointerup", () => {
       btnCreateRoom.disabled = true;
-      ensureSocket()?.emit("newGame");
+      const s = ensureSocket();
+      if (!s) return;
+
+      s.emit("newGame");
+      s.once("gameCreated", () => {
+        btnCreateRoom.disabled = false;
+      });
+      s.once("connect_error", () => {
+        btnCreateRoom.disabled = false;
+      });
     });
+  }
+
+  function debugState(tag) {
+    console.log(
+      `[DBG ${tag}] turn=${currentTurn} human=${humanColor} anim=${isAnimating} queue=${onlineMoveQueue.length} proc=${processingQueue}`
+    );
   }
 
   /* socket.on("gameCreated", (roomId) => {
@@ -323,14 +406,16 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch {}
     });
   }
-
+*/
   if (btnJoinRoom && joinCodeInput) {
     btnJoinRoom.addEventListener("pointerup", () => {
       const code = (joinCodeInput.value || "").trim();
+      console.log("[UI] intentando unirse a", code);
       if (code) ensureSocket()?.emit("joinGame", code);
     });
   }
 
+  /*
   // Arranque al emparejar
   socket.on("startGame", ({ roomId, color }) => {
     currentRoomId = roomId;
@@ -1004,23 +1089,26 @@ document.addEventListener("DOMContentLoaded", function () {
         const cell = boardEl.children[idx];
 
         const code = board[row][col];
+
+        // ✅ SANITIZE: si por algún motivo hay más de 1 pieza en la celda, elimina las extra
+        const pieces = cell.querySelectorAll("img.piece");
+        if (pieces.length > 1) {
+          for (let k = 1; k < pieces.length; k++) pieces[k].remove();
+        }
+
+        // Re-toma la referencia tras sanear
         let img = cell.querySelector("img.piece");
 
         if (code) {
           if (!img) {
             img = document.createElement("img");
             img.className = "piece";
-            Object.assign(img.style, {
-              width: "85%",
-              height: "auto",
-              display: "block",
-              margin: "0 auto",
-              position: "relative",
-              zIndex: 2,
-              willChange: "transform",
-              backfaceVisibility: "hidden",
-            });
+            // ...
           }
+
+          // ✅ por si el img venía "hidden" de una captura anterior
+          img.style.visibility = "visible";
+          img.style.opacity = "1";
 
           if (img.dataset.code !== code) {
             img.src = pieceImages[code];
@@ -1032,8 +1120,9 @@ document.addEventListener("DOMContentLoaded", function () {
             img.addEventListener("pointerdown", onPointerDown);
             cell.appendChild(img);
           }
-        } else if (img) {
-          img.remove();
+        } else {
+          // ✅ Si la casilla está vacía en el board[][], asegúrate de no dejar ninguna pieza en DOM
+          pieces.forEach((p) => p.remove());
         }
       }
     }
@@ -1479,8 +1568,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // 18) MOVER PIEZA (animado) + CAPTURAS + PROMOCIÓN
   // ==========================================================
   function animatePieceMove(pieceElem, fromCell, toCell, callback) {
+    if (!pieceElem || !fromCell || !toCell) {
+      if (typeof callback === "function") callback();
+      return;
+    }
+
     const pieceRect = pieceElem.getBoundingClientRect();
-    const fromRect = fromCell.getBoundingClientRect();
     const toRect = toCell.getBoundingClientRect();
 
     const w = pieceRect.width;
@@ -1488,42 +1581,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const toLeft = toRect.left + (toRect.width - w) / 2;
     const toTop = toRect.top + (toRect.height - h) / 2;
+
     const dx = toLeft - pieceRect.left;
     const dy = toTop - pieceRect.top;
 
+    // Clon para animar
     const clone = pieceElem.cloneNode(true);
     Object.assign(clone.style, {
-      position: "absolute",
+      position: "fixed",
       left: `${pieceRect.left}px`,
       top: `${pieceRect.top}px`,
       width: `${w}px`,
       height: `${h}px`,
       margin: 0,
       pointerEvents: "none",
-      zIndex: 1000,
+      zIndex: 9999,
       willChange: "transform",
+      transform: "translate3d(0,0,0)",
       backfaceVisibility: "hidden",
-      transform: "translateZ(0)",
     });
+
     document.body.appendChild(clone);
 
-    pieceElem.style.visibility = "hidden";
+    // ✅ Elimina la pieza original del DOM para evitar “flash”/duplicados
+    // (renderBoard() la creará en su sitio final al terminar)
+    pieceElem.remove();
 
-    clone.animate(
-      [
-        { transform: "translate(0, 0)" },
-        { transform: `translate(${dx}px, ${dy}px)` },
-      ],
-      {
-        duration: 100,
-        easing: "ease-in-out",
-        fill: "forwards",
-      }
-    ).onfinish = () => {
-      clone.remove();
-      pieceElem.style.visibility = "visible";
-      if (typeof callback === "function") callback();
-    };
+    // No hace falta doble rAF aquí; con 1 suele ir bien.
+    requestAnimationFrame(() => {
+      const anim = clone.animate(
+        [
+          { transform: "translate3d(0,0,0)" },
+          { transform: `translate3d(${dx}px, ${dy}px, 0)` },
+        ],
+        { duration: 160, easing: "ease-in-out", fill: "forwards" }
+      );
+
+      const finish = () => {
+        clone.remove();
+        if (typeof callback === "function") callback();
+      };
+
+      anim.onfinish = finish;
+      anim.oncancel = finish;
+    });
   }
 
   function movePiece(from, to, isHumanMove = false) {
@@ -1541,7 +1642,14 @@ document.addEventListener("DOMContentLoaded", function () {
     isAnimating = true;
 
     const piece = board[from.row][from.col];
-    if (piece[1] === "k") kingMoved[currentTurn] = true;
+    if (!piece) {
+      console.warn("[ON] movePiece: casilla from vacía, ignorando", {
+        from,
+        to,
+      });
+      isAnimating = false;
+      return;
+    }
 
     let target = board[to.row][to.col];
     let isCapture = false;
@@ -1622,32 +1730,50 @@ document.addEventListener("DOMContentLoaded", function () {
       function onDone() {
         if (++doneCount < 2) return;
 
-        const files = "abcdefgh";
-        const kingTo = files[to.col] + (8 - to.row);
-        logMove({ color: currentTurn, type: "k" }, kingTo);
+        // ⚡️ Importante: consolidar DOM pesado en el siguiente frame
+        requestAnimationFrame(() => {
+          const files = "abcdefgh";
+          const kingTo = files[to.col] + (8 - to.row);
+          logMove({ color: currentTurn, type: "k" }, kingTo);
 
-        removeLastMoveHighlights();
-        getCell(from.row, from.col).classList.add("highlight");
-        getCell(to.row, to.col).classList.add("highlight");
-        const rookFromCol = to.col === 6 ? 7 : 0;
-        const rookToCol = to.col === 6 ? 5 : 3;
-        getCell(row, rookFromCol).classList.add("highlight");
-        getCell(row, rookToCol).classList.add("highlight");
-        lastMoveCells = [
-          { row: from.row, col: from.col },
-          { row: to.row, col: to.col },
-          { row, col: rookFromCol },
-          { row, col: rookToCol },
-        ];
+          removeLastMoveHighlights();
+          getCell(from.row, from.col).classList.add("highlight");
+          getCell(to.row, to.col).classList.add("highlight");
 
-        renderBoard();
+          const rookFromCol2 = to.col === 6 ? 7 : 0;
+          const rookToCol2 = to.col === 6 ? 5 : 3;
 
-        if (isHumanMove && isOnlineGame && currentRoomId) {
-          emitOnlineMove(from, to);
-        }
+          getCell(row, rookFromCol2).classList.add("highlight");
+          getCell(row, rookToCol2).classList.add("highlight");
 
-        finishMove();
-        isAnimating = false;
+          lastMoveCells = [
+            { row: from.row, col: from.col },
+            { row: to.row, col: to.col },
+            { row, col: rookFromCol2 },
+            { row, col: rookToCol2 },
+          ];
+
+          renderBoard();
+
+          if (isHumanMove && isOnlineGame && currentRoomId) {
+            emitOnlineMove(from, to);
+          }
+
+          finishMove();
+          isAnimating = false;
+        });
+      }
+
+      // ✅ Si faltan imágenes, no animamos pero seguimos la lógica
+      if (!kImg || !rImg || !kFromCell || !kToCell || !rFromCell || !rToCell) {
+        requestAnimationFrame(() => {
+          renderBoard();
+          if (isHumanMove && isOnlineGame && currentRoomId)
+            emitOnlineMove(from, to);
+          finishMove();
+          isAnimating = false;
+        });
+        return;
       }
 
       animatePieceMove(kImg, kFromCell, kToCell, onDone);
@@ -1667,14 +1793,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const fromCellElem = getCell(from.row, from.col);
-    const movingPieceElem = fromCellElem.querySelector("img");
+    const movingPieceElem = fromCellElem?.querySelector("img");
     const toCellElem = getCell(to.row, to.col);
+
+    if (isCapture && toCellElem) {
+      const victimImg = toCellElem.querySelector("img.piece");
+      if (victimImg) victimImg.remove(); // ✅ fuera, nada de hidden
+    }
 
     // ✅ Si por lo que sea no existe la imagen, no animamos (pero la partida sigue)
     if (!movingPieceElem || !fromCellElem || !toCellElem) {
-      renderBoard();
-      finishMove();
-      isAnimating = false;
+      requestAnimationFrame(() => {
+        renderBoard();
+        finishMove();
+        isAnimating = false;
+      });
       return;
     }
 
@@ -1688,21 +1821,25 @@ document.addEventListener("DOMContentLoaded", function () {
         const finishPromotion = (promoted) => {
           board[to.row][to.col] = promoted;
           playSound(promotionSound, "promotion");
-          renderBoard();
-          updateHealthBar();
-          updatePositionHistory();
 
-          if (isHumanMove) emitOnlineMove(from, to);
+          // ⚡️ DOM + lógica pesada en el siguiente frame
+          requestAnimationFrame(() => {
+            renderBoard();
+            updateHealthBar();
+            updatePositionHistory();
 
-          const val = pieceValues[promoted[1]];
-          currentHealth[promoted[0]] = Math.min(
-            maxHealth[promoted[0]],
-            currentHealth[promoted[0]] + val
-          );
-          updateHealthBar();
+            if (isHumanMove) emitOnlineMove(from, to);
 
-          finishMove();
-          isAnimating = false;
+            const val = pieceValues[promoted[1]];
+            currentHealth[promoted[0]] = Math.min(
+              maxHealth[promoted[0]],
+              currentHealth[promoted[0]] + val
+            );
+            updateHealthBar();
+
+            finishMove();
+            isAnimating = false;
+          });
         };
 
         // ✅ Robot/rival: autopromoción a reina
@@ -1712,23 +1849,26 @@ document.addEventListener("DOMContentLoaded", function () {
         // Humano: modal como siempre
         showPromotionModal(piece[0], to.row, to.col, finishPromotion);
       } else {
-        renderBoard();
+        // ⚡️ DOM + lógica pesada en el siguiente frame
+        requestAnimationFrame(() => {
+          renderBoard();
 
-        const files = "abcdefgh";
-        const toAlg = files[to.col] + (8 - to.row);
-        logMove({ color: piece[0], type: piece[1] }, toAlg);
+          const files = "abcdefgh";
+          const toAlg = files[to.col] + (8 - to.row);
+          logMove({ color: piece[0], type: piece[1] }, toAlg);
 
-        if (isHumanMove) emitOnlineMove(from, to);
+          if (isHumanMove) emitOnlineMove(from, to);
 
-        getCell(from.row, from.col).classList.add("highlight");
-        getCell(to.row, to.col).classList.add("highlight");
-        lastMoveCells = [
-          { row: from.row, col: from.col },
-          { row: to.row, col: to.col },
-        ];
+          getCell(from.row, from.col).classList.add("highlight");
+          getCell(to.row, to.col).classList.add("highlight");
+          lastMoveCells = [
+            { row: from.row, col: from.col },
+            { row: to.row, col: to.col },
+          ];
 
-        finishMove();
-        isAnimating = false;
+          finishMove();
+          isAnimating = false;
+        });
       }
     });
   }
@@ -2078,11 +2218,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================================
   // 21) EFECTOS VISUALES (explosión, check, checkmate)
   // ==========================================================
+  // ✅ Control rápido de VFX en online (puedes dejarlo arriba del archivo)
+  const ONLINE_VFX = true; // false = no explosiones en online (más fluido)
+
   function createCapturedPieceExplosion(capturedCode, to) {
     const src = pieceImages[capturedCode];
-    if (!src) return; // ✅ si no hay imagen, no hacemos nada
+    if (!src) return; // si no hay imagen, no hacemos nada
 
-    const count = 15;
+    // ✅ En online: desactiva o reduce muchísimo
+    if (isOnlineGame && !ONLINE_VFX) return;
+
+    // ✅ Menos partículas en online si lo activas
+    const count = isOnlineGame ? 8 : 15; // ✅ online más ligero
+    const duration = isOnlineGame ? 280 : 400; // ✅ online más corto
+
     const cell = getCell(to.row, to.col);
     if (!cell) return;
 
@@ -2090,7 +2239,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const originX = rect.left + rect.width / 2;
     const originY = rect.top + rect.height / 2;
     const size = rect.width;
-    const DISTANCE = rect.width * 1.6;
+
+    // ✅ Menos distancia en online (menos trabajo)
+    const DISTANCE = rect.width * (isOnlineGame ? 1.0 : 1.6);
 
     for (let i = 0; i < count; i++) {
       const angle = (2 * Math.PI * i) / count;
@@ -2108,9 +2259,10 @@ document.addEventListener("DOMContentLoaded", function () {
         height: `${size}px`,
         margin: "0",
         pointerEvents: "none",
-        transform: "translate(-50%, -50%) scale(1)",
+        transform: "translate(-50%, -50%) translateZ(0) scale(1)",
         opacity: "1",
         zIndex: "1000",
+        willChange: "transform, opacity",
       });
 
       document.body.appendChild(img);
@@ -2118,15 +2270,22 @@ document.addEventListener("DOMContentLoaded", function () {
       img.animate(
         [
           {
-            transform: "translate(-50%, -50%) translate(0, 0) scale(1)",
+            transform:
+              "translate(-50%, -50%) translateZ(0) translate(0, 0) scale(1)",
             opacity: 1,
           },
           {
-            transform: `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(1.5)`,
+            transform: `translate(-50%, -50%) translateZ(0) translate(${dx}px, ${dy}px) scale(${
+              isOnlineGame ? 1.25 : 1.5
+            })`,
             opacity: 0,
           },
         ],
-        { duration: 400, easing: "ease-out", fill: "forwards" }
+        {
+          duration: isOnlineGame ? 260 : 400, // ✅ más corto en online
+          easing: "ease-out",
+          fill: "forwards",
+        }
       ).onfinish = () => img.remove();
     }
   }
@@ -2396,7 +2555,11 @@ document.addEventListener("DOMContentLoaded", function () {
       showEndGameModal("Tablas por triple repetición");
       return;
     }
-
+    console.log("[DBG] finishMove enter", {
+      currentTurn,
+      isAnimating,
+      processingQueue,
+    });
     // 5) Cambiar turno
     switchTurn();
   }
@@ -2496,6 +2659,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function switchTurn() {
+    console.log("[DBG] switchTurn before", { currentTurn });
     if (isReviewMode) return;
 
     stopTimer(currentTurn);
@@ -2507,6 +2671,8 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       isAnimating = false;
     }
+    DEBUG && console.log("[DBG] switchTurn before", { currentTurn });
+    DEBUG && console.log("[DBG] switchTurn after", { currentTurn });
   }
 
   function syncProfilesUI() {

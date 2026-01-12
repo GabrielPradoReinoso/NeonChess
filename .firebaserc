@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "neon-chess-2dd34",
+    "firebase deploy --only hosting": "neon-chess-2dd34"
+  },
+  "targets": {},
+  "etags": {}
+}

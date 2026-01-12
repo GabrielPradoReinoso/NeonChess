@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "Algunos cambios visuales"
+git commit -m "Restablezco la modalidad Online, corrijo algunos problemas de rendimiento del juego asi como también animaciones defectuosas"
 git push
 
 
