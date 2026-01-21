@@ -2,7 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>NEON CHESS</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="icon" href="assets/images/logo-neon-chess.png" />
@@ -53,21 +56,37 @@
     </header>
 
     <!-- Sección principal -->
-    <main class="main-section" id="mainSection">      
-      <button id="btnOnline" class="btn">Jugar online</button> 
-      <br> <br>
-      <button id="btnLocal" class="btn">Jugar contra el robot</button> 
+    <main class="main-section" id="mainSection">
+      <button id="btnOnline" class="btn">Jugar online</button>
+      <br />
+      <br />
+      <button id="btnLocal" class="btn">Jugar contra el robot</button>
     </main>
 
     <!-- Panel elección online -->
     <section id="onlineChoice" class="online-choice hidden">
-      <h3>Juega online contra un amig@ </h3>
-      <p class="online-info">Uno de los jugadores debe generar el código de la partida pulsando el botón <b class="marked-text">"Obtener código"</b>  y posteriormente compartir el código con el amig@ que desea unirse, después este deberá introducir el código en el campo indicado y una vez introducido el código correctamente en el campo, deberá pulsar el botón de <b class="marked-text">"Unirse"</b> , automaticamente se conectará la partida y aparecera la página de juego y se podrá comenzar a jugar. ¡Buena suerte!</p>
-      
+      <h3>Juega online contra un amig@</h3>
+      <p class="online-info">
+        Uno de los jugadores debe generar el código de la partida pulsando el
+        botón <b class="marked-text">"Obtener código"</b> y posteriormente
+        compartir el código con el amig@ que desea unirse, después este deberá
+        introducir el código en el campo indicado y una vez introducido el
+        código correctamente en el campo, deberá pulsar el botón de
+        <b class="marked-text">"Unirse"</b> , automaticamente se conectará la
+        partida y aparecera la página de juego y se podrá comenzar a jugar.
+        ¡Buena suerte!
+      </p>
+
       <div class="online-actions">
-        <button id="btnCreateRoom" class="btn primary">Obtener código</button> <p></p> 
+        <button id="btnCreateRoom" class="btn primary">Obtener código</button>
+        <p></p>
         <div class="join-box">
-          <input id="joinCodeInput" type="text" placeholder="Introduce código" maxlength="8" />
+          <input
+            id="joinCodeInput"
+            type="text"
+            placeholder="Introduce código"
+            maxlength="8"
+          />
           <button id="btnJoinRoom" class="btn">Unirse</button>
         </div>
       </div>
@@ -184,7 +203,7 @@
           <div class="health-progress" id="health-black"></div>
         </div>
 
-        <div id="player1" class="player-profile top thinking">
+        <div id="player1" class="player-profile top">
           <div class="matrix-overlay-player1"></div>
 
           <div class="profile-image">
@@ -195,8 +214,10 @@
             <span class="player-name">GPR robot</span>
             <span class="player-timer active-clock">00:00</span> &nbsp;
             <span class="player-score">Puntos: 0</span>
+            <span id="robotDifficulty" class="robot-diff"></span>
+            <span class="turn-led" id="turnLedP2" title="Turno"></span>
           </div>
-          <span id="robotDifficulty" class="robot-diff"></span>
+          
         </div>
 
         <div id="chessBoard" class="chess-board">
@@ -212,6 +233,7 @@
             <span class="player-name">Humano</span>
             <span class="player-timer active-clock">00:00</span> &nbsp;
             <span class="player-score">Puntos: 0</span>
+            <span class="turn-led" id="turnLedP1" title="Turno"></span>
           </div>
         </div>
 
@@ -241,13 +263,33 @@
             <button id="toggleMute" title="Silenciar/Activar sonido">🔊</button>
             <button id="nextTrack" title="Siguiente pista">⏭️</button>
           </div>
+
+          <button id="btnChat" title="Chat">💬</button>
         </div>
       </div>
     </div>
 
+    <div id="chatModal" class="modal-overlay hidden">
+      <div class="modal-box chat-modal">
+        <button id="chatClose" class="modal-close-btn">×</button>
+        <div id="chatMessages" class="chat-messages"></div>
+
+        <form id="chatForm" class="chat-form">
+          <input
+            id="chatInput"
+            maxlength="300"
+            placeholder="Escribe..."
+            autocomplete="off"
+          />
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+
     <!-- Footer -->
-    <footer>&copy; 2025 Gabriel Prado (GPR Studio). All rights reserved.
-</footer>
+    <footer>
+      &copy; 2025 Gabriel Prado (GPR Studio). All rights reserved.
+    </footer>
 
     <!-- Overlay de precarga pre-partida -->
     <div id="pregameLoadingOverlay" class="overlay hidden">
@@ -268,8 +310,7 @@
 
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
-    <!--<script src="/socket.io/socket.io.js"></script>--> 
+    <!--<script src="/socket.io/socket.io.js"></script>-->
     <script type="module" src="js/script.js"></script>
-    
   </body>
 </html>

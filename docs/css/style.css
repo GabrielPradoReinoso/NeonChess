@@ -655,7 +655,6 @@ body.game-active footer {
 }
 
 /* Estilos para las opciones de dificultad _____________________*/
-
 #difficultySelector .option {
   list-style: none;
   padding: 40px;
@@ -1142,72 +1141,79 @@ body.game-active footer {
 /* MATRIX RAIN AS PAGE BACKGROUND                */
 /*------------------------------------------------*/
 
-/* 1) El profile debe ser contenedor relativo */
+
+/* Overlay dentro del perfil (ya lo tienes) */
 #player1 {
-  position: relative;
-  overflow: hidden; /* recorta la lluvia fuera del perfil */
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-/* 2) El overlay cubre TODO #player1 */
-.matrix-overlay-player1 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+#player1 .matrix-overlay-player1 {
+  position: absolute !important;
+  inset: 0 !important;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s ease;
-  -webkit-transition: opacity 0.2s ease;
-  -moz-transition: opacity 0.2s ease;
-  -ms-transition: opacity 0.2s ease;
-  -o-transition: opacity 0.2s ease;
+  display: flex;          /* columnas sin huecos */
   z-index: 0;
 }
 
-/* 3) Cuando entra en “thinking” lo haces visible */
 #player1.thinking .matrix-overlay-player1.visible {
   opacity: 1;
 }
 
-/* 4) Cada columna de 0/1 flota encima, animándose igual que antes */
-.matrix-overlay-player1 .matrix-col {
+/* Contenido por encima */
+#player1 .profile-image,
+#player1 .profile-info {
+  position: relative;
+  z-index: 2;
+}
+
+/* Columna: ocupa un trozo fijo del ancho, 100% alto */
+#player1 .matrix-overlay-player1 .matrix-col {
+  flex: 0 0 var(--col-w, 12px);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stream que se mueve dentro de la columna */
+#player1 .matrix-overlay-player1 .matrix-stream {
   position: absolute;
-  bottom: 100%; /* arrancan fuera arriba */
+  left: 0;
+  width: 100%;
   font-family: monospace;
-  font-size: 15px;
-  font-weight: lighter;
-  line-height: 18px; /* coincide con tu cálculo */
-  color: rgba(79, 246, 255, 0.903);
-  text-shadow: 0px 0px 2px rgb(79, 246, 255);
-  animation-name: matrix-fall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  z-index: 0;
+  font-size: 50px;
+  font-weight: 300;
+  line-height: 18px;
+  color: rgba(79, 246, 255, 0.9);
+  text-shadow: 0 0 2px rgb(79, 246, 255);
+  white-space: pre; /* respeta saltos de línea */
 }
 
-/* 5) Keyframes idénticos a los que tenías */
-@keyframes matrix-fall {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(100%);
-    -webkit-transform: translateY(100%);
-    -moz-transform: translateY(100%);
-    -ms-transform: translateY(100%);
-    -o-transform: translateY(100%);
-  }
+/* Direcciones */
+#player1 .matrix-overlay-player1 .matrix-stream.down {
+  top: -140%;
+  animation: matrix-down var(--dur, 2.6s) linear infinite;
 }
 
-/* 1) Asegúrate de que el overlay esté en z-index 0 */
-.matrix-overlay-player1 {
-  z-index: 0 !important;
+#player1 .matrix-overlay-player1 .matrix-stream.up {
+  top: 140%;
+  animation: matrix-up var(--dur, 2.6s) linear infinite;
 }
+
+@keyframes matrix-down {
+  to { transform: translateY(140%); }
+}
+
+@keyframes matrix-up {
+  to { transform: translateY(-140%); }
+}
+
 
 .profile-info {
-  max-width: 100%;
-  padding: 10px;
+  width: 100%;
+  padding: 8px;
   background-color: #000000;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 2px solid var(--cycle-border-color);
@@ -1221,17 +1227,17 @@ body.game-active footer {
 /* 2) Eleva explícitamente tanto la imagen como la info */
 #player1 .profile-image,
 #player1 .profile-info {
-  position: relative; /* para que z-index funcione */
-  z-index: 1 !important;
+  position: relative; 
+  z-index: 2;
 }
 
 /*Estilos para las imágenes de los perfiles de los jugadores*/
 .profile-image img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   margin-right: 10px;
-  margin-left: 5px;
+  margin-left: 4px;
   background-color: black;
   box-shadow: 0px 0px 20px var(--cycle-border-color);
   border: 2px solid var(--cycle-border-color);
@@ -1258,14 +1264,14 @@ body.game-active footer {
 /* Estilos para el indicador del nivel del robot*/
 .robot-diff {
   display: inline-block;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: #e5ff4f;
   background-color: #0f0d0a;
-  padding: 20px 6px;
+  padding: 1px;
   margin-left: 4px;
   box-shadow: 0 0 6px #e5ff4f;
-  border: 2px solid #e5ff4f;
+  border: 1px solid #e5ff4f;
   border-radius: 3px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -1273,12 +1279,12 @@ body.game-active footer {
   -o-border-radius: 3px;
   z-index: 1;
   height: 30px;
-  line-height: 5px;
+  line-height: 20px;
 }
 /*Estilos para los nombres de los jugadores*/
 .player-name {
   font-family: "FrancoisOne";
-  font-size: 12px;
+  font-size: 9px;
   font-weight: 700;
   text-shadow: 0px 0px 2px black;
   border: 1px solid rgb(79, 246, 255);
@@ -1300,7 +1306,7 @@ body.game-active footer {
   border: 1px solid var(--cycle-border-color);
   box-shadow: 0px 0px 8px var(--cycle-border-color);
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: 10px;
   margin-bottom: 10px;
   border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -1402,6 +1408,178 @@ body.game-active footer {
   width: 20px;
   height: auto;
 }
+
+/*Estilos del CHAT de juego*/
+.chat-panel{
+  width: 320px;
+  max-width: 92vw;
+  height: 420px;
+  background:#0f1636;
+  border:2px solid rgb(79,246,255);
+  box-shadow:0 0 12px rgba(79,246,255,.6);
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.chat-header{
+  padding:10px 12px;
+  font-weight:700;
+  color:rgb(79,246,255);
+  border-bottom:1px solid rgba(79,246,255,.35);
+}
+
+.chat-messages{
+  flex:1;
+  padding:10px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.chat-msg{
+  font-size:13px;
+  line-height:1.25;
+  padding:8px 10px;
+  border-radius:10px;
+  max-width: 85%;
+  word-break:break-word;
+}
+
+.chat-msg.me{
+  align-self:flex-end;
+  background:rgba(255,0,180,.12);
+  border:1px solid rgba(255,0,180,.35);
+}
+
+.chat-msg.them{
+  align-self:flex-start;
+  background:rgba(79,246,255,.10);
+  border:1px solid rgba(79,246,255,.35);
+}
+
+.chat-meta{
+  opacity:.7;
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.chat-form{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border-top:1px solid rgba(79,246,255,.35);
+}
+
+#chatInput{
+  flex:1;
+  border-radius:8px;
+  border:1px solid rgba(79,246,255,.35);
+  background:#0b1028;
+  color:#fff;
+  padding:8px 10px;
+  outline:none;
+}
+
+#chatSend{
+  border-radius:8px;
+  border:1px solid rgba(79,246,255,.6);
+  background:transparent;
+  color:rgb(79,246,255);
+  padding:8px 12px;
+  cursor:pointer;
+}
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background: rgba(18, 28, 64, 0.6);
+  backdrop-filter: blur(6px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 5000;
+}
+
+.modal-overlay.hidden{ display:none; }
+
+.modal-box{
+  width: 320px;
+  max-width: 92vw;
+  border:2px solid rgb(79,246,255);
+  box-shadow:0 0 18px rgba(79,246,255,.6);
+  background: radial-gradient(circle at top, #16245a, #0b1028);
+  border-radius: 12px;
+  overflow:hidden;
+}
+
+.chat-modal{
+  height: 420px;
+  display:flex;
+  flex-direction:column;
+}
+
+
+/*Estilos del indicador de turno*/
+.turn-led{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 6px;
+  margin-right: 6px;
+  border: 1px solid rgba(79,246,255,.6);
+  background: rgba(79,246,255,.15);
+  box-shadow: none;
+}
+
+.turn-led.on{
+  background: rgba(79,246,255,.95);
+  box-shadow: 0 0 10px rgba(79,246,255,.9), 0 0 25px rgba(79,246,255,.6);
+  animation: turnPulse 1.2s infinite;
+}
+
+@keyframes turnPulse{
+  0%{ transform: scale(1); opacity: .85; }
+  50%{ transform: scale(1.35); opacity: 1; }
+  100%{ transform: scale(1); opacity: .85; }
+}
+
+.conn-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  margin-left:auto;
+}
+
+.conn-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#2cff7a;
+  box-shadow:0 0 10px rgba(44,255,122,.7);
+}
+
+.conn-status.reconnecting .conn-dot{
+  background:#ffd84f;
+  box-shadow:0 0 10px rgba(255,216,79,.7);
+  animation:pulse 1s infinite;
+  -webkit-animation:pulse 1s infinite;
+}
+.conn-status.offline .conn-dot{
+  background:#ff4f4f;
+  box-shadow:0 0 10px rgba(255,79,79,.7);
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);opacity:.8}
+  50%{transform:scale(1.35);opacity:1}
+  100%{transform:scale(1);opacity:.8}
+}
+
+
 /* ____________________________________________________________*/
 
 /* Estilos para el modal de promoción__________________________*/
@@ -2074,6 +2252,15 @@ body.game-active .chess-container {
 .mobile-only {
   display: none;
 }
+
+/* Optimización de render para móviles: reduce parpadeo */
+.cell img,
+.clone-explosion {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
 
 /*--------------------------------*/
 /*----------RESPONSIVE------------*/
