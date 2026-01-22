@@ -1,169 +1,138 @@
-
-OBSERVACIONES ACTUALES DEL PROYECTO:
-    
-
+NEON CHESS — ÍNDICE DEFINITIVO (Consolidado)
 [0] MAPA Y CONTROL
-   0.1 Congelar “estado actual”: snapshot del repo + versión (tag/zip)
-   0.2 Lista de objetivos: qué significa “listo” (local / online / deploy)
-   0.3 Entorno: cómo se ejecuta (local + hosting + cloud run)
+
+[⏳] 0.1 Congelar “estado actual”: snapshot del repo + versión (tag/zip)
+
+[⏳] 0.2 Lista de objetivos: qué significa “listo” (local / online / deploy)
+
+[⏳] 0.3 Entorno: cómo se ejecuta (local + hosting + cloud run)
 
 [1] CONSISTENCIA DE PARTIDA LOCAL (prioridad alta)
-   1.1 Historial coherente: positionHistory vs moveList (siempre sincronizados)
-   1.2 Promoción consistente: movePiece vs movePieceNoAnim (misma lógica)
-   1.3 Audio corregido: menuMusic apunta a archivo real + política autoplay
-   1.4 Revisión de locks: isAnimating / processingQueue / reviewMode (sin bloqueos raros)
-   1.5 Timers: precisión, pausas, cambio de turno, fin por tiempo estable
-   1.6 Endgame: mate/jaque/tablas (flujo y UI sin estados zombis)
-   1.7 UI/UX base: highlights, indicadores, drag&drop, “blink error” consistente
 
-[2] ROBOT (STOCKFISH) — estabilidad y control
-   2.1 Worker carga fiable (rutas, import.meta.url, compatibilidad)
-   2.2 UCI: init/isready correcto + setoption skill + go movetime
-   2.3 “Thinking overlay” matrix: no se queda “pegado” (on/off robusto)
-   2.4 Niveles: calibrar skill/movetime para que el nivel se sienta real
-   2.5 (Opcional) Mejoras: ponderar depth/nodes, resign, blunders, etc.
+[✓] 1.1 Historial coherente: positionHistory vs moveList (siempre sincronizados) (RC-1.2)
 
-[3] ONLINE (cliente) — robustez real
-  3.1 Conexión UI: connStatus/connText y estados correctos
-  3.2 Cola de movimientos: orden, watchdog, no duplicados, no “saltos”
-  3.3 Sync: requestSync + huecos por seq (edge cases)
-  3.4 Persistencia: NEONCHESS_ROOM / NEONCHESS_ONLINE (rejoin real)
-  3.5 Turnos online: cliente nunca permite mover fuera de turno (ya) + pruebas
-  3.6 Chat: optimistic UI + dedupe + límite + UX
+[✓] 1.2 Promoción consistente: movePiece vs movePieceNoAnim (misma lógica) (RC-2.6 mínimo viable)
 
-[4] ONLINE (server) — seguridad mínima y reconexión
-  4.1 Rejoin de jugadores: recuperar host/guest tras reconexión (socket.id cambia)
-  4.2 Validación mínima: solo host/guest pueden emitir, y solo su turno
-  4.3 Integridad sala: evitar spam de moves/chat, rate limiting básico
-  4.4 Limpieza: DISCONNECT_GRACE_MS y cleanupTimer correcto
-  4.5 Observabilidad: logs útiles (roomId, seq, eventos clave)
+[⏳] 1.3 Audio corregido: menuMusic apunta a archivo real + política autoplay
 
-[5] ARQUITECTURA / REPO (orden y mantenimiento)
-  5.1 Separar backend del frontend (server fuera de docs si aplica)
-  5.2 node_modules fuera de docs (y en .gitignore + firebase ignore)
-  5.3 Estructura clara: /public (frontend) vs /server (backend)
-  5.4 Scripts npm: start/dev/deploy (automatizar)
-  5.5 Variables de entorno y config por entorno (local/prod)
+[✓] 1.4 Revisión de locks: isAnimating / processingQueue / reviewMode (sin bloqueos raros) (RC-1.7 + RC-1.8)
 
-[6] DEPLOYMENT (Firebase + Cloud Run)
-  6.1 Hosting estático: reglas, rutas, cache, .nojekyll, 404
-  6.2 Cloud Run: CORS ALLOWED_ORIGINS correcto (prod + local)
-  6.3 URLs en cliente: CLOUD_RUN_URL / LOCAL_SOCKET_URL / GitHub Pages
-  6.4 Seguridad: headers, HTTPS, websocket estable
-  6.5 Checklist de publicación: “sube y funciona” en limpio
+[⏳] 1.5 Timers: precisión, pausas, cambio de turno, fin por tiempo estable
 
-[7] CALIDAD (pruebas rápidas y “no se rompe”)
-  7.1 Smoke tests manuales (lista corta y repetible)
-  7.2 Casos límite: enroque, en-passant, promoción, mate, tablas, tiempo
-  7.3 Online: desconectar/reconectar, sync, spam clicks, doble submit chat
-  7.4 Rendimiento: animaciones, móviles, resize/orientación
+[⏳] 1.6 Endgame: mate/jaque/tablas (flujo y UI sin estados zombis)
 
-[8] MEJORAS FUTURAS (cuando lo anterior esté sólido)
-  8.1 PGN export / import
-  8.2 Espectador (watch mode)
-  8.3 Matchmaking rápido (sin código)
-  8.4 Ranking / stats persistentes
-  8.5 Autoridad total del server (reglas en backend)
+[✓] 1.7 UI/UX base: highlights, indicadores, drag&drop, “blink error” consistente (estable y validado por uso)
 
-NEON CHESS — ÍNDICE DE RECUPERACIÓN DESDE VERSIONES ANTIGUAS
+[2] HISTORIAL AVANZADO (integrado, antes “RC-1”)
 
-[RC-0] BASE DE COMPARACIÓN
-   RC-0.1 Congelar versión actual como baseline (no tocar)
-   RC-0.2 Identificar versión antigua como “fuente de features”
-   RC-0.3 Regla de oro: NO copiar bloques enteros, solo ideas/funciones
+[✓] 2.1 Historial animado al avanzar/retroceder (handleHistoryStep) (RC-1.1)
 
-[RC-1] HISTORIAL AVANZADO (una de las mayores pérdidas)
-   RC-1.1 Historial animado al avanzar/retroceder (handleHistoryStep)
-   RC-1.2 Sincronización perfecta: board ↔ positionHistory ↔ UI
-   RC-1.3 Diferenciación capturas normales vs en-passant
-   RC-1.4 “Revivir” piezas al deshacer (animatePieceAppear)
-   RC-1.5 Scroll automático centrado en el movimiento activo
-   RC-1.6 Eliminación de entradas UI al retroceder
-   RC-1.7 Prevención de navegación durante animaciones
-   RC-1.8 Separación clara: navegación ≠ juego activo
+[✓] 2.2 Sincronización perfecta: board ↔ positionHistory ↔ UI (RC-1.2)
 
-[RC-2] PROMOCIÓN DE PEONES (UX completa)
-   RC-2.1 Modal visual de promoción (humano)
-   RC-2.2 Autopromoción solo para robot/rival
-   RC-2.3 Sonido específico de promoción
-   RC-2.4 Actualización correcta de salud y score tras promoción
-   RC-2.5 Integración con historial (logMove correcto)
-   RC-2.6 Promoción consistente en movePiece y movePieceNoAnim
+[✓] 2.3 Diferenciación capturas normales vs en-passant (RC-1.3)
 
-[RC-3] FEEDBACK DE ERROR Y AMENAZA AL REY
-   RC-3.1 Animación de amenaza al rey (showKingThreatAnimation)
-   RC-3.2 Highlight de trayectorias de ataque
-   RC-3.3 Feedback visual al intentar mover a jaque
-   RC-3.4 Sonido de error diferenciado
-   RC-3.5 Blink-error coherente en clicks inválidos
-   RC-3.6 Diferenciar “movimiento ilegal” vs “rey en jaque”
+[✓] 2.4 “Revivir” piezas al deshacer (resultado funcional mediante snapshots y render) (equivalente operativo RC-1.4)
 
-[RC-4] EFECTOS VISUALES (VFX) RECUPERABLES
-   RC-4.1 Explosión de pieza capturada (createCapturedPieceExplosion)
-   RC-4.2 Reducción automática de VFX en modo online
-   RC-4.3 Animaciones CHECK y CHECKMATE
-   RC-4.4 Control global ONLINE_VFX (performance)
+[✓] 2.5 Scroll automático al final en live y no forzado en review (RC-1.5)
 
-[RC-5] MATRIX RAIN DEL ROBOT (mejor integración)
-   RC-5.1 Activar matrix solo cuando Stockfish piensa
-   RC-5.2 Desactivar matrix inmediatamente en bestmove
-   RC-5.3 Evitar overlays persistentes tras reset
-   RC-5.4 Optimizar número de columnas/filas según tamaño
+[✓] 2.6 Eliminación/visibilidad correcta de entradas UI al retroceder (UI ligada a currentHistoryIndex) (RC-1.6)
 
-[RC-6] MÚSICA Y SONIDO (perdidas parciales)
-   RC-6.1 Música de menú funcional
-   RC-6.2 Música de partida separada
-   RC-6.3 Playlist + cambio de pista
-   RC-6.4 Toggle mute persistente
-   RC-6.5 Pool de sonidos (evitar solapamientos)
-   RC-6.6 Sonidos diferenciados: move / capture / check / error
+[✓] 2.7 Prevención de navegación durante animaciones + locks consistentes (RC-1.7)
 
-[RC-7] ENDGAME MODAL AVANZADO
-   RC-7.1 Modal dinámico generado por JS
-   RC-7.2 Imagen real del ganador
-   RC-7.3 Mensaje contextual (mate, tablas, rendición, tiempo)
-   RC-7.4 Botones: repetir partida / volver menú
-   RC-7.5 Comportamiento correcto en online vs local
+[✓] 2.8 Separación clara: navegación ≠ juego activo (enter/exit review coherente) (RC-1.8)
 
-[RC-8] UI / UX FINO (sensación “premium”)
-   RC-8.1 Highlight último movimiento completo (incl. enroque)
-   RC-8.2 Indicadores de movimiento válidos
-   RC-8.3 Drag & drop con umbral real
-   RC-8.4 Prevención de clicks durante animaciones
-   RC-8.5 Coordinadas visibles y estables
+[✓] 2.9 Audio en historial: regla especial “Prev sobre captura = sonido de move” (ajuste final confirmado)
 
-[RC-9] REGLAS Y TABLAS (detalle que suele perderse)
-   RC-9.1 Tablas por rey ahogado
-   RC-9.2 Tablas por insuficiencia de material
-   RC-9.3 Triple repetición
-   RC-9.4 Sincronía correcta con historial y endgame
+[3] VFX / FEEDBACK VISUAL (integrado, antes “RC-4”)
 
-[RC-10] PERFIL ROBOT / HUMANO
-   RC-10.1 Sincronizar dificultad UI ↔ lógica
-   RC-10.2 Ocultar info de robot en online
-   RC-10.3 Mostrar badge de nivel solo en local
+[✓] 3.1 Explosión de pieza capturada (createCapturedPieceExplosion) (RC-4.1)
 
-RUTA DE TRABAJO
+[✓] 3.2 Reducción automática de VFX en modo online (RC-4.2)
 
-Primero: [0] (Mapa y control) → porque te protege de perder trabajo.
+[✓] 3.3 Animaciones CHECK y CHECKMATE (RC-4.3)
 
-Después: [1] (Local) → porque es el “core” del juego.
+[⏳] 3.4 Control global ONLINE_VFX (toggle/estrategia performance) (RC-4.4)
 
-Luego: [2] (Robot) → cuando el core no se rompe.
+[4] ROBOT (STOCKFISH) — estabilidad y control
 
-Luego: [3] (Online cliente) → cuando el local ya es estable.
+[⏳] 4.1 Worker carga fiable (rutas, import.meta.url, compatibilidad)
 
-Luego: [4] (Online server) → para que el online sea serio.
+[⏳] 4.2 UCI: init/isready correcto + setoption skill + go movetime
 
-Luego: [5] (Arquitectura) y [6] (Deploy) → cuando ya funciona, lo ordenamos y publicamos bien.
+[⏳] 4.3 “Thinking overlay” matrix: no se queda “pegado” (on/off robusto)
 
-Luego: [7] (Calidad) → checklist final para no romper.
+[⏳] 4.4 Niveles: calibrar skill/movetime para que el nivel se sienta real
 
-Finalmente: [8] (Mejoras futuras).
+[⏳] 4.5 (Opcional) Mejoras: ponderar depth/nodes, resign, blunders, etc.
 
+[5] ONLINE (cliente) — robustez real
 
+[⏳] 5.1 Conexión UI: connStatus/connText y estados correctos
 
+[⏳] 5.2 Cola de movimientos: orden, watchdog, no duplicados, no “saltos”
 
+[⏳] 5.3 Sync: requestSync + huecos por seq (edge cases)
 
+[⏳] 5.4 Persistencia: NEONCHESS_ROOM / NEONCHESS_ONLINE (rejoin real)
 
-    
+[⏳] 5.5 Turnos online: cliente nunca permite mover fuera de turno + pruebas
+
+[⏳] 5.6 Chat: optimistic UI + dedupe + límite + UX
+
+[6] ONLINE (server) — seguridad mínima y reconexión
+
+[⏳] 6.1 Rejoin de jugadores: recuperar host/guest tras reconexión (socket.id cambia)
+
+[⏳] 6.2 Validación mínima: solo host/guest pueden emitir, y solo su turno
+
+[⏳] 6.3 Integridad sala: evitar spam de moves/chat, rate limiting básico
+
+[⏳] 6.4 Limpieza: DISCONNECT_GRACE_MS y cleanupTimer correcto
+
+[⏳] 6.5 Observabilidad: logs útiles (roomId, seq, eventos clave)
+
+[7] ARQUITECTURA / REPO (orden y mantenimiento)
+
+[⏳] 7.1 Separar backend del frontend (server fuera de docs si aplica)
+
+[⏳] 7.2 node_modules fuera de docs (y en .gitignore + firebase ignore)
+
+[⏳] 7.3 Estructura clara: /public (frontend) vs /server (backend)
+
+[⏳] 7.4 Scripts npm: start/dev/deploy (automatizar)
+
+[⏳] 7.5 Variables de entorno y config por entorno (local/prod)
+
+[8] DEPLOYMENT (Firebase + Cloud Run)
+
+[⏳] 8.1 Hosting estático: reglas, rutas, cache, .nojekyll, 404
+
+[⏳] 8.2 Cloud Run: CORS ALLOWED_ORIGINS correcto (prod + local)
+
+[⏳] 8.3 URLs en cliente: CLOUD_RUN_URL / LOCAL_SOCKET_URL / GitHub Pages
+
+[⏳] 8.4 Seguridad: headers, HTTPS, websocket estable
+
+[⏳] 8.5 Checklist de publicación: “sube y funciona” en limpio
+
+[9] CALIDAD (pruebas rápidas y “no se rompe”)
+
+[⏳] 9.1 Smoke tests manuales (lista corta y repetible)
+
+[⏳] 9.2 Casos límite: enroque, en-passant, promoción, mate, tablas, tiempo
+
+[⏳] 9.3 Online: desconectar/reconectar, sync, spam clicks, doble submit chat
+
+[⏳] 9.4 Rendimiento: animaciones, móviles, resize/orientación
+
+[10] MEJORAS FUTURAS (cuando lo anterior esté sólido)
+
+[⏳] 10.1 PGN export / import
+
+[⏳] 10.2 Espectador (watch mode)
+
+[⏳] 10.3 Matchmaking rápido (sin código)
+
+[⏳] 10.4 Ranking / stats persistentes
+
+[⏳] 10.5 Autoridad total del server (reglas en backend)

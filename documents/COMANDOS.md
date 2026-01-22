@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "Restablezco la modalidad Online, corrijo algunos problemas de rendimiento del juego asi como también animaciones defectuosas"
+git commit -m "Refactor core game logic and restore full animated move history"
 git push
 
 

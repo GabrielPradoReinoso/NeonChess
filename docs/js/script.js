@@ -93,8 +93,6 @@ const repetitionCount = new Map();
 // Historial UI (lista de movimientos)
 let moveList = []; // {from,to,piece,capture,ts}
 
-moveList = [];
-
 // Scores / salud
 const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 const kingBaseHealth = 5;
@@ -195,6 +193,60 @@ function copyTextToClipboard(text) {
       reject(e);
     }
   });
+}
+
+function enterReviewMode() {
+  if (isReviewMode) return;
+  isReviewMode = true;
+  isNavigating = true;
+  stopTimer("w");
+  stopTimer("b");
+}
+
+function exitReviewMode() {
+  if (!isReviewMode) return;
+  isReviewMode = false;
+  isNavigating = false;
+
+  // timers: estaban parados por enterReviewMode()
+  if (Number.isFinite(timers[currentTurn])) startTimer(currentTurn);
+}
+
+function maybeExitReviewAtEnd() {
+  if (currentHistoryIndex === positionHistory.length - 1) {
+    exitReviewModeToLiveGame();  // limpia estado / UI
+    exitReviewMode();            // reanuda timers si procede
+    setTurnLED?.();
+  }
+}
+
+function exitReviewModeToLiveGame() {
+  isReviewMode = false;
+  isNavigating = false;
+
+  // unlock coherente (estado + CSS)
+  try { endAnimationLock?.(); } catch {}
+
+  try { removeMoveIndicators?.(); } catch {}
+  try {
+    document.querySelectorAll(".cell.selected")
+      .forEach(c => c.classList.remove("selected"));
+  } catch {}
+  selectedCell = null;
+
+  updateKingStatus?.();
+  renderBoard?.();
+}
+
+function scrollMoveHistoryToEnd(smooth = true) {
+  const hist = document.querySelector(".move-history");
+  if (!hist) return;
+
+  // Si el usuario está navegando/review, NO lo forces al final
+  if (isNavigating || isReviewMode) return;
+
+  const left = hist.scrollWidth - hist.clientWidth;
+  hist.scrollTo({ left: Math.max(0, left), behavior: smooth ? "smooth" : "auto" });
 }
 
 // ============================================================
@@ -2033,6 +2085,7 @@ function movePiece(from, to, isHumanMove = false) {
         emitOnlineMove(rcToAlgebraic(from), rcToAlgebraic(to));
       }
 
+      pushMoveToHistory(moveRecord);
       finishMove();
       endAnimationLock();
     });
@@ -2296,7 +2349,14 @@ function pushMoveToHistory(mv) {
   }
 
   moveList.push(mv);
+  if (!isReviewMode && !isNavigating) {
+  currentHistoryIndex = moveList.length; 
+  }
+
   renderMoveHistoryUI();
+
+  // Auto-scroll al final (solo en live)
+  scrollMoveHistoryToEnd(true);
 }
 
 function renderMoveHistoryUI() {
@@ -2304,12 +2364,34 @@ function renderMoveHistoryUI() {
   if (!hist) return;
 
   hist.innerHTML = "";
-  for (let i = 0; i < moveList.length; i++) {
+
+  // En live: mostrar todo.
+  // En review/navegación: mostrar solo hasta el snapshot actual.
+  const visibleMoves = (isReviewMode || isNavigating)
+  ? Math.max(0, currentHistoryIndex)
+  : moveList.length;
+
+
+  for (let i = 0; i < visibleMoves; i++) {
     const m = moveList[i];
-    const div = document.createElement("div");
-    div.className = "move-item";
-    div.textContent = `${i + 1}. ${rcToAlgebraic(m.from)} → ${rcToAlgebraic(m.to)}`;
-    hist.appendChild(div);
+    if (!m) continue;
+
+    const entry = document.createElement("div");
+    entry.className = "move-entry";
+
+    const img = document.createElement("img");
+    img.src = pieceImages[m.piece];
+    img.alt = m.piece;
+    img.draggable = false;
+
+    const span = document.createElement("span");
+    const arrow = m.capture ? "×" : "→";
+    span.textContent =
+      `${rcToAlgebraic(m.from)} ${arrow} ${rcToAlgebraic(m.to)}`;
+
+    entry.appendChild(img);
+    entry.appendChild(span);
+    hist.appendChild(entry);
   }
 }
 
@@ -2571,9 +2653,6 @@ function goToHistoryIndex(i) {
   const snap = positionHistory[i];
   if (!snap) return;
 
-  // reconstruye board desde snap.pos (tu formato actual getBoardPosition guarda "0," y "_turn")
-  // → si antes tenías snapshot real, mejor usarlo. Si no: guarda snapshot real a partir de ahora.
-
   if (snap.snapshot) {
     board = snap.snapshot.map((r) => r.slice());
   }
@@ -2583,6 +2662,7 @@ function goToHistoryIndex(i) {
       ? "b"
       : "w"
     : currentTurn;
+
   currentHealth = { ...snap.health };
   scores = { ...snap.scores };
 
@@ -2593,6 +2673,30 @@ function goToHistoryIndex(i) {
   };
 
   renderBoard();
+
+  // --- VFX/SFX al navegar por historial ---
+  // Usa isNavigating (más fiable que isReviewMode en edge cases)
+  if (isNavigating) {
+    const lastMove = i > 0 ? moveList[i - 1] : null;
+
+    if (lastMove) {
+      // Sonido
+      try {
+        if (lastMove.capture) playSound(captureSound, "capture");
+        else playSound(moveSound, "move");
+      } catch (_) {}
+
+      // Explosión solo si fue captura
+      if (lastMove.capture) {
+        try {
+          requestAnimationFrame(() => {
+            createCapturedPieceExplosion(lastMove.capture, lastMove.to);
+          });
+        } catch (_) {}
+      }
+    }
+  }
+
   updateHealthBar();
   updateScores();
   updateKingStatus();
@@ -2600,36 +2704,226 @@ function goToHistoryIndex(i) {
   maybeExitReviewAtEnd();
 }
 
-function enterReviewMode() {
-  if (isReviewMode) return;
-  isReviewMode = true;
-  stopTimer("w");
-  stopTimer("b");
-}
+function handleHistoryStep(direction) {
+  if (!positionHistory.length) return;
+  if (isAnimating || isNavigating) return;
 
-function exitReviewMode() {
-  if (!isReviewMode) return;
-  isReviewMode = false;
-  if (Number.isFinite(timers[currentTurn])) startTimer(currentTurn);
-}
+  const maxIdx = positionHistory.length - 1;
+  const fromIdx = currentHistoryIndex;
+  const toIdx =
+    direction === "next"
+      ? Math.min(maxIdx, fromIdx + 1)
+      : Math.max(0, fromIdx - 1);
 
-function maybeExitReviewAtEnd() {
-  if (currentHistoryIndex === positionHistory.length - 1) {
-    exitReviewMode();
+  if (toIdx === fromIdx) return;
+
+  // Entra en review y bloquea input mientras animamos
+  enterReviewMode();
+  isNavigating = true;
+  startAnimationLock();
+
+  // Fuente del movimiento según relación snapshots<->moves:
+  // snapshot 0 = estado inicial; snapshot i = después de i movimientos.
+  // Por tanto, mover "next" usa moveList[fromIdx], mover "prev" usa moveList[fromIdx - 1].
+  const mv =
+    direction === "next" ? moveList[fromIdx] : moveList[fromIdx - 1];
+
+  // Si no hay moveRecord (desfase), fallback a salto directo sin animación
+  if (!mv) {
+    goToHistoryIndex(toIdx);
+    isNavigating = false;
+    endAnimationLock();
+    return;
   }
+
+  // Pon el tablero en el snapshot "origen" y renderiza antes de animar
+  const snapFrom = positionHistory[fromIdx];
+  const snapTo = positionHistory[toIdx];
+
+  if (snapFrom?.snapshot) {
+    board = snapFrom.snapshot.map((r) => r.slice());
+  }
+  renderBoard();
+
+  // Determina from/to para la animación según dirección
+  const aFrom = direction === "next" ? mv.from : mv.to;
+  const aTo = direction === "next" ? mv.to : mv.from;
+
+  const fromCell = getCell(aFrom.row, aFrom.col);
+  const toCell = getCell(aTo.row, aTo.col);
+
+  // SFX (simple pero consistente)
+  const isCapture = !!mv.capture;
+  const isPawn = mv.piece && mv.piece[1] === "p";
+  const isPromoForward =
+    direction === "next" &&
+    isPawn &&
+    (aTo.row === 0 || aTo.row === 7);
+
+  // Enroque (detectable por rey moviéndose 2 columnas)
+  const isCastling =
+    mv.piece && mv.piece[1] === "k" && Math.abs(mv.to.col - mv.from.col) === 2;
+
+  // Helper de “consolidación” al final
+  const commitToSnapshot = () => {
+    if (snapTo?.snapshot) {
+      board = snapTo.snapshot.map((r) => r.slice());
+    }
+
+    // Recalcula turno/flags/vida/scores desde snapshot destino
+    currentHistoryIndex = toIdx;
+    renderMoveHistoryUI();
+
+    currentTurn = snapTo.lastMoveBy
+      ? snapTo.lastMoveBy === "w"
+        ? "b"
+        : "w"
+      : currentTurn;
+
+    currentHealth = { ...snapTo.health };
+    scores = { ...snapTo.scores };
+
+    kingMoved = { ...snapTo.castling.kingMoved };
+    rookMoved = {
+      w: { ...snapTo.castling.rookMoved.w },
+      b: { ...snapTo.castling.rookMoved.b },
+    };
+
+    renderBoard();
+    updateHealthBar();
+    updateScores();
+    updateKingStatus();
+    setTurnLED();
+
+    isNavigating = false;
+    endAnimationLock();
+
+    // Si ya estás al final, sales de review y vuelves al “live game”
+    maybeExitReviewAtEnd();
+  };
+
+  // Si no hay DOM para animar, fallback a commit directo
+  if (!fromCell || !toCell) {
+    commitToSnapshot();
+    return;
+  }
+
+  // En forward-capture, elimina víctima del DOM y dispara VFX antes de animar
+  if (direction === "next" && isCapture && toCell) {
+  // VFX (explosión) usando el código de la pieza capturada
+  try {
+    // mv.capture es el code tipo "bp", "wn", etc.
+    createCapturedPieceExplosion?.(mv.capture, aTo);
+  } catch (_) {}
+
+  // Quita la víctima del DOM para evitar duplicados durante la animación
+  const victimImg = toCell.querySelector("img.piece");
+  if (victimImg) victimImg.remove();
+  }
+
+
+  // Sonidos (mínimo viable)
+  if (isPromoForward) {
+  playSound(promotionSound, "promotion");
+  } else if (isCapture) {
+  // Captura: solo sonido de captura al avanzar
+  // Al retroceder, suena como movimiento normal
+  playSound(direction === "next" ? captureSound : moveSound,
+            direction === "next" ? "capture" : "move");
+  } else {
+  playSound(moveSound, "move");
+  }
+
+
+  // Enroque: anima rey + torre
+  if (isCastling) {
+    const row = mv.from.row; // misma fila siempre
+    const kingFrom = direction === "next" ? mv.from : mv.to;
+    const kingTo = direction === "next" ? mv.to : mv.from;
+
+    // Determina columnas torre según lado (corto: g-file / largo: c-file)
+    const rookFromCol = kingTo.col === 6 ? 7 : 0;
+    const rookToCol = kingTo.col === 6 ? 5 : 3;
+
+    // Si vamos hacia atrás, intercambia origen/destino de torre también
+    const rFrom =
+      direction === "next"
+        ? { row, col: rookFromCol }
+        : { row, col: rookToCol };
+    const rTo =
+      direction === "next"
+        ? { row, col: rookToCol }
+        : { row, col: rookFromCol };
+
+    const kFromCell = getCell(kingFrom.row, kingFrom.col);
+    const kToCell = getCell(kingTo.row, kingTo.col);
+    const rFromCell = getCell(rFrom.row, rFrom.col);
+    const rToCell = getCell(rTo.row, rTo.col);
+
+    const kImg = kFromCell?.querySelector("img.piece");
+    const rImg = rFromCell?.querySelector("img.piece");
+
+    if (!kImg || !rImg || !kFromCell || !kToCell || !rFromCell || !rToCell) {
+      commitToSnapshot();
+      return;
+    }
+
+    let done = 0;
+    const onDone = () => {
+      done += 1;
+      if (done < 2) return;
+      commitToSnapshot();
+    };
+
+    animatePieceMove(kImg, kFromCell, kToCell, onDone);
+    animatePieceMove(rImg, rFromCell, rToCell, onDone);
+    return;
+  }
+
+  // Movimiento normal: anima la pieza que esté en fromCell
+  const movingPieceElem = fromCell.querySelector("img.piece");
+  if (!movingPieceElem) {
+    commitToSnapshot();
+    return;
+  }
+
+  animatePieceMove(movingPieceElem, fromCell, toCell, () => {
+    commitToSnapshot();
+  });
+}
+
+// HISTORIAL: helpers + navegación + UI
+function bindHistoryScrollButtons() {
+  const wrapper = document.querySelector(".move-history-wrapper");
+  const hist = document.querySelector(".move-history");
+  if (!wrapper || !hist) return;
+
+  const btns = wrapper.querySelectorAll(".history-btn");
+  if (btns.length < 2) return;
+
+  const btnLeft = btns[0];
+  const btnRight = btns[btns.length - 1];
+
+  const step = () => Math.max(120, Math.floor(hist.clientWidth * 0.6));
+
+  btnLeft.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    hist.scrollBy({ left: -step(), behavior: "smooth" });
+  });
+
+  btnRight.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    hist.scrollBy({ left: step(), behavior: "smooth" });
+  });
 }
 
 // HISTORIAL – BOTONES PREV / NEXT
 $("btnPrev")?.addEventListener("pointerup", () => {
-  if (!positionHistory.length) return;
-  enterReviewMode();
-  goToHistoryIndex(currentHistoryIndex - 1);
+  handleHistoryStep("prev");
 });
 
 $("btnNext")?.addEventListener("pointerup", () => {
-  if (!positionHistory.length) return;
-  enterReviewMode();
-  goToHistoryIndex(currentHistoryIndex + 1);
+  handleHistoryStep("next");
 });
 
 // ============================================================
@@ -2885,6 +3179,8 @@ function repeatGame() {
 
   const hist = document.querySelector(".move-history");
   if (hist) hist.innerHTML = "";
+
+  moveList = [];
   positionHistory = [];
   currentHistoryIndex = 0;
 
@@ -3120,6 +3416,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initGeneralUI();
     initUISetup();
     bindButtonSfx();
+
+    bindHistoryScrollButtons();
 
     // Estado inicial UI
     setConn("offline");
