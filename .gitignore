@@ -102,3 +102,7 @@ env.yaml
 
 # Block GitHub >100MB file
 public/assets/sounds/game-music(20).mp3
+
+# Baselines
+*.zip
+baseline_neonchess.zip
