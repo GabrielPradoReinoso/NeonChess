@@ -2,21 +2,15 @@
   "name": "chess-gpr-base-proyecto",
   "version": "1.0.0",
   "private": true,
-  "main": "server.js",
   "type": "commonjs",
   "engines": { "node": ">=18" },
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "node server.js",
+    "web": "npx live-server . --port=3000"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "chess.js": "^1.4.0",
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
-  },
-  "description": ""
+  }
 }
-

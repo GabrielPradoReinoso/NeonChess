@@ -1,138 +1,97 @@
-NEON CHESS — ÍNDICE DEFINITIVO (Consolidado)
+NEON CHESS — ÍNDICE DEFINITIVO
 [0] MAPA Y CONTROL
 
-[⏳] 0.1 Congelar “estado actual”: snapshot del repo + versión (tag/zip)
-
-[⏳] 0.2 Lista de objetivos: qué significa “listo” (local / online / deploy)
-
-[⏳] 0.3 Entorno: cómo se ejecuta (local + hosting + cloud run)
+❌ 0.1 Congelar “estado actual”: snapshot del repo + versión (tag/zip)
+❌ 0.2 Lista de objetivos: qué significa “listo” (local / online / deploy)
+❌ 0.3 Entorno: cómo se ejecuta (local + hosting + cloud run)
 
 [1] CONSISTENCIA DE PARTIDA LOCAL (prioridad alta)
 
-[✓] 1.1 Historial coherente: positionHistory vs moveList (siempre sincronizados) (RC-1.2)
+✅ 1.1 Historial coherente: positionHistory vs moveList (siempre sincronizados) (RC-1.2)
 
-[✓] 1.2 Promoción consistente: movePiece vs movePieceNoAnim (misma lógica) (RC-2.6 mínimo viable)
+✅ 1.2 Promoción consistente: movePiece vs movePieceNoAnim (misma lógica) (RC-2.6 mínimo viable)
 
-[⏳] 1.3 Audio corregido: menuMusic apunta a archivo real + política autoplay
+❌ 1.3 Audio corregido: menuMusic apunta a archivo real + política autoplay
 
-[✓] 1.4 Revisión de locks: isAnimating / processingQueue / reviewMode (sin bloqueos raros) (RC-1.7 + RC-1.8)
+✅ 1.4 Revisión de locks: isAnimating / processingQueue / reviewMode (sin bloqueos raros) (RC-1.7 + RC-1.8)
 
-[⏳] 1.5 Timers: precisión, pausas, cambio de turno, fin por tiempo estable
+❌ 1.5 Timers: precisión, pausas, cambio de turno, fin por tiempo estable
 
-[⏳] 1.6 Endgame: mate/jaque/tablas (flujo y UI sin estados zombis)
+✅ 1.6 Endgame: mate/jaque/tablas (flujo y UI sin estados zombis)
 
-[✓] 1.7 UI/UX base: highlights, indicadores, drag&drop, “blink error” consistente (estable y validado por uso)
+✅ 1.7 UI/UX base: highlights, indicadores, drag&drop, “blink error” consistente (estable y validado por uso)
 
 [2] HISTORIAL AVANZADO (integrado, antes “RC-1”)
 
-[✓] 2.1 Historial animado al avanzar/retroceder (handleHistoryStep) (RC-1.1)
-
-[✓] 2.2 Sincronización perfecta: board ↔ positionHistory ↔ UI (RC-1.2)
-
-[✓] 2.3 Diferenciación capturas normales vs en-passant (RC-1.3)
-
-[✓] 2.4 “Revivir” piezas al deshacer (resultado funcional mediante snapshots y render) (equivalente operativo RC-1.4)
-
-[✓] 2.5 Scroll automático al final en live y no forzado en review (RC-1.5)
-
-[✓] 2.6 Eliminación/visibilidad correcta de entradas UI al retroceder (UI ligada a currentHistoryIndex) (RC-1.6)
-
-[✓] 2.7 Prevención de navegación durante animaciones + locks consistentes (RC-1.7)
-
-[✓] 2.8 Separación clara: navegación ≠ juego activo (enter/exit review coherente) (RC-1.8)
-
-[✓] 2.9 Audio en historial: regla especial “Prev sobre captura = sonido de move” (ajuste final confirmado)
+✅ 2.1 Historial animado al avanzar/retroceder (handleHistoryStep) (RC-1.1)
+✅ 2.2 Sincronización perfecta: board ↔ positionHistory ↔ UI (RC-1.2)
+✅ 2.3 Diferenciación capturas normales vs en-passant (RC-1.3)
+✅ 2.4 “Revivir” piezas al deshacer (resultado funcional mediante snapshots y render) (equivalente operativo RC-1.4)
+✅ 2.5 Scroll automático al final en live y no forzado en review (RC-1.5)
+✅ 2.6 Eliminación/visibilidad correcta de entradas UI al retroceder (UI ligada a currentHistoryIndex) (RC-1.6)
+✅ 2.7 Prevención de navegación durante animaciones + locks consistentes (RC-1.7)
+✅ 2.8 Separación clara: navegación ≠ juego activo (enter/exit review coherente) (RC-1.8)
+✅ 2.9 Audio en historial: regla especial “Prev sobre captura = sonido de move” (ajuste final confirmado)
 
 [3] VFX / FEEDBACK VISUAL (integrado, antes “RC-4”)
 
-[✓] 3.1 Explosión de pieza capturada (createCapturedPieceExplosion) (RC-4.1)
-
-[✓] 3.2 Reducción automática de VFX en modo online (RC-4.2)
-
-[✓] 3.3 Animaciones CHECK y CHECKMATE (RC-4.3)
-
-[⏳] 3.4 Control global ONLINE_VFX (toggle/estrategia performance) (RC-4.4)
+✅ 3.1 Explosión de pieza capturada (createCapturedPieceExplosion) (RC-4.1)
+✅ 3.2 Reducción automática de VFX en modo online (RC-4.2)
+✅ 3.3 Animaciones CHECK y CHECKMATE (RC-4.3)
+❌ 3.4 Control global ONLINE_VFX (toggle/estrategia performance) (RC-4.4)
 
 [4] ROBOT (STOCKFISH) — estabilidad y control
 
-[⏳] 4.1 Worker carga fiable (rutas, import.meta.url, compatibilidad)
-
-[⏳] 4.2 UCI: init/isready correcto + setoption skill + go movetime
-
-[⏳] 4.3 “Thinking overlay” matrix: no se queda “pegado” (on/off robusto)
-
-[⏳] 4.4 Niveles: calibrar skill/movetime para que el nivel se sienta real
-
-[⏳] 4.5 (Opcional) Mejoras: ponderar depth/nodes, resign, blunders, etc.
+❌ 4.1 Worker carga fiable (rutas, import.meta.url, compatibilidad)
+❌ 4.2 UCI: init/isready correcto + setoption skill + go movetime
+❌ 4.3 “Thinking overlay” matrix: no se queda “pegado” (on/off robusto)
+❌ 4.4 Niveles: calibrar skill/movetime para que el nivel se sienta real
+❌ 4.5 (Opcional) Mejoras: ponderar depth/nodes, resign, blunders, etc.
 
 [5] ONLINE (cliente) — robustez real
 
-[⏳] 5.1 Conexión UI: connStatus/connText y estados correctos
-
-[⏳] 5.2 Cola de movimientos: orden, watchdog, no duplicados, no “saltos”
-
-[⏳] 5.3 Sync: requestSync + huecos por seq (edge cases)
-
-[⏳] 5.4 Persistencia: NEONCHESS_ROOM / NEONCHESS_ONLINE (rejoin real)
-
-[⏳] 5.5 Turnos online: cliente nunca permite mover fuera de turno + pruebas
-
-[⏳] 5.6 Chat: optimistic UI + dedupe + límite + UX
+✅ 5.1 Conexión UI: connStatus/connText y estados correctos
+✅ 5.2 Cola de movimientos: orden, watchdog, no duplicados, no “saltos”
+✅ 5.3 Sync: requestSync + huecos por seq (edge cases)
+❌ 5.4 Persistencia: NEONCHESS_ROOM / NEONCHESS_ONLINE (rejoin real)
+✅ 5.5 Turnos online: cliente nunca permite mover fuera de turno + pruebas
+✅ 5.6 Chat: optimistic UI + dedupe + límite + UX
 
 [6] ONLINE (server) — seguridad mínima y reconexión
 
-[⏳] 6.1 Rejoin de jugadores: recuperar host/guest tras reconexión (socket.id cambia)
-
-[⏳] 6.2 Validación mínima: solo host/guest pueden emitir, y solo su turno
-
-[⏳] 6.3 Integridad sala: evitar spam de moves/chat, rate limiting básico
-
-[⏳] 6.4 Limpieza: DISCONNECT_GRACE_MS y cleanupTimer correcto
-
-[⏳] 6.5 Observabilidad: logs útiles (roomId, seq, eventos clave)
+❌ 6.1 Rejoin de jugadores: recuperar host/guest tras reconexión (socket.id cambia)
+❌ 6.2 Validación mínima: solo host/guest pueden emitir, y solo su turno
+❌ 6.3 Integridad sala: evitar spam de moves/chat, rate limiting básico
+❌ 6.4 Limpieza: DISCONNECT_GRACE_MS y cleanupTimer correcto
+❌ 6.5 Observabilidad: logs útiles (roomId, seq, eventos clave)
 
 [7] ARQUITECTURA / REPO (orden y mantenimiento)
 
-[⏳] 7.1 Separar backend del frontend (server fuera de docs si aplica)
-
-[⏳] 7.2 node_modules fuera de docs (y en .gitignore + firebase ignore)
-
-[⏳] 7.3 Estructura clara: /public (frontend) vs /server (backend)
-
-[⏳] 7.4 Scripts npm: start/dev/deploy (automatizar)
-
-[⏳] 7.5 Variables de entorno y config por entorno (local/prod)
+❌ 7.1 Separar backend del frontend (server fuera de docs si aplica)
+❌ 7.2 node_modules fuera de docs (y en .gitignore + firebase ignore)
+❌ 7.3 Estructura clara: /public (frontend) vs /server (backend)
+❌ 7.4 Scripts npm: start/dev/deploy (automatizar)
+❌ 7.5 Variables de entorno y config por entorno (local/prod)
 
 [8] DEPLOYMENT (Firebase + Cloud Run)
 
-[⏳] 8.1 Hosting estático: reglas, rutas, cache, .nojekyll, 404
-
-[⏳] 8.2 Cloud Run: CORS ALLOWED_ORIGINS correcto (prod + local)
-
-[⏳] 8.3 URLs en cliente: CLOUD_RUN_URL / LOCAL_SOCKET_URL / GitHub Pages
-
-[⏳] 8.4 Seguridad: headers, HTTPS, websocket estable
-
-[⏳] 8.5 Checklist de publicación: “sube y funciona” en limpio
+❌ 8.1 Hosting estático: reglas, rutas, cache, .nojekyll, 404
+❌ 8.2 Cloud Run: CORS ALLOWED_ORIGINS correcto (prod + local)
+❌ 8.3 URLs en cliente: CLOUD_RUN_URL / LOCAL_SOCKET_URL / GitHub Pages
+❌ 8.4 Seguridad: headers, HTTPS, websocket estable
+❌ 8.5 Checklist de publicación: “sube y funciona” en limpio
 
 [9] CALIDAD (pruebas rápidas y “no se rompe”)
 
-[⏳] 9.1 Smoke tests manuales (lista corta y repetible)
-
-[⏳] 9.2 Casos límite: enroque, en-passant, promoción, mate, tablas, tiempo
-
-[⏳] 9.3 Online: desconectar/reconectar, sync, spam clicks, doble submit chat
-
-[⏳] 9.4 Rendimiento: animaciones, móviles, resize/orientación
+❌ 9.1 Smoke tests manuales (lista corta y repetible)
+❌ 9.2 Casos límite: enroque, en-passant, promoción, mate, tablas, tiempo
+❌ 9.3 Online: desconectar/reconectar, sync, spam clicks, doble submit chat
+❌ 9.4 Rendimiento: animaciones, móviles, resize/orientación
 
 [10] MEJORAS FUTURAS (cuando lo anterior esté sólido)
 
-[⏳] 10.1 PGN export / import
-
-[⏳] 10.2 Espectador (watch mode)
-
-[⏳] 10.3 Matchmaking rápido (sin código)
-
-[⏳] 10.4 Ranking / stats persistentes
-
-[⏳] 10.5 Autoridad total del server (reglas en backend)
+❌ 10.1 PGN export / import
+❌ 10.2 Espectador (watch mode)
+❌ 10.3 Matchmaking rápido (sin código)
+❌ 10.4 Ranking / stats persistentes
+❌ 10.5 Autoridad total del server (reglas en backend)

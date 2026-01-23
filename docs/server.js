@@ -29,7 +29,10 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
 const corsOrigin =
   allowedOrigins.length > 0
     ? allowedOrigins
-    : ["http://localhost:3000", "http://localhost:5000"];
+    : ["http://localhost:3000", 
+      "http://localhost:5000",
+      "http://127.0.0.1:56337",
+];
 
 const io = new Server(server, {
   path: "/socket.io",

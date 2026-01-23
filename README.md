@@ -1,55 +1,84 @@
-# ♟️ Neon Chess – Web Chess Game (Vanilla JavaScript)
+# ♟️ NEON CHESS
 
-Neon Chess es un juego de ajedrez desarrollado en **JavaScript vanilla**, con una estética neon futurista y múltiples modos de juego, incluyendo partidas contra una IA (Stockfish) y multijugador online en tiempo real.
+NEON CHESS is a web-based chess game with a neon / cyberpunk aesthetic, focused on smooth animations, rich visual feedback, and robust game-state handling.
 
-Este proyecto forma parte de mi proceso de aprendizaje en **desarrollo frontend**, con foco en JavaScript avanzado, lógica de aplicación compleja, manipulación del DOM y experiencia de usuario.
-
----
-
-## 🚀 Demo
-*(Próximamente desplegado online)*
+It supports local play, AI matches powered by Stockfish, and real-time online multiplayer via Socket.IO (backend required).
 
 ---
 
-## 🧠 Características principales
+## ✨ Features
 
-- ♟️ Motor de ajedrez integrado (Stockfish vía Web Worker)
-- 🤖 Juego contra la IA con niveles de dificultad configurables
-- 🌐 Modo multijugador online en tiempo real (Socket.IO)
-- ⏱️ Control de tiempo (modo clásico / infinito)
-- 🔁 Historial de movimientos con navegación
-- 🎨 Interfaz neon animada y responsiva
-- 🔊 Sonidos y música dinámica
-- 🧠 Reglas completas de ajedrez:
-  - Enroque
-  - En passant
-  - Promoción
-  - Jaque y jaque mate
-  - Empate por rey ahogado o material insuficiente
+### 🎮 Game Modes
+- **Local Player vs Player**
+- **Player vs AI (Stockfish)** — configurable difficulty
+- **Online Multiplayer (1v1)** — real-time via Socket.IO
+
+### 🧠 Gameplay & Logic
+- Full chess rules:
+  - Castling
+  - En-passant
+  - Pawn promotion
+  - Check, checkmate, stalemate
+  - Draw detection (repetition / insufficient material)
+- Timers per player
+- Health / score system based on captures
+
+### 📜 Advanced Move History
+- Fully animated move history
+- Step-by-step navigation (Prev / Next)
+- Review mode isolated from live gameplay
+- Correct handling of captures, castling and en-passant
+- Auto-scroll to latest move
+
+### 🎨 Visuals & UX
+- Neon / cyberpunk UI
+- Smooth piece animations
+- Capture VFX
+- Matrix-style AI thinking overlay
+- Sound effects for moves, captures, errors and events
+- Responsive layout
+
+### 🌐 Online Features
+- Room-based matchmaking
+- Reconnection handling
+- Move deduplication and sequencing
+- Chat between players
+- Connection status indicators
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## 🧱 Architecture
 
-- JavaScript (ES6+)
-- HTML5
-- CSS3 (animaciones y efectos visuales)
-- Web Workers (Stockfish)
+### Frontend
+- HTML / CSS / JavaScript (ES Modules)
+- Runs as a static site
+- Compatible with GitHub Pages and Firebase Hosting
+
+### Backend (required for online mode)
+- Node.js + Express
 - Socket.IO
-- Firebase / Google Cloud Run (modo online)
+- Manages rooms, turns, reconnections and chat
 
 ---
 
-## 📸 Capturas del proyecto
+## 🚀 Live Demo
 
-*(Pendiente de añadir imágenes del juego)*
+### GitHub Pages
+➡️ **Local play & AI only**  
+Online multiplayer is disabled due to platform limitations.
+
+> GitHub Pages does not support WebSockets or persistent backend processes.
 
 ---
 
-## 📦 Instalación local
+## 🕹️ Running Locally
+
+### 1️⃣ Frontend (Local / AI)
+
+You can run the frontend using any static server.
+
+Example using `live-server`:
 
 ```bash
-git clone https://github.com/TU-USUARIO/TU-REPO.git
-cd TU-REPO
-npm install
-npm start
+cd docs
+npx live-server
