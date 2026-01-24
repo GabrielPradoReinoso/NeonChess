@@ -1657,48 +1657,47 @@ let matrixBuilt = false;
 
 function buildMatrixRain() {
   const overlay = document.querySelector("#player1 .matrix-overlay-player1");
-  if (!overlay) return;
+  if (!overlay) return false;
+
+  const rect = overlay.getBoundingClientRect();
+  if (rect.width < 50 || rect.height < 30) return false;
 
   overlay.innerHTML = "";
 
-  const rect = overlay.getBoundingClientRect();
+  // Debe cuadrar con CSS (line-height: 14px)
+  const lineH = 14;
 
-  // Basado en font-size/line-height reales de tu CSS
-  const lineH = 18;          // coincide con CSS
-  const minCols = 18;        // densidad mínima (ajusta si quieres)
-  const maxCols = 36;        // densidad máxima (ajusta si quieres)
+  // Columna “ideal” en px (al ser grid 1fr, esto solo calcula cuántas columnas crear)
+  const approxColWidth = 10;
 
-  // Calcula columnas según ancho, pero limita para que no quede ni muy vacío ni muy apretado
-  const approxColWidth = 16;
-  let cols = Math.floor(rect.width / approxColWidth);
-  cols = Math.max(minCols, Math.min(maxCols, cols));
+  // Más columnas => menos sensación de huecos
+  let cols = Math.ceil(rect.width / approxColWidth);
+  cols = Math.max(28, Math.min(70, cols));
 
-  // Cantidad de dígitos necesarios para cubrir alto (y sobrar para el movimiento)
   const neededLines = Math.ceil(rect.height / lineH);
-  const streamLen = neededLines + 30; // extra para continuidad
+  const streamLen = neededLines + 20;
 
-  // helper: genera "001101010..." pero lo convertimos a vertical con saltos de línea
   const makeStreamText = (len) => {
     let s = "";
     for (let i = 0; i < len; i++) s += Math.random() > 0.5 ? "1" : "0";
-    return s.split("").join("\n"); // ✅ ahora se ve en columna
+    return s.split("").join("\n");
   };
+
+  // Asegura grid con número exacto de columnas
+  overlay.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
   for (let i = 0; i < cols; i++) {
     const col = document.createElement("div");
     col.className = "matrix-col";
 
-    // Stream interior (es lo que se anima)
     const stream = document.createElement("span");
     stream.className = "matrix-stream";
     stream.textContent = makeStreamText(streamLen);
 
-    // Alterna dirección: 0 sube, 1 baja, 2 sube...
+    // Mucho más lento (antes 2.4–5.6s)
     const goingUp = i % 2 === 0;
-
-    // Velocidad y offset (random pero controlado)
-    const dur = 2.4 + Math.random() * 3.2; // 2.4s–5.6s
-    const delay = -Math.random() * dur;    // arranca “a mitad”
+    const dur = 7.0 + Math.random() * 6.0;   // 7–13s
+    const delay = -Math.random() * dur;
 
     stream.style.animationName = goingUp ? "matrix-up" : "matrix-down";
     stream.style.animationDuration = `${dur}s`;
@@ -1706,14 +1705,15 @@ function buildMatrixRain() {
     stream.style.animationIterationCount = "infinite";
     stream.style.animationDelay = `${delay}s`;
 
-    // Opcional: ligera variación de opacidad por columna para “profundidad”
-    col.style.opacity = String(0.65 + Math.random() * 0.35);
+    // Variación suave (evita “parches” demasiado oscuros)
+    col.style.opacity = String(0.75 + Math.random() * 0.25);
 
     col.appendChild(stream);
     overlay.appendChild(col);
   }
 
   matrixBuilt = true;
+  return true;
 }
 
 function setRobotThinking(on) {
@@ -1721,20 +1721,41 @@ function setRobotThinking(on) {
   const overlay = document.querySelector("#player1 .matrix-overlay-player1");
   if (!p1 || !overlay) return;
 
-  // Construye solo una vez (cuando ya está en DOM)
-  if (!matrixBuilt) buildMatrixRain();
+  if (on) {
+    // Construcción robusta: si el primer intento da tamaño 0, reintenta 1-2 frames
+    if (!matrixBuilt) {
+      const ok = buildMatrixRain();
+      if (!ok) {
+        requestAnimationFrame(() => {
+          const ok2 = buildMatrixRain();
+          if (!ok2) requestAnimationFrame(() => buildMatrixRain());
+        });
+      }
+    }
+  }
 
   p1.classList.toggle("thinking", !!on);
   overlay.classList.toggle("visible", !!on);
 }
 
-// Si cambia tamaño/orientación, reconstruye columnas para que se ajuste
+/* Resize: solo reconstruye si ya existe (y con debounce) */
+let __matrixResizeT = 0;
 window.addEventListener("resize", () => {
-  matrixBuilt = false;
-  // solo reconstruimos si el overlay existe
-  const overlay = document.querySelector("#player1 .matrix-overlay-player1");
-  if (overlay) buildMatrixRain();
+  clearTimeout(__matrixResizeT);
+  __matrixResizeT = setTimeout(() => {
+    const p1 = $("player1");
+    const overlay = document.querySelector("#player1 .matrix-overlay-player1");
+    if (!p1 || !overlay) return;
+
+    const isOn = p1.classList.contains("thinking") && overlay.classList.contains("visible");
+    if (!isOn) return;
+
+    matrixBuilt = false;
+    buildMatrixRain();
+  }, 120);
 });
+
+
 
 // Jaque / mate overlays (simple)
 function showCheckAnimation() {

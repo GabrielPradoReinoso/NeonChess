@@ -148,7 +148,7 @@ git push
 ---
 ## subir cambios en github
 git add .
-git commit -m "Refactor core game logic and restore full animated move history"
+git commit -m "Refactor player profiles layout and stabilize robot matrix overlay"
 git push
 
 

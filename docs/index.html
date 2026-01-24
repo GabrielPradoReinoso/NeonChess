@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -48,7 +48,7 @@
             <a href="pagina-carga.html"><li>Ajustes</li></a>
             <a href="pagina-carga.html"><li>Tablero y piezas</li></a>
             <a href="pagina-carga.html"><li>Videos</li></a>
-            <a href="pagina-carga.html"><li>Campeonatos presenciales</li></a>
+            <a href="pagina-carga.html"><li>Campeonatos</li></a>
             <a href="pagina-carga.html"><li>Sobre este proyecto</li></a>
           </ul>
         </div>
@@ -57,10 +57,10 @@
 
     <!-- Sección principal -->
     <main class="main-section" id="mainSection">
-      <button id="btnOnline" class="btn">Jugar online</button>
-      <br />
-      <br />
       <button id="btnLocal" class="btn">Jugar contra el robot</button>
+      <br />
+      <br />
+      <button id="btnOnline" class="btn">Jugar online</button>
     </main>
 
     <!-- Panel elección online -->
@@ -199,25 +199,31 @@
       </div>
 
       <div class="chess-container">
-        <div class="health-bar health-bar-top">
+        <!-- Health (top / player1) -->
+        <div
+          class="health-bar health-bar-top"
+          aria-label="Salud jugador superior"
+        >
           <div class="health-progress" id="health-black"></div>
         </div>
 
         <div id="player1" class="player-profile top">
           <div class="matrix-overlay-player1"></div>
 
-          <div class="profile-image">
+          <div class="profile-avatar">
             <img src="assets/images/gpr-robotic-img.jpg" alt="Jugador 1" />
           </div>
 
-          <div class="profile-info">
-            <span class="player-name">GPR robot</span>
-            <span class="player-timer active-clock">00:00</span> &nbsp;
-            <span class="player-score">Puntos: 0</span>
-            <span id="robotDifficulty" class="robot-diff"></span>
-            <span class="turn-led" id="turnLedP2" title="Turno"></span>
+          <div class="profile-meta">
+            <div class="profile-row profile-row--top">
+              <span class="player-name">GPR robot</span>
+              <span class="player-score">Puntos: 0</span>
+              <span class="player-timer active-clock">00:00</span>
+              <span class="turn-led" id="turnLedP1" title="Turno"></span>
+              <span id="robotDifficulty" class="robot-diff"></span>
+            </div>
+
           </div>
-          
         </div>
 
         <div id="chessBoard" class="chess-board">
@@ -225,19 +231,25 @@
         </div>
 
         <div id="player2" class="player-profile bottom">
-          <div class="profile-image">
+          <div class="profile-avatar">
             <img src="assets/images/human-img-profile.jpg" alt="Jugador 2" />
           </div>
 
-          <div class="profile-info">
-            <span class="player-name">Humano</span>
-            <span class="player-timer active-clock">00:00</span> &nbsp;
-            <span class="player-score">Puntos: 0</span>
-            <span class="turn-led" id="turnLedP1" title="Turno"></span>
+          <div class="profile-meta">
+            <div class="profile-row profile-row--top">
+              <span class="player-name">Humano</span>
+              <span class="player-score">Puntos: 0</span>
+              <span class="player-timer active-clock">00:00</span>
+              <span class="turn-led" id="turnLedP2" title="Turno"></span>
+            </div>
           </div>
         </div>
 
-        <div class="health-bar health-bar-bottom">
+        <!-- Health (bottom / player2) -->
+        <div
+          class="health-bar health-bar-bottom"
+          aria-label="Salud jugador inferior"
+        >
           <div class="health-progress" id="health-white"></div>
         </div>
 
