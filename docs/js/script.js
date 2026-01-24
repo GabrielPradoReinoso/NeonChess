@@ -128,30 +128,37 @@ function endAnimationLock() {
 const connStatus = $("connStatus");
 const connText = $("connText");
 
-function setConn(state) {
+function setOpponentConn(state) {
+  // ✅ En local vs robot NO debe mostrarse nunca
+  if (!isOnlineGame) return;
+
   const status = $("connStatus");
   const textEl = $("connText");
-  if (!textEl) return;
+  if (!status || !textEl) return;
 
   textEl.textContent =
-    state === "online"
-      ? "Conectado"
-      : state === "reconnecting"
-        ? "Reconectando…"
-        : "Desconectado";
+    state === "online" ? "Rival conectado" :
+    state === "reconnecting" ? "Buscando rival…" :
+    "Rival desconectado";
 
-  if (!status) return;
-
-  status.classList.remove("online", "offline", "reconnecting");
+  status.classList.remove("online", "offline", "reconnecting", "hidden");
   status.classList.add(state);
 
-  // Si tienes un puntito/luz dentro, por ejemplo: <span class="conn-dot"></span>
   const dot = status.querySelector(".conn-dot");
   if (dot) {
     dot.classList.remove("online", "offline", "reconnecting");
     dot.classList.add(state);
   }
 }
+
+function refreshConnVisibility() {
+  const el = $("connStatus");
+  if (!el) return;
+
+  if (isOnlineGame) el.classList.remove("hidden");
+  else el.classList.add("hidden");
+}
+
 
 // Algebraic helpers (online)
 function algebraicToRC(sq) {
@@ -318,6 +325,18 @@ const LOCAL_SOCKET_URL = "http://localhost:8080";
 // Socket singleton
 let socket = null;
 
+// Desconecta y limpia el socket (al salir de modo online)
+function teardownSocket() {
+  try {
+    if (socket) {
+      socket.removeAllListeners?.();
+      socket.disconnect?.();
+    }
+  } catch (_) {}
+  socket = null;
+}
+
+
 // Throttle sync (evita inundar)
 let __syncCooldown = 0;
 function requestSyncThrottled() {
@@ -354,16 +373,14 @@ function ensureSocket() {
   // Conexión / reconexión
   // ============================
   socket.on("connect", () => {
-    console.log("[io] conectado", socket.id);
-    setConn("online");
-
-    // Si hubo microcorte en partida, re-sincroniza
+    // aún no sabes si el rival está; pide sync o que el server te mande opponentStatus
+    if (isOnlineGame) setOpponentConn("reconnecting");
     if (isOnlineGame && currentRoomId) requestSyncThrottled();
   });
 
   socket.on("disconnect", (reason) => {
     console.warn("[io] disconnect:", reason);
-    setConn("offline");
+    setOpponentConn("offline");
 
     // Rehabilita botones de lobby si existen
     const btnCreateRoom = $("btnCreateRoom");
@@ -374,7 +391,7 @@ function ensureSocket() {
 
   socket.on("connect_error", (err) => {
     console.warn("[io] connect_error:", err?.message || err);
-    setConn("reconnecting");
+    setOpponentConn("reconnecting");
   });
 
   socket.io.on("reconnect_attempt", () => setConn("reconnecting"));
@@ -453,7 +470,7 @@ function ensureSocket() {
     if (oppName) oppName.textContent = "Rival online";
     if (myName) myName.textContent = "Tú";
 
-    // En online, no tiene sentido badge de robot
+    // En online, se quita badge de robot
     robotBadge?.classList.add("hidden");
 
     // Chat visible en online
@@ -527,21 +544,25 @@ function ensureSocket() {
   // Eventos de sala
   // ============================
   socket.on("opponentStatus", ({ online }) => {
-    const el = $("opponentStatusText"); // crea este ID en tu HTML donde quieras
-    if (!el) return;
-    el.textContent = online ? "Rival conectado" : "Rival desconectado";
-    el.classList.toggle("online", !!online);
+  setOpponentConn(online ? "online" : "offline");
   });
 
   socket.on("opponentLeft", () => {
-    console.warn("[ON] opponentLeft");
-    alert("El rival se ha desconectado.");
+  setOpponentConn("offline");
+
+  // Evita que el jugador se quede esperando
+  stopTimer("w");
+  stopTimer("b");
+  showEndGameModal("El rival se ha desconectado. La partida ha finalizado.");
   });
 
   socket.on("opponentResigned", () => {
-    console.warn("[ON] opponentResigned");
-    alert("Tu rival se rindió.");
+  setOpponentConn("offline");
+  stopTimer("w");
+  stopTimer("b");
+  showEndGameModal("Tu rival se rindió. Fin de la partida.");
   });
+
 
   return socket;
 }
@@ -825,9 +846,11 @@ function initUISetup() {
 
   // Botón LOCAL (robot)
   btnLocal?.addEventListener("pointerup", () => {
+    teardownSocket(); 
     // Reset modo
     isOnlineGame = false;
     currentRoomId = null;
+    refreshConnVisibility();
 
     // Ocultar home
     if (mainSection) mainSection.style.display = "none";
@@ -936,7 +959,7 @@ function playSound(audioObj, type) {
 }
 
 // Música (exponemos para que online startGame pueda usarla sin duplicar)
-const menuMusic = new Audio("assets/sounds/");
+const menuMusic = new Audio("assets/sounds/music-1.mp3");
 menuMusic.loop = true;
 menuMusic.volume = 0.6;
 
@@ -3172,6 +3195,7 @@ function showResignConfirmModal() {
 
 // Reset / repeat (si no los pegaste ya)
 function repeatGame() {
+  teardownSocket();
   // 🧹 Reset persistencia online (repeat = nueva partida limpia)
   localStorage.removeItem("NEONCHESS_ROOM");
   localStorage.removeItem("NEONCHESS_ONLINE");
@@ -3384,10 +3408,17 @@ function actuallyStartGame() {
   else $("connStatus")?.classList.remove("hidden");
 
   updateRobotDifficultyBadge(difficultyLevel);
+
+  // Ocultar el indicador de conexión en modo local
+  if (!isOnlineGame) $("connStatus")?.classList.add("hidden");
+
+  refreshConnVisibility();
+
 }
 
 // playButton (modo local)
 playButton?.addEventListener("pointerup", () => {
+  teardownSocket(); 
   // 🧹 Limpia estado online persistido
   localStorage.removeItem("NEONCHESS_ROOM");
   localStorage.removeItem("NEONCHESS_ONLINE");
@@ -3395,6 +3426,7 @@ playButton?.addEventListener("pointerup", () => {
   // si vienes de local/robot
   isOnlineGame = false;
   currentRoomId = null;
+  refreshConnVisibility();
 
   // ✅ OFFLINE: oculta indicador de conexión (si existe)
   $("connStatus")?.classList.add("hidden");

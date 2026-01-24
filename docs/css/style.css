@@ -1275,9 +1275,9 @@ body.game-active footer {
 /* LED turno */
 /* Estilos del indicador de turno */
 .turn-led{
-  flex: 0 0 18px;
+  flex: 0 0 12px;
   width: 12px;
-  height: 18px;
+  height: 12px;
   border-radius: 50%;
   margin-left: 10px;
   margin-right: 10px;
@@ -1365,8 +1365,6 @@ body.game-active footer {
     width: calc(100vw - 24px);
   }
 }
-
-
 /* ____________________________________________________________*/
 
 /* Barras de salud de los jugadores_____________________________*/
@@ -1558,9 +1556,6 @@ body.game-active footer {
   flex-direction:column;
 }
 
-
-
-
 .conn-status{
   display:flex;
   align-items:center;
@@ -1594,8 +1589,11 @@ body.game-active footer {
   100%{transform:scale(1);opacity:.8}
 }
 
-
+body:not(.online-game) #connStatus{
+  display:none !important;
+}
 /* ____________________________________________________________*/
+
 
 /* Estilos para el modal de promoción__________________________*/
 
