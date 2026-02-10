@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="icon" href="assets/images/logo-neon-chess.png" />
   </head>
+
   <body>
     <!-- Loading Screen -->
     <div id="loadingOverlay" class="loading-overlay">
@@ -45,11 +46,11 @@
         <div id="dropdownMenu" class="dropdown-menu">
           <div class="menu-close">x</div>
           <ul>
-            <a href="pagina-carga.html"><li>Ajustes</li></a>
-            <a href="pagina-carga.html"><li>Tablero y piezas</li></a>
-            <a href="pagina-carga.html"><li>Videos</li></a>
-            <a href="pagina-carga.html"><li>Campeonatos</li></a>
-            <a href="pagina-carga.html"><li>Sobre este proyecto</li></a>
+            <li><a href="pagina-carga.html">Ajustes</a></li>
+            <li><a href="pagina-carga.html">Tablero y piezas</a></li>
+            <li><a href="pagina-carga.html">Videos</a></li>
+            <li><a href="pagina-carga.html">Campeonatos</a></li>
+            <li><a href="pagina-carga.html">Sobre este proyecto</a></li>
           </ul>
         </div>
       </div>
@@ -72,7 +73,7 @@
         compartir el código con el amig@ que desea unirse, después este deberá
         introducir el código en el campo indicado y una vez introducido el
         código correctamente en el campo, deberá pulsar el botón de
-        <b class="marked-text">"Unirse"</b> , automaticamente se conectará la
+        <b class="marked-text">"Unirse"</b>, automaticamente se conectará la
         partida y aparecera la página de juego y se podrá comenzar a jugar.
         ¡Buena suerte!
       </p>
@@ -80,6 +81,7 @@
       <div class="online-actions">
         <button id="btnCreateRoom" class="btn primary">Obtener código</button>
         <p></p>
+
         <div class="join-box">
           <input
             id="joinCodeInput"
@@ -113,6 +115,7 @@
       <!-- Sección de configuración de juego -->
       <div id="gameSetup" class="game-setup hidden">
         <h2 id="game-setup-title">ELIGE TU MODO DE JUEGO</h2>
+
         <div id="config-options">
           <!-- Dificultad -->
           <div class="plantilla-dos">
@@ -221,8 +224,13 @@
               <span class="player-timer active-clock">00:00</span>
               <span class="turn-led" id="turnLedP1" title="Turno"></span>
               <span id="robotDifficulty" class="robot-diff"></span>
-               <!-- Indicador conexión (solo oponente / online) -->
-              <span id="connStatus" class="conn-status hidden offline" title="Conexión">
+
+              <!-- Indicador conexión (solo oponente / online) -->
+              <span
+                id="connStatus"
+                class="conn-status hidden offline"
+                title="Conexión"
+              >
                 <span class="conn-dot"></span>
                 <span id="connText">Desconectado</span>
               </span>
@@ -264,9 +272,11 @@
               alt="Retroceder movimientos"
             />
           </button>
+
           <button id="btnSurrender">
             <img src="assets/images/flag-button.png" alt="" />
           </button>
+
           <button id="btnNext">
             <img
               src="assets/images/right-arrow.svg"
@@ -279,28 +289,45 @@
             <button id="toggleMute" title="Silenciar/Activar sonido">🔊</button>
             <button id="nextTrack" title="Siguiente pista">⏭️</button>
           </div>
+        </div>
 
-          <button id="btnChat" title="Chat">💬</button>
+        <!-- ========================= -->
+        <!-- CHAT (BOTÓN + BADGE)      -->
+        <!-- ========================= -->
+        <div id="chatPanel" class="chat-panel hidden">
+          <div class="chat-btn">
+            <button id="btnChat" type="button" class="chat-open-btn">💬</button>
+            <span id="chatBadge" class="chat-badge hidden">0</span>
+          </div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- CHAT MODAL (ÚNICO)        -->
+        <!-- ========================= -->
+        <div id="chatModal" class="chat-modal hidden">
+          <div class="chat-modal-content">
+            <button id="chatClose" type="button" class="chat-close">×</button>
+
+            <!-- ÚNICO CONTENEDOR DE MENSAJES -->
+            <div id="chatMessages" class="chat-messages"></div>
+
+            <!-- ÚNICO FORM -->
+            <form id="chatForm" class="chat-form" autocomplete="off">
+              <input
+                id="chatInput"
+                type="text"
+                maxlength="300"
+                placeholder="Escribe..."
+                autocomplete="off"
+              />
+              <button type="submit" id="chatSend">Enviar</button>
+            </form>
+          </div>
         </div>
       </div>
+      <!-- /.chess-container -->
     </div>
-
-    <div id="chatModal" class="modal-overlay hidden">
-      <div class="modal-box chat-modal">
-        <button id="chatClose" class="modal-close-btn">×</button>
-        <div id="chatMessages" class="chat-messages"></div>
-
-        <form id="chatForm" class="chat-form">
-          <input
-            id="chatInput"
-            maxlength="300"
-            placeholder="Escribe..."
-            autocomplete="off"
-          />
-          <button type="submit">Enviar</button>
-        </form>
-      </div>
-    </div>
+    <!-- /#gameContainer -->
 
     <!-- Footer -->
     <footer>
@@ -324,7 +351,7 @@
       </div>
     </div>
 
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://chess-socket-948127788089.europe-west1.run.app/socket.io/socket.io.js"></script>
     <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->
     <!--<script src="/socket.io/socket.io.js"></script>-->
     <script type="module" src="js/script.js"></script>

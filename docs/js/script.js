@@ -39,9 +39,11 @@ const DEBUG = false;
 function $(id) {
   return document.getElementById(id);
 }
+
 function $$(sel) {
   return Array.from(document.querySelectorAll(sel));
 }
+
 function addEventMulti(el, events, handler) {
   if (!el) return;
   events.forEach((evt) => el.addEventListener(evt, handler, false));
@@ -128,6 +130,15 @@ function endAnimationLock() {
 const connStatus = $("connStatus");
 const connText = $("connText");
 
+function setConn(state) {
+  // Estado global del indicador (solo se ve en online)
+  if (!isOnlineGame) return;
+  if (state === "online") return setOpponentConn("online");
+  if (state === "reconnecting") return setOpponentConn("reconnecting");
+  return setOpponentConn("offline");
+}
+
+
 function setOpponentConn(state) {
   // ✅ En local vs robot NO debe mostrarse nunca
   if (!isOnlineGame) return;
@@ -158,7 +169,6 @@ function refreshConnVisibility() {
   if (isOnlineGame) el.classList.remove("hidden");
   else el.classList.add("hidden");
 }
-
 
 // Algebraic helpers (online)
 function algebraicToRC(sq) {
@@ -319,7 +329,7 @@ const isHosting =
 const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
 
 // URLs (mantén tus valores)
-const CLOUD_RUN_URL = "https://chess-socket-mbzdrwz7ga-ew.a.run.app";
+const CLOUD_RUN_URL = "https://chess-socket-948127788089.europe-west1.run.app";
 const LOCAL_SOCKET_URL = "http://localhost:8080";
 
 // Socket singleton
@@ -336,7 +346,6 @@ function teardownSocket() {
   socket = null;
 }
 
-
 // Throttle sync (evita inundar)
 let __syncCooldown = 0;
 function requestSyncThrottled() {
@@ -350,8 +359,12 @@ function requestSyncThrottled() {
 // ensureSocket() (central)
 // ----------------------------
 function ensureSocket() {
+  console.log("[io] ensureSocket called");
+
+  // Ya existe
   if (socket) return socket;
 
+  // Bloqueo GitHub Pages (si lo mantienes así)
   if (IS_GITHUB_PAGES) {
     console.warn("[io] GitHub Pages: online deshabilitado");
     return null;
@@ -369,37 +382,75 @@ function ensureSocket() {
     timeout: 20000,
   });
 
-  // ============================
-  // Conexión / reconexión
-  // ============================
-  socket.on("connect", () => {
-    // aún no sabes si el rival está; pide sync o que el server te mande opponentStatus
-    if (isOnlineGame) setOpponentConn("reconnecting");
-    if (isOnlineGame && currentRoomId) requestSyncThrottled();
+  // ✅ Exponer para depuración desde consola
+  window.socket = socket;
+
+  // ✅ Ping test correcto (NO window.__socket)
+  socket.emit("ping_test", { hello: "x" }, function (ack) {
+    console.log("PING_ACK", ack);
   });
 
-  socket.on("disconnect", (reason) => {
+  // Info del servidor (si tu backend lo emite)
+  socket.on("serverInfo", function (info) {
+    console.log("[serverInfo]", info);
+  });
+
+  // ✅ DEBUG GLOBAL: onAny puede no existir según types/linter
+  if (typeof socket.onAny === "function") {
+    socket.onAny(function (event) {
+      const args = Array.prototype.slice.call(arguments, 1);
+      console.log("[io:any]", event, args);
+    });
+  } else {
+    console.warn("[io] socket.onAny no disponible (ok).");
+  }
+
+  // ============================================================
+  // Conexión / reconexión
+  // ============================================================
+  socket.on("connect", function () {
+    console.log("[io] connect:", socket.id, "room:", currentRoomId);
+    console.log("CLIENT socket", socket.id);
+
+    if (isOnlineGame) setOpponentConn("reconnecting");
+
+    // Rejoin + sync si ya estabas en una room
+    if (isOnlineGame && currentRoomId) {
+      socket.emit("rejoinRoom", { roomId: currentRoomId });
+      requestSyncThrottled();
+    }
+
+    socket.emit("ping_test", { hello: "world" }, function (ack) {
+      console.log("[PING_TEST ACK]", ack);
+    });
+  });
+
+  socket.on("disconnect", function (reason) {
     console.warn("[io] disconnect:", reason);
     setOpponentConn("offline");
 
-    // Rehabilita botones de lobby si existen
     const btnCreateRoom = $("btnCreateRoom");
     const btnJoinRoom = $("btnJoinRoom");
     if (btnCreateRoom) btnCreateRoom.disabled = false;
     if (btnJoinRoom) btnJoinRoom.disabled = false;
   });
 
-  socket.on("connect_error", (err) => {
-    console.warn("[io] connect_error:", err?.message || err);
+  socket.on("connect_error", function (err) {
+    console.warn("[io] connect_error:", (err && err.message) ? err.message : err);
     setOpponentConn("reconnecting");
   });
 
-  socket.io.on("reconnect_attempt", () => setConn("reconnecting"));
+  // Reconexión (si existe socket.io manager)
+  if (socket.io && typeof socket.io.on === "function") {
+    socket.io.on("reconnect_attempt", function () {
+      if (isOnlineGame) setOpponentConn("reconnecting");
+    });
+  }
 
-  // ============================
+  // ============================================================
   // Errores semánticos del server
-  // ============================
-  socket.on("error", (msg) => {
+  // ============================================================
+  socket.on("error", function (msg) {
     console.warn("[ON] server error:", msg);
     alert(msg);
 
@@ -409,10 +460,10 @@ function ensureSocket() {
     if (btnJoinRoom) btnJoinRoom.disabled = false;
   });
 
-  // ============================
+  // ============================================================
   // Crear sala
-  // ============================
-  socket.on("gameCreated", (roomId) => {
+  // ============================================================
+  socket.on("gameCreated", function (roomId) {
     console.log("[ON] gameCreated", roomId);
 
     currentRoomId = String(roomId || "").trim();
@@ -421,98 +472,106 @@ function ensureSocket() {
     const roomCodeText = $("roomCodeText");
     const btnCreateRoom = $("btnCreateRoom");
 
-    createdRoomBox?.classList.remove("hidden");
+    if (createdRoomBox) createdRoomBox.classList.remove("hidden");
     if (roomCodeText) roomCodeText.textContent = currentRoomId;
     if (btnCreateRoom) btnCreateRoom.disabled = false;
   });
 
-  // ============================
+  // ============================================================
   // Inicio partida
-  // ============================
-  socket.on("startGame", ({ roomId, color }) => {
+  // ============================================================
+  socket.on("startGame", function (payload) {
+    const roomId = payload && payload.roomId ? payload.roomId : "";
+    const color = payload && payload.color ? payload.color : "w";
+
     console.log("[ON] startGame", roomId, color);
 
+    // --- estado online ---
     isOnlineGame = true;
     currentRoomId = String(roomId || "").trim();
-    humanColor = color;
+    humanColor = (color === "b") ? "b" : "w";
     currentTurn = "w";
 
-    // ✅ Persistencia online (para reconexión)
+    console.log("[CHAT] room set", { currentRoomId: currentRoomId, socketId: socket ? socket.id : null });
+
+    // Persistencia
     localStorage.setItem("NEONCHESS_ROOM", currentRoomId);
     localStorage.setItem("NEONCHESS_ONLINE", "1");
 
-    // UI: esconder lobby/menú y mostrar juego
+    // Rejoin explícito (robusto en refresh/reconnect)
+    try {
+      socket.emit("rejoinRoom", { roomId: currentRoomId });
+    } catch (e) {
+      console.warn("[ON] rejoinRoom emit failed", e);
+    }
+
+    // --- UI navegación ---
     const mainSection = $("mainSection");
     const onlineChoice = $("onlineChoice");
     const onlineLobby = $("onlineLobby");
     const gameContainer = $("gameContainer");
     const chessContainer = document.querySelector(".chess-container");
 
-    mainSection && (mainSection.style.display = "none");
-    onlineChoice?.classList.add("hidden");
-    onlineLobby?.classList.add("hidden");
+    if (mainSection) mainSection.style.display = "none";
+    if (onlineChoice) onlineChoice.classList.add("hidden");
+    if (onlineLobby) onlineLobby.classList.add("hidden");
 
     const gameSetup = $("gameSetup");
-    gameSetup?.classList.add("hidden");
-    if (gameSetup) gameSetup.style.display = "none";
+    if (gameSetup) {
+      gameSetup.classList.add("hidden");
+      gameSetup.style.display = "none";
+    }
 
-    document.querySelector("header")?.classList.add("hidden");
+    const header = document.querySelector("header");
+    if (header) header.classList.add("hidden");
     document.body.classList.add("game-active");
 
-    gameContainer?.classList.remove("hidden");
-    chessContainer?.classList.remove("hidden");
-
-    // Etiquetas de perfil (IDs ejemplo)
-    const oppName = $("opponentName");
-    const myName = $("playerName");
-    const robotBadge = $("difficultyBadge");
-
-    if (oppName) oppName.textContent = "Rival online";
-    if (myName) myName.textContent = "Tú";
-
-    // En online, se quita badge de robot
-    robotBadge?.classList.add("hidden");
+    if (gameContainer) gameContainer.classList.remove("hidden");
+    if (chessContainer) chessContainer.classList.remove("hidden");
 
     // Chat visible en online
     const chatPanel = $("chatPanel");
     const chatMessages = $("chatMessages");
-    chatPanel?.classList.remove("hidden");
+    if (chatPanel) chatPanel.classList.remove("hidden");
     if (chatMessages) chatMessages.innerHTML = "";
 
-    // Música: se gestiona en bloque Audio, aquí solo intentamos parar menú si existe
+    // Música
     try {
-      if (window.menuMusic?.pause) window.menuMusic.pause();
-      if (window.playGameMusic) window.playGameMusic();
+      if (window.menuMusic && typeof window.menuMusic.pause === "function") window.menuMusic.pause();
+      if (typeof window.playGameMusic === "function") window.playGameMusic();
     } catch (_) {}
 
-    // ✅ En online: muestra indicador de conexión
-    $("connStatus")?.classList.remove("hidden");
-    $("robotDifficulty")?.classList.add("hidden");
+    // Indicador conexión / robot diff
+    const connStatus = $("connStatus");
+    const robotDifficulty = $("robotDifficulty");
+    if (connStatus) connStatus.classList.remove("hidden");
+    if (robotDifficulty) robotDifficulty.classList.add("hidden");
+
     // Arranca partida
     actuallyStartGame();
 
-    // Sync inicial por seguridad
+    // Sync inicial por si hay huecos
     requestSyncThrottled();
 
-    // LED turno
+    // Turn LED
     setTurnLED();
   });
 
-  // ============================
+  // ============================================================
   // Movimiento del rival
-  // ============================
-  socket.on("opponentMove", (mv) => {
+  // ============================================================
+  socket.on("opponentMove", function (mv) {
     try {
       if (!mv) return;
 
-      const moveId = mv.id || `${mv.from}-${mv.to}-${mv.seq || ""}`;
+      const moveId = mv.id || (mv.from + "-" + mv.to + "-" + (mv.seq || ""));
       if (seenMoveIds.has(moveId)) return;
       rememberMoveId(moveId);
 
       const seq = mv.seq || 0;
       if (seq) {
         if (lastAppliedSeq && seq > lastAppliedSeq + 1) {
-          console.warn("[ON] hueco detectado", { lastAppliedSeq, seq });
+          console.warn("[ON] hueco detectado", { lastAppliedSeq: lastAppliedSeq, seq: seq });
           requestSyncThrottled();
         }
         lastAppliedSeq = Math.max(lastAppliedSeq, seq);
@@ -525,44 +584,38 @@ function ensureSocket() {
     }
   });
 
-  // ============================
+  // ============================================================
   // Chat receive
-  // ============================
-  socket.on("chatMessage", (msg) => {
-    console.log(
-      "[CHAT] recv",
-      msg,
-      "room:",
-      currentRoomId,
-      "socket:",
-      socket?.id,
-    );
+  // ============================================================
+  socket.on("chatMessage", function (msg) {
+    console.log("[CHAT] recv", msg, {
+      mySocketId: socket ? socket.id : null,
+      room: currentRoomId,
+    });
     appendChatMessage(msg);
   });
 
-  // ============================
+  // ============================================================
   // Eventos de sala
-  // ============================
-  socket.on("opponentStatus", ({ online }) => {
-  setOpponentConn(online ? "online" : "offline");
+  // ============================================================
+  socket.on("opponentStatus", function (payload) {
+    const online = payload && payload.online;
+    setOpponentConn(online ? "online" : "offline");
   });
 
-  socket.on("opponentLeft", () => {
-  setOpponentConn("offline");
-
-  // Evita que el jugador se quede esperando
-  stopTimer("w");
-  stopTimer("b");
-  showEndGameModal("El rival se ha desconectado. La partida ha finalizado.");
+  socket.on("opponentLeft", function () {
+    setOpponentConn("offline");
+    stopTimer("w");
+    stopTimer("b");
+    showEndGameModal("El rival se ha desconectado. La partida ha finalizado.");
   });
 
-  socket.on("opponentResigned", () => {
-  setOpponentConn("offline");
-  stopTimer("w");
-  stopTimer("b");
-  showEndGameModal("Tu rival se rindió. Fin de la partida.");
+  socket.on("opponentResigned", function () {
+    setOpponentConn("offline");
+    stopTimer("w");
+    stopTimer("b");
+    showEndGameModal("Tu rival se rindió. Fin de la partida.");
   });
-
 
   return socket;
 }
@@ -764,6 +817,8 @@ const chatInput = $("chatInput");
 const btnChat = $("btnChat");
 const chatClose = $("chatClose");
 
+const chatBadge = $("chatBadge");
+
 // Dropdowns UI
 function setupDropdown(buttonId, optionsId, onSelect) {
   const btn = $(buttonId);
@@ -819,10 +874,6 @@ function initUISetup() {
   if (chatMessages) chatMessages.innerHTML = "";
 
   // Modal chat (si existe)
-  btnChat?.addEventListener("pointerup", () => {
-    chatModal?.classList.remove("hidden");
-    setTimeout(() => chatInput?.focus(), 0);
-  });
   chatClose?.addEventListener("pointerup", () =>
     chatModal?.classList.add("hidden"),
   );
@@ -961,13 +1012,13 @@ function playSound(audioObj, type) {
 // Música (exponemos para que online startGame pueda usarla sin duplicar)
 const menuMusic = new Audio("assets/sounds/music-1.mp3");
 menuMusic.loop = true;
-menuMusic.volume = 0.6;
+menuMusic.volume = 0.3;
 
 const gameMusic = new Audio();
 gameMusic.loop = true;
-gameMusic.volume = 0.6;
+gameMusic.volume = 0.3;
 
-const playlist = ["assets/sounds/music-2.mp3"];
+const playlist = ["assets/sounds/music-4.mp3"];
 let currentTrack = 0;
 
 function loadTrack(idx) {
@@ -1146,7 +1197,7 @@ function generateEmptyBoard() {
   }
 }
 
-// Obtiene la celda DOM para una posición lógica (row/col en board[][])
+// Obtiene la celda DOM para una posición lógica
 function getCell(row, col) {
   const boardEl = $("chessBoard");
   if (!boardEl) return null;
@@ -1159,9 +1210,6 @@ function getCell(row, col) {
   return boardEl.children[idx] || null;
 }
 
-// FIX CLAVE: renderBoard NO se bloquea por isAnimating.
-// Bloqueamos input con isAnimating, pero el render debe poder consolidar el DOM
-// inmediatamente tras animaciones.
 function renderBoard() {
   const boardEl = $("chessBoard");
   if (!boardEl) return;
@@ -2974,21 +3022,43 @@ $("btnNext")?.addEventListener("pointerup", () => {
 // 12) CHAT ONLINE (UI + submit + renderer)
 // ============================================================
 
-chatPanel?.classList.add("hidden");
-
-btnChat?.addEventListener("pointerup", () => {
-  chatModal?.classList.remove("hidden");
-  setTimeout(() => chatInput?.focus(), 0);
-});
-chatClose?.addEventListener("pointerup", () =>
-  chatModal?.classList.add("hidden"),
-);
-chatModal?.addEventListener("pointerup", (e) => {
-  if (e.target === chatModal) chatModal.classList.add("hidden");
-});
-
-// --- CHAT dedupe (evita duplicados si hacemos "optimistic UI")
+// Estado badge
 const seenChatIds = new Set();
+let unreadChatCount = 0;
+
+function getChatEls() {
+  return {
+    chatPanel: document.getElementById("chatPanel"),
+    chatModal: document.getElementById("chatModal"),
+    chatMessages: document.getElementById("chatMessages"),
+    chatForm: document.getElementById("chatForm"),
+    chatInput: document.getElementById("chatInput"),
+    btnChat: document.getElementById("btnChat"),
+    chatClose: document.getElementById("chatClose"),
+    chatBadge: document.getElementById("chatBadge"),
+  };
+}
+
+function setChatBadge(n) {
+  const { chatBadge } = getChatEls();
+  unreadChatCount = Math.max(0, n | 0);
+  if (!chatBadge) return;
+
+  if (unreadChatCount <= 0) {
+    chatBadge.classList.add("hidden");
+  } else {
+    chatBadge.textContent = String(unreadChatCount);
+    chatBadge.classList.remove("hidden");
+  }
+}
+
+function isChatOpen() {
+  const { chatPanel, chatModal } = getChatEls();
+  if (chatModal) return !chatModal.classList.contains("hidden");
+  if (chatPanel) return !chatPanel.classList.contains("hidden");
+  return false;
+}
+
 function rememberChatId(id) {
   if (!id) return;
   seenChatIds.add(id);
@@ -2999,7 +3069,11 @@ function rememberChatId(id) {
 }
 
 function appendChatMessage(msg) {
-  if (!chatMessages) return;
+  const { chatMessages } = getChatEls();
+  if (!chatMessages) {
+    console.warn("[CHAT] chatMessages NO existe en DOM");
+    return;
+  }
 
   if (!msg) return;
   if (msg.id && seenChatIds.has(msg.id)) return;
@@ -3010,6 +3084,9 @@ function appendChatMessage(msg) {
   const wrap = document.createElement("div");
   wrap.className = "chat-msg " + (isMe ? "me" : "them");
 
+  if (msg.id) wrap.dataset.msgId = msg.id;
+  wrap.dataset.status = msg.status || "";
+
   const meta = document.createElement("div");
   meta.className = "chat-meta";
 
@@ -3019,6 +3096,10 @@ function appendChatMessage(msg) {
   const mm = String(t.getMinutes()).padStart(2, "0");
   meta.textContent = `${who} · ${hh}:${mm}`;
 
+  if (isMe && msg.status === "sending") meta.textContent += " · enviando…";
+  if (isMe && msg.status === "ok") meta.textContent += " · ✓";
+  if (isMe && msg.status === "fail") meta.textContent += " · ✗";
+
   const body = document.createElement("div");
   body.textContent = String(msg.text || "");
 
@@ -3026,42 +3107,105 @@ function appendChatMessage(msg) {
   wrap.appendChild(body);
   chatMessages.appendChild(wrap);
 
-  // autoscroll
+  // Unread badge solo si NO soy yo y chat no está abierto
+  if (!isMe && !isChatOpen()) {
+    setChatBadge(unreadChatCount + 1);
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-if (chatForm) {
+function initChatUI() {
+  const {
+    chatPanel,
+    chatModal,
+    chatForm,
+    chatInput,
+    btnChat,
+    chatClose,
+  } = getChatEls();
+
+  // Si existe panel, lo ocultamos por defecto (se muestra al entrar en startGame)
+  chatPanel?.classList.add("hidden");
+
+  // Si existe modal + botón, restauramos UX de antes
+  if (btnChat && chatModal) {
+    btnChat.addEventListener("pointerup", () => {
+      chatModal.classList.remove("hidden");
+      setTimeout(() => chatInput?.focus(), 0);
+      setChatBadge(0);
+    });
+
+    chatClose?.addEventListener("pointerup", () =>
+      chatModal.classList.add("hidden"),
+    );
+
+    chatModal.addEventListener("pointerup", (e) => {
+      if (e.target === chatModal) chatModal.classList.add("hidden");
+    });
+  } else {
+    // Si NO hay modal/botón, avisa (esto explica tu “ya no hay botón”)
+    console.warn("[CHAT] No existe btnChat/chatModal -> chat será inline (si el HTML lo muestra)");
+  }
+
+  // Bind submit una sola vez
+  if (!chatForm || !chatInput) {
+    console.warn("[CHAT] faltan nodos form/input");
+    return;
+  }
+  if (chatForm.dataset.bound === "1") return;
+  chatForm.dataset.bound = "1";
+
   chatForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    console.log("[CHAT] submit interceptado", { isOnlineGame, currentRoomId });
 
     if (!isOnlineGame || !currentRoomId) return;
 
-    const text = (chatInput?.value || "").trim();
+    const text = (chatInput.value || "").trim();
     if (!text) return;
 
     const s = ensureSocket();
-    if (!s) return;
+    if (!s || !s.connected) {
+      console.warn("[CHAT] socket no conectado");
+      return;
+    }
 
-    const now = Date.now();
-    if (window.__lastChatTs && now - window.__lastChatTs < 300) return;
-    window.__lastChatTs = now;
-
+    const ts = Date.now();
     const id =
       crypto?.randomUUID?.() ||
-      `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      `${ts}-${Math.random().toString(16).slice(2)}`;
 
-    // ✅ Optimistic UI: lo ves tú al instante (y dedupe evita duplicados)
-    appendChatMessage({ id, from: s.id, text, ts: now });
+    // Optimistic UI SIEMPRE
+    appendChatMessage({ id, from: s.id, text, ts, status: "sending" });
 
-    s.emit(
-      "chatMessage",
-      { roomId: currentRoomId, id, text, ts: now },
-      (ack) => {
-        if (!ack?.ok) console.warn("[CHAT] no enviado:", ack);
-      },
-    );
+    console.log("[CHAT] emit chatMessage", { roomId: currentRoomId, id });
 
-    chatInput.value = "";
+    s.emit("chatMessage", { roomId: currentRoomId, id, text, ts }, (ack) => {
+      console.log("[CHAT] ack:", ack);
+      const node = document.querySelector(`.chat-msg[data-msg-id="${id}"]`);
+
+      if (!ack?.ok) {
+        if (node) {
+          node.dataset.status = "fail";
+          const meta = node.querySelector(".chat-meta");
+          if (meta) meta.textContent += " · ✗";
+        }
+        return;
+      }
+
+      // ok
+      if (node) {
+        node.dataset.status = "ok";
+        const meta = node.querySelector(".chat-meta");
+        if (meta && !meta.textContent.includes("✓")) meta.textContent += " · ✓";
+      }
+
+      chatInput.value = "";
+    });
+
   });
 }
 
@@ -3469,7 +3613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initGeneralUI();
     initUISetup();
     bindButtonSfx();
-
+    initChatUI();
     bindHistoryScrollButtons();
 
     // Estado inicial UI

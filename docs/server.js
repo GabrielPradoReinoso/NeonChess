@@ -13,6 +13,18 @@ app.set("trust proxy", true);
 app.get("/", (_req, res) => res.status(200).send("OK"));
 app.get("/healthz", (_req, res) => res.status(200).send("ok"));
 
+const BUILD_STAMP = new Date().toISOString();
+
+app.get("/__whoami", (_req, res) => {
+  res.status(200).json({
+    ok: true,
+    buildStamp: BUILD_STAMP,
+    nodeEnv: process.env.NODE_ENV || null,
+    port: process.env.PORT || null,
+  });
+});
+
+
 if (NODE_ENV !== "production") {
   app.use(express.static(path.join(__dirname, "public")));
 }
@@ -120,6 +132,16 @@ function scheduleRoomCleanup(roomId, reason = "disconnect") {
 // Socket.IO
 // =============================
 io.on("connection", (socket) => {
+
+  socket.emit("serverInfo", {
+    revision: process.env.K_REVISION || null,
+    service: process.env.K_SERVICE || null,
+    build: BUILD_STAMP,
+    ts: Date.now(),
+    socketId: socket.id,
+  });
+
+
   console.log(`[${now()}] conectado: ${socket.id}`);
 
   socket.on("disconnect", (reason) => {
@@ -147,6 +169,11 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("ping_test", (payload, ack) => {
+    console.log("[ping_test] from", socket.id, payload);
+    ack?.({ ok: true, t: Date.now() });
+  });
+
   // Crear partida (host)
   socket.on("newGame", () => {
     let roomId;
@@ -170,8 +197,9 @@ io.on("connection", (socket) => {
     };
 
     socket.join(roomId);
-    socket.emit("gameCreated", roomId);
+    console.log("[room] host joined", { roomId, socketId: socket.id });
 
+    socket.emit("gameCreated", roomId);
     console.log(`[${now()}] sala creada ${roomId} por ${socket.id}`);
   });
 
@@ -193,6 +221,7 @@ io.on("connection", (socket) => {
     }
 
     socket.join(roomId);
+    console.log("[room] guest joined", { roomId, socketId: socket.id });
 
     // host = w, guest = b
     io.to(room.hostId).emit("startGame", {
@@ -246,25 +275,91 @@ io.on("connection", (socket) => {
     ack?.({ ok: true, moves: missing, serverSeq: room.seq });
   });
 
-  // Chat (rebote a room)
-  socket.on("chatMessage", ({ roomId, id, text, ts }, ack) => {
-    const room = rooms[roomId];
-    if (!room) return ack?.({ ok: false, error: "room_not_found" });
+  // ============================================================
+  // CHAT MESSAGE (room broadcast + fallback directo a host/guest)
+  // ============================================================
+  socket.on("chatMessage", (payload = {}, ack) => {
+    console.log("[chatMessage] HIT", {
+      socketId: socket.id,
+      roomId: payload?.roomId,
+      hasAck: typeof ack === "function",
+      textLen: String(payload?.text || "").length,
+    });
 
-    const cleanText = String(text || "").slice(0, 300).trim();
-    if (!cleanText) return ack?.({ ok: false, error: "empty_message" });
+    try {
+      const roomId = String(payload.roomId || "").trim();
+      const text = String(payload.text || "").trim();
+      const id = payload.id ? String(payload.id) : null;
+      const ts = Number.isFinite(payload.ts) ? payload.ts : Date.now();
 
-    const msg = {
-      id:
-        String(id || "").trim() ||
-        `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      from: socket.id,
-      text: cleanText,
-      ts: Number(ts) || Date.now(),
-    };
+      if (!roomId || !text) {
+        console.warn("[chatMessage] bad_payload", { roomId, textLen: text.length });
+        ack?.({ ok: false, error: "bad_payload" });
+        return;
+      }
 
-    io.to(roomId).emit("chatMessage", msg);
-    ack?.({ ok: true });
+      const room = rooms[roomId];
+      if (!room) {
+        console.warn("[chatMessage] room_not_found", roomId);
+        ack?.({ ok: false, error: "room_not_found" });
+        return;
+      }
+
+      const msg = {
+        roomId,
+        id: id || `${ts}-${Math.random().toString(16).slice(2)}`,
+        text,
+        ts,
+        from: socket.id,
+      };
+
+      // ✅ EMITE A TODA LA ROOM (NO a hostId/guestId)
+      console.log("[chatMessage] broadcasting to room:", roomId);
+      io.to(roomId).emit("chatMessage", msg);
+
+      // ✅ ACK SIEMPRE
+      ack?.({ ok: true });
+    } catch (err) {
+      console.error("[chatMessage] error:", err);
+      ack?.({ ok: false, error: "server_error" });
+    }
+  });
+
+  // ============================================================
+  // REJOIN ROOM (reconexión / refresh)
+  // ============================================================
+  socket.on("rejoinRoom", ({ roomId } = {}) => {
+    try {
+      const rid = String(roomId || "").trim();
+      if (!rid) return;
+
+      const room = rooms[rid];
+
+      // Únete SIEMPRE a la room de Socket.IO
+      socket.join(rid);
+
+      // Si existe la sala en memoria, actualiza presencia y cancela cleanup
+      if (room) {
+        if (room.cleanupTimer) {
+          clearTimeout(room.cleanupTimer);
+          room.cleanupTimer = null;
+        }
+
+        // Marca online si este socket es host/guest
+        if (room.hostId === socket.id) room.hostOnline = true;
+        if (room.guestId === socket.id) room.guestOnline = true;
+
+        // (Opcional pero útil) si alguien cambió de socket.id por reconnect,
+        // aquí NO lo puedes “re-asignar” sin una identidad estable (token).
+        // Por eso el fallback del chat es importante.
+        emitOpponentStatus(rid);
+      }
+
+      socket.emit("rejoinAck", { ok: true, roomId: rid });
+    } catch (err) {
+      console.error("[rejoinRoom] error:", err);
+      socket.emit("rejoinAck", { ok: false });
+    }
   });
 
   // Rendición
