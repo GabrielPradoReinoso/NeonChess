@@ -13,6 +13,7 @@
   max-width: 680px;
   padding: 10px 0px;
   margin: auto;
+  background: transparent;
 }
 
 /* Título */
@@ -23,9 +24,8 @@
   padding: 20px 5px;
   margin: 0px 10px;
   border: 2px solid var(--cycle-border-color);
-  box-shadow:
-    0px 0px 20px #860073 inset,
-    0px 0px 10px var(--cycle-border-color);
+  box-shadow: 0px 0px 20px #860073 inset,
+              0px 0px 10px var(--cycle-border-color);
   border-radius: 10px 10px 0px 0px;
   -webkit-border-radius: 10px 10px 0px 0px;
   -moz-border-radius: 10px 10px 0px 0px;
@@ -39,7 +39,8 @@
   max-height: 100%;
   min-height: 350px;
   margin: 0px 10px;
-  background-color: var(--game-bg);
+  background-color: color-mix(in srgb, var(--game-bg) 88%, transparent);
+  backdrop-filter: blur(6px);
   border-left: 2px solid var(--cycle-border-color);
   border-bottom: 2px solid var(--cycle-border-color);
   border-right: 2px solid var(--cycle-border-color);

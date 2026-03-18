@@ -11,7 +11,10 @@
     <link rel="icon" href="assets/images/logo-neon-chess.png" />
   </head>
 
-  <body>
+  <body class="app-loading loading-lock">
+    <!-- Animación fondo de pantalla-->
+    <div id="animated-bg"></div>
+
     <!-- Loading Screen -->
     <div id="loadingOverlay" class="loading-overlay">
       <div class="spinner"></div>
@@ -370,23 +373,6 @@
     <footer>
       &copy; 2025 Gabriel Prado (GPR Studio). All rights reserved.
     </footer>
-
-    <!-- Overlay de precarga pre-partida -->
-    <div id="pregameLoadingOverlay" class="overlay hidden">
-      <div class="overlay-content">
-        <p>Cargando partida... <span id="pregamePercent">0%</span></p>
-        <div class="progress-bar">
-          <div id="pregameProgress" class="progress-fill"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Overlay de cuenta regresiva -->
-    <div id="countdownOverlay" class="overlay hidden">
-      <div class="overlay-content">
-        <div id="countdownNumber" class="countdown-number">3</div>
-      </div>
-    </div>
 
     <script src="https://chess-socket-948127788089.europe-west1.run.app/socket.io/socket.io.js"></script>
     <!--<script src="http://localhost:8080/socket.io/socket.io.js"></script>-->

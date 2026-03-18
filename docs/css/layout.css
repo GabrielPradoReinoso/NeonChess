@@ -2,11 +2,38 @@
 /*----------- LAYOUT ------------*/
 /*-------------------------------*/
 
+/* Fondo de pantalla animado */
+.main-section {
+  position: relative;
+  z-index: 1;
+}
+
+body.game-active #animated-bg {
+  display: none;
+}
+
 /* Contenedor del juego */
 .game-container {
   position: relative;
   padding: 0px;
-  background-color: var(--main-bg-color);
+  background-color: transparent;
+}
+
+/*-------------------------------*/
+/*------ CAPAS / BACKGROUND -----*/
+/*-------------------------------*/
+header,
+.main-section,
+#onlineChoice,
+#onlineLobby,
+#gameContainer,
+#gameSetup,
+footer,
+.settings-modal,
+.loading-overlay,
+.overlay {
+  position: relative;
+  z-index: 1;
 }
 
 /* Contenedor principal de ajedrez */

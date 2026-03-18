@@ -33,6 +33,10 @@
 
 "use strict";
 
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
 const DEBUG = false;
 
 // Helpers DOM
@@ -47,6 +51,117 @@ function $$(sel) {
 function addEventMulti(el, events, handler) {
   if (!el) return;
   events.forEach((evt) => el.addEventListener(evt, handler, false));
+}
+
+// Esperar a que la UI cargue para mostrar contenido
+function waitForWindowLoad() {
+  return new Promise((resolve) => {
+    if (document.readyState === "complete") {
+      resolve();
+      return;
+    }
+    window.addEventListener("load", resolve, { once: true });
+  });
+}
+
+function waitForFontsReady() {
+  if (document.fonts && document.fonts.ready) {
+    return document.fonts.ready.catch(() => {});
+  }
+  return Promise.resolve();
+}
+
+function nextFrame() {
+  return new Promise((resolve) => requestAnimationFrame(resolve));
+}
+
+async function revealAppWhenStable() {
+  await waitForWindowLoad();
+  await waitForFontsReady();
+
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+
+  await nextFrame();
+  await nextFrame();
+
+  if (loadingOverlay) {
+    loadingOverlay.remove();
+
+    document.body.classList.remove("app-loading");
+    document.body.classList.add("app-ready");
+    document.body.classList.remove("loading-lock");
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  } else {
+    document.body.classList.remove("app-loading");
+    document.body.classList.add("app-ready");
+    document.body.classList.remove("loading-lock");
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+}
+
+// Fondo animado página principal
+function initAnimatedBackground() {
+  const container = document.getElementById("animated-bg");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const NUM_FILLED = 24;
+  const NUM_OUTLINED = 14;
+
+  function createSquare(type = "fill") {
+    const square = document.createElement("div");
+    square.classList.add("bg-square", type);
+
+    const size =
+      type === "outline"
+        ? 50 + Math.random() * 130
+        : 35 + Math.random() * 110;
+
+    square.style.width = size + "px";
+    square.style.height = size + "px";
+
+    square.style.left = Math.random() * 100 + "vw";
+
+    // Arrancan antes: delays mucho más bajos y algunos negativos
+    const duration = 12 + Math.random() * 16;
+    const delay = -Math.random() * 8;
+
+    square.style.animationDuration = duration + "s";
+    square.style.animationDelay = delay + "s";
+
+    if (type === "fill") {
+      square.style.opacity = 0.12 + Math.random() * 0.18;
+    } else {
+      square.style.opacity = 0.25 + Math.random() * 0.35;
+    }
+
+    // ligera variación vertical inicial
+    square.style.setProperty("--drift-x", `${-30 + Math.random() * 60}px`);
+    square.style.setProperty("--drift-rot", `${-12 + Math.random() * 24}deg`);
+
+    container.appendChild(square);
+    const isStrong = Math.random() < 0.25;
+
+    if (isStrong) {
+      square.style.opacity = type === "fill"
+        ? 0.35 + Math.random() * 0.2
+        : 0.5 + Math.random() * 0.3;
+
+      square.style.filter = "brightness(1.4)";
+    }
+  }
+
+  for (let i = 0; i < NUM_FILLED; i++) createSquare("fill");
+  for (let i = 0; i < NUM_OUTLINED; i++) createSquare("outline");
 }
 
 // Estado juego
@@ -1026,13 +1141,13 @@ function playSound(audioObj, type) {
 }
 
 // Música (exponemos para que online startGame pueda usarla sin duplicar)
-const menuMusic = new Audio("assets/sounds/music-1.");
+const menuMusic = new Audio("assets/sounds/music-1.mp3");
 menuMusic.loop = true;
 menuMusic.volume = 0.3;
 
 const gameMusic = new Audio();
 gameMusic.loop = true;
-gameMusic.volume = 0.6;
+gameMusic.volume = 0.3;
 
 const playlist = ["assets/sounds/music-4.mp3"];
 let currentTrack = 0;
@@ -1100,14 +1215,6 @@ function initGeneralUI() {
   document.querySelector(".menu-close")?.addEventListener("pointerup", () => {
     $("dropdownMenu")?.classList.remove("show");
   });
-
-  // Overlay inicial (load)
-  if (loadingOverlay) {
-    window.addEventListener("load", () => {
-      loadingOverlay.style.opacity = 0;
-      setTimeout(() => loadingOverlay.remove(), 500);
-    });
-  }
 
   // Arranca música menú (silencioso si el navegador bloquea autoplay)
   menuMusic.play().catch(() => {});
@@ -4206,6 +4313,7 @@ playButton?.addEventListener("pointerup", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   try {
+    initAnimatedBackground();
     initVisualTheme();
     initGeneralUI();
     initUISetup();
@@ -4213,6 +4321,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initChatUI();
     bindHistoryScrollButtons();
     setConn("offline");
+
+    revealAppWhenStable();
   } catch (err) {
     console.error("[BOOT] error:", err);
   }

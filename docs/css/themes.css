@@ -21,7 +21,7 @@
 /* Tema Neon */
 body[data-theme="default"] {
   --main-logo-image: url("../assets/images/logo-neon-chess.png");
-  --main-bg-image: url("../assets/images/retro-chess-background.webp");
+  --main-bg-image: none;
 
   --user-icon-img: url("../assets/images/user-icon-neon.png");
   --user-icon-img-hover: url("../assets/images/user-icon-neon-hover.png");
@@ -68,7 +68,7 @@ body[data-theme="default"] {
 
   --coord-color: #59FFFF;
 
-  --move-highlight-bg: #bd31e086;
+  --move-highlight-bg: #cd81e086;
   --move-highlight-shadow: 0px 0px 5px #E800C7 inset;
 
   --check-bg: #79890E;
@@ -91,12 +91,23 @@ body[data-theme="default"] {
 
   --matrix-color: #5BC1C8;
   --matrix-shadow: 0 0 4px #427F84;
+
+  --bg-square-fill: rgba(140, 240, 255, 0.22);
+  --bg-square-fill-strong: rgba(140, 240, 255, 0.42);
+
+  --bg-square-outline: rgba(140, 240, 255, 0.55);
+  --bg-square-outline-strong: rgba(140, 240, 255, 0.78);
+
+  --bg-square-glow: rgba(111, 246, 255, 0.35);
+  --bg-square-glow-strong: rgba(111, 246, 255, 0.6);
+
+  --bg-square-inner-glow: rgba(111, 246, 255, 0.18);
 }
 
 /* Tema Classic */
 body[data-theme="neon-classic"] {
   --main-logo-image: url("../assets/images/logo-classic-chess.png");
-  --main-bg-image: url("../assets/images/classic-chess-background.png");
+  --main-bg-image: none;
 
   --user-icon-img: url("../assets/images/user-icon-classic.png");
   --user-icon-img-hover: url("../assets/images/user-icon-classic-hover.png");
@@ -170,4 +181,15 @@ body[data-theme="neon-classic"] {
 
   --matrix-color: #CBB57C;
   --matrix-shadow: 0 0 4px #776B4E;
+
+  --bg-square-fill: rgba(245, 223, 175, 0.16);
+  --bg-square-fill-strong: rgba(245, 223, 175, 0.3);
+
+  --bg-square-outline: rgba(245, 223, 175, 0.52);
+  --bg-square-outline-strong: rgba(245, 223, 175, 0.62);
+
+  --bg-square-glow: rgba(217, 186, 119, 0.34);
+  --bg-square-glow-strong: rgba(217, 186, 119, 0.48);
+
+  --bg-square-inner-glow: rgba(196, 168, 109, 0.14);
 }
