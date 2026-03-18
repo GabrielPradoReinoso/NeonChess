@@ -138,7 +138,6 @@ function setConn(state) {
   return setOpponentConn("offline");
 }
 
-
 function setOpponentConn(state) {
   // ✅ En local vs robot NO debe mostrarse nunca
   if (!isOnlineGame) return;
@@ -148,9 +147,11 @@ function setOpponentConn(state) {
   if (!status || !textEl) return;
 
   textEl.textContent =
-    state === "online" ? "Rival conectado" :
-    state === "reconnecting" ? "Buscando rival…" :
-    "Rival desconectado";
+    state === "online"
+      ? "Rival conectado"
+      : state === "reconnecting"
+        ? "Buscando rival…"
+        : "Rival desconectado";
 
   status.classList.remove("online", "offline", "reconnecting", "hidden");
   status.classList.add(state);
@@ -231,8 +232,8 @@ function exitReviewMode() {
 
 function maybeExitReviewAtEnd() {
   if (currentHistoryIndex === positionHistory.length - 1) {
-    exitReviewModeToLiveGame();  // limpia estado / UI
-    exitReviewMode();            // reanuda timers si procede
+    exitReviewModeToLiveGame(); // limpia estado / UI
+    exitReviewMode(); // reanuda timers si procede
     setTurnLED?.();
   }
 }
@@ -242,12 +243,17 @@ function exitReviewModeToLiveGame() {
   isNavigating = false;
 
   // unlock coherente (estado + CSS)
-  try { endAnimationLock?.(); } catch {}
-
-  try { removeMoveIndicators?.(); } catch {}
   try {
-    document.querySelectorAll(".cell.selected")
-      .forEach(c => c.classList.remove("selected"));
+    endAnimationLock?.();
+  } catch {}
+
+  try {
+    removeMoveIndicators?.();
+  } catch {}
+  try {
+    document
+      .querySelectorAll(".cell.selected")
+      .forEach((c) => c.classList.remove("selected"));
   } catch {}
   selectedCell = null;
 
@@ -263,7 +269,10 @@ function scrollMoveHistoryToEnd(smooth = true) {
   if (isNavigating || isReviewMode) return;
 
   const left = hist.scrollWidth - hist.clientWidth;
-  hist.scrollTo({ left: Math.max(0, left), behavior: smooth ? "smooth" : "auto" });
+  hist.scrollTo({
+    left: Math.max(0, left),
+    behavior: smooth ? "smooth" : "auto",
+  });
 }
 
 // ============================================================
@@ -436,7 +445,7 @@ function ensureSocket() {
   });
 
   socket.on("connect_error", function (err) {
-    console.warn("[io] connect_error:", (err && err.message) ? err.message : err);
+    console.warn("[io] connect_error:", err && err.message ? err.message : err);
     setOpponentConn("reconnecting");
   });
 
@@ -489,10 +498,13 @@ function ensureSocket() {
     // --- estado online ---
     isOnlineGame = true;
     currentRoomId = String(roomId || "").trim();
-    humanColor = (color === "b") ? "b" : "w";
+    humanColor = color === "b" ? "b" : "w";
     currentTurn = "w";
 
-    console.log("[CHAT] room set", { currentRoomId: currentRoomId, socketId: socket ? socket.id : null });
+    console.log("[CHAT] room set", {
+      currentRoomId: currentRoomId,
+      socketId: socket ? socket.id : null,
+    });
 
     // Persistencia
     localStorage.setItem("NEONCHESS_ROOM", currentRoomId);
@@ -537,7 +549,8 @@ function ensureSocket() {
 
     // Música
     try {
-      if (window.menuMusic && typeof window.menuMusic.pause === "function") window.menuMusic.pause();
+      if (window.menuMusic && typeof window.menuMusic.pause === "function")
+        window.menuMusic.pause();
       if (typeof window.playGameMusic === "function") window.playGameMusic();
     } catch (_) {}
 
@@ -564,14 +577,17 @@ function ensureSocket() {
     try {
       if (!mv) return;
 
-      const moveId = mv.id || (mv.from + "-" + mv.to + "-" + (mv.seq || ""));
+      const moveId = mv.id || mv.from + "-" + mv.to + "-" + (mv.seq || "");
       if (seenMoveIds.has(moveId)) return;
       rememberMoveId(moveId);
 
       const seq = mv.seq || 0;
       if (seq) {
         if (lastAppliedSeq && seq > lastAppliedSeq + 1) {
-          console.warn("[ON] hueco detectado", { lastAppliedSeq: lastAppliedSeq, seq: seq });
+          console.warn("[ON] hueco detectado", {
+            lastAppliedSeq: lastAppliedSeq,
+            seq: seq,
+          });
           requestSyncThrottled();
         }
         lastAppliedSeq = Math.max(lastAppliedSeq, seq);
@@ -713,7 +729,7 @@ function processOnlineMoveQueue() {
 
   try {
     // movimiento recibido => NO es humano
-    movePiece(from, to, false);
+    movePiece(from, to, false, next.promotion || null);
   } catch (err) {
     console.error("[ON] movePiece explotó:", err, next);
     finishMove = prevFinishMove;
@@ -736,7 +752,7 @@ function processOnlineMoveQueue() {
 // ----------------------------
 // Emit movimiento propio (sin retries)
 // ----------------------------
-function emitOnlineMove(from, to) {
+function emitOnlineMove(from, to, promotion = null) {
   if (!isOnlineGame || !currentRoomId) return;
 
   const s = ensureSocket();
@@ -752,7 +768,7 @@ function emitOnlineMove(from, to) {
     crypto?.randomUUID?.() ||
     `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  const payload = { roomId: currentRoomId, move: { from, to, id } };
+  const payload = { roomId: currentRoomId, move: { from, to, id, promotion } };
 
   s.emit("playerMove", payload, (res) => {
     if (!res?.ok) {
@@ -897,7 +913,7 @@ function initUISetup() {
 
   // Botón LOCAL (robot)
   btnLocal?.addEventListener("pointerup", () => {
-    teardownSocket(); 
+    teardownSocket();
     // Reset modo
     isOnlineGame = false;
     currentRoomId = null;
@@ -1010,13 +1026,13 @@ function playSound(audioObj, type) {
 }
 
 // Música (exponemos para que online startGame pueda usarla sin duplicar)
-const menuMusic = new Audio("assets/sounds/music-1.mp3");
+const menuMusic = new Audio("assets/sounds/music-1.");
 menuMusic.loop = true;
 menuMusic.volume = 0.3;
 
 const gameMusic = new Audio();
 gameMusic.loop = true;
-gameMusic.volume = 0.3;
+gameMusic.volume = 0.6;
 
 const playlist = ["assets/sounds/music-4.mp3"];
 let currentTrack = 0;
@@ -1085,12 +1101,6 @@ function initGeneralUI() {
     $("dropdownMenu")?.classList.remove("show");
   });
 
-  // CSS vars
-  document.documentElement.style.setProperty(
-    "--cycle-border-color",
-    "rgb(79, 246, 255)",
-  );
-
   // Overlay inicial (load)
   if (loadingOverlay) {
     window.addEventListener("load", () => {
@@ -1101,27 +1111,131 @@ function initGeneralUI() {
 
   // Arranca música menú (silencioso si el navegador bloquea autoplay)
   menuMusic.play().catch(() => {});
+
+    // Modal "Tablero y piezas"
+  const openBoardPieces = $("openBoardPieces");
+  const boardPiecesModal = $("boardPiecesModal");
+  const closeBoardPiecesModal = $("closeBoardPiecesModal");
+
+  openBoardPieces?.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    boardPiecesModal?.classList.remove("hidden");
+    $("dropdownMenu")?.classList.remove("show");
+    updateVisualThemeButtonsUI();
+  });
+
+  closeBoardPiecesModal?.addEventListener("pointerup", () => {
+    boardPiecesModal?.classList.add("hidden");
+  });
+
+  boardPiecesModal?.addEventListener("pointerup", (e) => {
+    if (e.target === boardPiecesModal) {
+      boardPiecesModal.classList.add("hidden");
+    }
+  });
+
+  document.querySelectorAll(".visual-theme-btn").forEach((btn) => {
+    btn.addEventListener("pointerup", () => {
+      const themeName = btn.dataset.visualtheme;
+      if (!themeName) return;
+
+      applyVisualTheme(themeName);
+      updateVisualThemeButtonsUI();
+    });
+  });
 }
 
 // ============================================================
 // 6) TABLERO: generación, coordenadas, render
 // ============================================================
 
-// Imágenes de piezas
-const pieceImages = {
-  wk: "assets/images/pink-neon-king.png",
-  wq: "assets/images/pink-neon-queen.png",
-  wr: "assets/images/pink-neon-rook.png",
-  wb: "assets/images/pink-neon-bishop.png",
-  wn: "assets/images/pink-neon-horse.png",
-  wp: "assets/images/pink-neon-pawn.png",
-  bk: "assets/images/blue-neon-king.png",
-  bq: "assets/images/blue-neon-queen.png",
-  br: "assets/images/blue-neon-rook.png",
-  bb: "assets/images/blue-neon-bishop.png",
-  bn: "assets/images/blue-neon-horse.png",
-  bp: "assets/images/blue-neon-pawn.png",
+// IMAGENES DE PIEZAS
+// ===== Sistema de sets de piezas =====
+
+const PIECESET_KEY = "NEONCHESS_PIECES";
+
+// sets disponibles
+const PIECESETS = {
+  default: "assets/images/pieces/default",
+  "neon-classic": "assets/images/pieces/neon-classic",
 };
+
+const VISUAL_THEME_KEY = "NEONCHESS_VISUAL_THEME";
+
+const VISUAL_THEMES = {
+  default: "default",
+  "neon-classic": "neon-classic"
+};
+
+let currentVisualTheme =
+  localStorage.getItem(VISUAL_THEME_KEY) || "default";
+
+function applyVisualTheme(themeName) {
+  if (!VISUAL_THEMES[themeName]) return;
+
+  currentVisualTheme = themeName;
+  localStorage.setItem(VISUAL_THEME_KEY, themeName);
+
+  document.body.dataset.theme = themeName;
+
+  // sincroniza automáticamente las piezas con el tema visual
+  if (PIECESETS[themeName]) {
+    currentPieceSet = themeName;
+    localStorage.setItem(PIECESET_KEY, themeName);
+    pieceImages = getPieceImages();
+  }
+
+  renderBoard();
+}
+
+function initVisualTheme() {
+  const savedTheme = localStorage.getItem(VISUAL_THEME_KEY) || "default";
+  applyVisualTheme(savedTheme);
+}
+// set activo
+let currentPieceSet = localStorage.getItem(PIECESET_KEY) || "default";
+
+// genera dinámicamente las rutas de piezas
+function getPieceImages() {
+  const base = PIECESETS[currentPieceSet];
+
+  return {
+    wk: `${base}/wk.png`,
+    wq: `${base}/wq.png`,
+    wr: `${base}/wr.png`,
+    wb: `${base}/wb.png`,
+    wn: `${base}/wn.png`,
+    wp: `${base}/wp.png`,
+    bk: `${base}/bk.png`,
+    bq: `${base}/bq.png`,
+    br: `${base}/br.png`,
+    bb: `${base}/bb.png`,
+    bn: `${base}/bn.png`,
+    bp: `${base}/bp.png`,
+  };
+}
+
+// objeto usado por el tablero
+let pieceImages = getPieceImages();
+
+function setPieceSet(setName) {
+  if (!PIECESETS[setName]) return;
+
+  currentPieceSet = setName;
+  localStorage.setItem(PIECESET_KEY, setName);
+
+  pieceImages = getPieceImages();
+
+  renderBoard();
+  updatePieceSetButtonsUI();
+}
+
+function updateVisualThemeButtonsUI() {
+  document.querySelectorAll(".visual-theme-btn").forEach((btn) => {
+    const isActive = btn.dataset.visualtheme === currentVisualTheme;
+    btn.classList.toggle("active", isActive);
+  });
+}
 
 // Helpers UI (marcadores / highlights)
 function removeMoveIndicators() {
@@ -1250,11 +1364,11 @@ function renderBoard() {
         img.style.visibility = "visible";
         img.style.opacity = "1";
 
-        if (img.dataset.code !== code) {
+        if (img.src !== new URL(pieceImages[code], window.location.href).href) {
           img.src = pieceImages[code];
-          img.alt = code;
-          img.dataset.code = code;
         }
+        img.alt = code;
+        img.dataset.code = code;
       } else {
         // celda vacía => nada de piezas en DOM
         imgs.forEach((p) => p.remove());
@@ -1291,8 +1405,8 @@ function renderCoordinates() {
           position:absolute; top:3px; left:3px;
           font-family:FrancoisOne, sans-serif;
           font-size:12px; line-height:12px;
-          color:rgb(17,255,255);
-          text-shadow:0 0 10px rgb(17,255,255);
+          color:var(--coord-color);
+          text-shadow:0 0 10px var(--coord-color);
           z-index:1;
           pointer-events:none;
           user-select:none;
@@ -1308,8 +1422,8 @@ function renderCoordinates() {
           position:absolute; bottom:3px; right:3px;
           font-family:FrancoisOne, sans-serif;
           font-size:12px; line-height:12px;
-          color:rgb(17,255,255);
-          text-shadow:0 0 10px rgb(17,255,255);
+          color:var(--coord-color);
+          text-shadow:0 0 10px var(--coord-color);
           z-index:1;
           pointer-events:none;
           user-select:none;
@@ -1598,6 +1712,62 @@ function isStalemate(color) {
   return true;
 }
 
+function simulateMove(from, to, fnCheck) {
+  const origFrom = board[from.row][from.col];
+  const origTo = board[to.row][to.col];
+
+  board[to.row][to.col] = origFrom;
+  board[from.row][from.col] = null;
+
+  let result = false;
+  try {
+    result = !!fnCheck();
+  } finally {
+    board[from.row][from.col] = origFrom;
+    board[to.row][to.col] = origTo;
+  }
+  return result;
+}
+
+function isPseudoLegalByType(from, to, piece) {
+  if (!piece) return false;
+
+  const type = piece[1];
+  const dRow = to.row - from.row;
+  const dCol = to.col - from.col;
+
+  // No mover a misma casilla
+  if (dRow === 0 && dCol === 0) return false;
+
+  switch (type) {
+    case "p": {
+      // Solo geometría básica (sin validar colisiones ni capturas)
+      const dir = piece[0] === "w" ? -1 : 1;
+      if (dCol === 0 && (dRow === dir || dRow === 2 * dir)) return true;
+      if (Math.abs(dCol) === 1 && dRow === dir) return true;
+      return false;
+    }
+    case "n":
+      return (
+        (Math.abs(dRow) === 2 && Math.abs(dCol) === 1) ||
+        (Math.abs(dRow) === 1 && Math.abs(dCol) === 2)
+      );
+    case "b":
+      return Math.abs(dRow) === Math.abs(dCol);
+    case "r":
+      return dRow === 0 || dCol === 0;
+    case "q":
+      return dRow === 0 || dCol === 0 || Math.abs(dRow) === Math.abs(dCol);
+    case "k": {
+      const isSingleStep = Math.abs(dRow) <= 1 && Math.abs(dCol) <= 1;
+      const isCastlingGeom = dRow === 0 && Math.abs(dCol) === 2;
+      return isSingleStep || isCastlingGeom;
+    }
+    default:
+      return false;
+  }
+}
+
 // ============================================================
 // 8) ANIMACIONES: mover pieza + VFX + amenazas
 // ============================================================
@@ -1767,7 +1937,7 @@ function buildMatrixRain() {
 
     // Mucho más lento (antes 2.4–5.6s)
     const goingUp = i % 2 === 0;
-    const dur = 7.0 + Math.random() * 6.0;   // 7–13s
+    const dur = 7.0 + Math.random() * 6.0; // 7–13s
     const delay = -Math.random() * dur;
 
     stream.style.animationName = goingUp ? "matrix-up" : "matrix-down";
@@ -1818,15 +1988,15 @@ window.addEventListener("resize", () => {
     const overlay = document.querySelector("#player1 .matrix-overlay-player1");
     if (!p1 || !overlay) return;
 
-    const isOn = p1.classList.contains("thinking") && overlay.classList.contains("visible");
+    const isOn =
+      p1.classList.contains("thinking") &&
+      overlay.classList.contains("visible");
     if (!isOn) return;
 
     matrixBuilt = false;
     buildMatrixRain();
   }, 120);
 });
-
-
 
 // Jaque / mate overlays (simple)
 function showCheckAnimation() {
@@ -1846,6 +2016,7 @@ function showCheckAnimation() {
   document.body.appendChild(anim);
   anim.addEventListener("animationend", () => anim.remove());
 }
+
 function showCheckmateAnimation() {
   const anim = document.createElement("div");
   anim.classList.add("checkmate-animation");
@@ -1862,6 +2033,171 @@ function showCheckmateAnimation() {
   });
   document.body.appendChild(anim);
   anim.addEventListener("animationend", () => anim.remove());
+}
+
+function showKingThreatAnimation(square, extraSquare = null) {
+  const attackers = [];
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (p && p[0] !== currentTurn && canAttack({ row: r, col: c }, square)) {
+        attackers.push({ row: r, col: c });
+      }
+    }
+  }
+
+  attackers.forEach(({ row, col }) => {
+    const cell = getCell(row, col);
+    if (cell) cell.classList.add("threat-highlight");
+  });
+
+  const kingCell = getCell(square.row, square.col);
+  if (kingCell) kingCell.classList.add("threat-highlight");
+
+  const extraCell = extraSquare
+    ? getCell(extraSquare.row, extraSquare.col)
+    : null;
+  if (extraCell) extraCell.classList.add("threat-highlight");
+
+  setTimeout(() => {
+    attackers.forEach(({ row, col }) => {
+      const cell = getCell(row, col);
+      if (cell) cell.classList.remove("threat-highlight");
+    });
+    if (kingCell) kingCell.classList.remove("threat-highlight");
+    if (extraCell) extraCell.classList.remove("threat-highlight");
+  }, 800);
+}
+
+// Devuelve lista de atacantes (coords) que atacan `square` (del color opuesto a `defenderColor`)
+function getAttackersOfSquare(square, defenderColor) {
+  const opp = defenderColor === "w" ? "b" : "w";
+  const attackers = [];
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (!p || p[0] !== opp) continue;
+      if (canAttack({ row: r, col: c }, square))
+        attackers.push({ row: r, col: c });
+    }
+  }
+  return attackers;
+}
+
+// Flash visual con clase .threat-highlight (atacantes + rey + opcionales)
+function flashThreatSquares(squares, duration = 950) {
+  const uniq = new Map();
+  for (const s of squares || []) {
+    if (!s) continue;
+    const k = `${s.row},${s.col}`;
+    uniq.set(k, s);
+  }
+
+  const list = Array.from(uniq.values());
+  for (const pos of list) {
+    const cell = getCell(pos.row, pos.col);
+    if (cell) cell.classList.add("threat-highlight");
+  }
+
+  setTimeout(() => {
+    for (const pos of list) {
+      const cell = getCell(pos.row, pos.col);
+      if (cell) cell.classList.remove("threat-highlight");
+    }
+  }, duration);
+}
+
+// Simula un movimiento (incluye en-passant y enroque) y ejecuta fn dentro; luego revierte.
+function simulateMoveAdvanced(from, to, fn) {
+  const piece = board[from.row][from.col];
+  const origFrom = piece;
+  const origTo = board[to.row][to.col];
+
+  // En-passant (solo para simulación)
+  let epCapturedPos = null;
+  let epCapturedPiece = null;
+  if (
+    piece &&
+    piece[1] === "p" &&
+    Math.abs(to.col - from.col) === 1 &&
+    !origTo &&
+    enPassantTarget &&
+    enPassantTarget.row === to.row &&
+    enPassantTarget.col === to.col
+  ) {
+    epCapturedPos = { row: from.row, col: to.col };
+    epCapturedPiece = board[epCapturedPos.row][epCapturedPos.col];
+  }
+
+  // Enroque (solo para simulación)
+  const isCastling =
+    piece && piece[1] === "k" && Math.abs(to.col - from.col) === 2;
+  let rookFrom = null,
+    rookTo = null,
+    rookPiece = null;
+
+  // Aplica move principal
+  board[to.row][to.col] = origFrom;
+  board[from.row][from.col] = null;
+
+  // Aplica EP captura
+  if (epCapturedPos) board[epCapturedPos.row][epCapturedPos.col] = null;
+
+  // Aplica rook en enroque
+  if (isCastling) {
+    const row = from.row;
+    const rookFromCol = to.col === 6 ? 7 : 0;
+    const rookToCol = to.col === 6 ? 5 : 3;
+
+    rookFrom = { row, col: rookFromCol };
+    rookTo = { row, col: rookToCol };
+    rookPiece = board[rookFrom.row][rookFrom.col];
+
+    board[rookTo.row][rookTo.col] = rookPiece;
+    board[rookFrom.row][rookFrom.col] = null;
+  }
+
+  let out;
+  try {
+    out = fn();
+  } finally {
+    // Revierte enroque
+    if (isCastling && rookFrom && rookTo) {
+      board[rookFrom.row][rookFrom.col] = rookPiece;
+      board[rookTo.row][rookTo.col] = null;
+    }
+
+    // Revierte EP
+    if (epCapturedPos)
+      board[epCapturedPos.row][epCapturedPos.col] = epCapturedPiece;
+
+    // Revierte principal
+    board[from.row][from.col] = origFrom;
+    board[to.row][to.col] = origTo;
+  }
+  return out;
+}
+
+// Rey intenta moverse a casilla atacada: ilumina destino rey + atacante(s)
+function showIllegalKingDestinationThreat(from, to, color) {
+  simulateMoveAdvanced(from, to, () => {
+    const kingPos = findKingPosition(color) || { ...to };
+    const attackers = getAttackersOfSquare(kingPos, color);
+    flashThreatSquares([kingPos, ...attackers], 1000);
+  });
+}
+
+// Pieza intenta moverse y deja a su rey en jaque (pieza clavada / destapa línea):
+// ilumina REY + atacante(s), NO la casilla destino.
+function showExposedKingThreatAfterMove(from, to, color) {
+  simulateMoveAdvanced(from, to, () => {
+    const kingPos = findKingPosition(color);
+    if (!kingPos) return;
+    const attackers = getAttackersOfSquare(kingPos, color);
+    flashThreatSquares([kingPos, ...attackers], 1000);
+  });
 }
 
 // ============================================================
@@ -1974,7 +2310,7 @@ function updateHealthBar() {
 // ----------------------------
 // Movimiento con animación
 // ----------------------------
-function movePiece(from, to, isHumanMove = false) {
+function movePiece(from, to, isHumanMove = false, promoType = null) {
   if (isReviewMode) return;
   if (isAnimating) return;
 
@@ -2046,12 +2382,15 @@ function movePiece(from, to, isHumanMove = false) {
   board[to.row][to.col] = piece;
   board[from.row][from.col] = null;
 
-  // ✅ Promoción automática (mínimo viable)
+  // ✅ PROMOCIÓN (humano: modal | no-humano: auto o por promoType)
+  let pendingPromotion = false;
+  let promotionColor = null;
+
   if (piece[1] === "p") {
     const lastRank = piece[0] === "w" ? 0 : 7;
     if (to.row === lastRank) {
-      board[to.row][to.col] = piece[0] + "q";
-      playSound(promotionSound, "promotion");
+      pendingPromotion = true;
+      promotionColor = piece[0];
     }
   }
 
@@ -2114,7 +2453,7 @@ function movePiece(from, to, isHumanMove = false) {
           emitOnlineMove(rcToAlgebraic(from), rcToAlgebraic(to));
         }
 
-        // ✅ HISTORIAL
+        //  HISTORIAL
         pushMoveToHistory(moveRecord);
 
         finishMove();
@@ -2162,20 +2501,30 @@ function movePiece(from, to, isHumanMove = false) {
       renderBoard();
       if (isHumanMove && isOnlineGame && currentRoomId)
         emitOnlineMove(rcToAlgebraic(from), rcToAlgebraic(to));
-      pushMoveToHistory(moveRecord);
-      finishMove();
-      endAnimationLock();
+        pushMoveToHistory(moveRecord);
+        finishMove();
+        endAnimationLock();
     });
     return;
   }
 
   animatePieceMove(movingPieceElem, fromCell, toCell, () => {
-    requestAnimationFrame(() => {
-      renderBoard();
+    requestAnimationFrame(async () => {
+    renderBoard();
 
-      if (isHumanMove && isOnlineGame && currentRoomId) {
-        emitOnlineMove(rcToAlgebraic(from), rcToAlgebraic(to));
+    if (pendingPromotion) {
+      let chosen = promoType || "q";
+      if (isHumanMove) {
+        chosen = await showPromotionModal(promotionColor);
       }
+      board[to.row][to.col] = promotionColor + chosen;
+      playSound(promotionSound, "promotion");
+      renderBoard();
+      moveRecord.promotion = chosen;
+    }
+
+    if (isHumanMove && isOnlineGame && currentRoomId)
+      emitOnlineMove(rcToAlgebraic(from), rcToAlgebraic(to), moveRecord.promotion || null);
 
       pushMoveToHistory(moveRecord);
       finishMove();
@@ -2187,7 +2536,7 @@ function movePiece(from, to, isHumanMove = false) {
 // ----------------------------
 // Movimiento sin animación (drag/drop)
 // ----------------------------
-function movePieceNoAnim(from, to, isHumanMove = false) {
+function movePieceNoAnim(from, to, isHumanMove = false, promoType = null) {
   if (isReviewMode) return;
   if (isAnimating) return;
 
@@ -2305,7 +2654,34 @@ function onCellClick(e) {
 
   removeMoveIndicators();
   const from = selectedCell;
+  const piece = board[from.row][from.col];
 
+  // 0) Si el movimiento ni siquiera respeta la geometría de la pieza => error simple
+  if (piece && !isPseudoLegalByType(from, targetPos, piece)) {
+    blinkCell(cell);
+    getCell(from.row, from.col)?.classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
+
+  // 1) Si es ilegal porque deja al rey en jaque, mostramos animación “amenaza real”
+  if (piece && moveLeavesKingInCheck(from, targetPos, currentTurn)) {
+    playSound(errorSound, "error");
+
+    if (piece[1] === "k") {
+      // Rey entrando en casilla atacada: destino + atacante(s)
+      showIllegalKingDestinationThreat(from, targetPos, currentTurn);
+    } else {
+      // Pieza clavada / destapa línea: rey + atacante(s)
+      showExposedKingThreatAfterMove(from, targetPos, currentTurn);
+    }
+
+    getCell(from.row, from.col)?.classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
+
+  // 2) Si no es por jaque, usa el error normal
   if (isValidMove(from, targetPos)) {
     getCell(from.row, from.col)?.classList.remove("selected");
     movePiece(from, targetPos, true);
@@ -2315,6 +2691,137 @@ function onCellClick(e) {
   }
 
   selectedCell = null;
+}
+
+function showPromotionModal(color) {
+  return new Promise((resolve) => {
+    // Overlay
+    const overlay = document.createElement("div");
+    overlay.id = "promotionModal";
+    overlay.style.cssText = `
+      position: fixed; inset: 0;
+      background: rgba(10, 20, 50, 0.75);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999999;
+    `;
+
+    // Caja
+    const box = document.createElement("div");
+    box.style.cssText = `
+      background: #0e1838;
+      border: 2px solid rgb(79,246,255);
+      box-shadow: 0 0 18px rgb(79,246,255);
+      border-radius: 3px;
+      padding: 16px 18px;
+      min-width: 320px;
+      text-align: center;
+    `;
+
+    const title = document.createElement("div");
+    title.textContent = "PROMOCIÓN";
+    title.style.cssText = `
+      font-family: FrancoisOne, sans-serif;
+      color: rgb(17,255,255);
+      text-shadow: 0 0 10px rgb(17,255,255);
+      margin-bottom: 12px;
+      font-size: 18px;
+      letter-spacing: 1px;
+    `;
+    box.appendChild(title);
+
+    const row = document.createElement("div");
+    row.style.cssText = `
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    `;
+
+    const options = [
+      { t: "q", label: "Reina" },
+      { t: "r", label: "Torre" },
+      { t: "b", label: "Alfil" },
+      { t: "n", label: "Caballo" },
+    ];
+
+    const makeBtn = (type, label) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.style.cssText = `
+        width: 64px; height: 64px;
+        border-radius: 10px;
+        border: 2px solid rgba(79,246,255,0.85);
+        background: rgba(79,246,255,0.08);
+        box-shadow: 0 0 10px rgba(79,246,255,0.6), inset 0 0 10px rgba(79,246,255,0.35);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        cursor: pointer;
+      `;
+      btn.onpointerup = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        cleanup();
+        resolve(type);
+      };
+
+      const img = document.createElement("img");
+      img.src = pieceImages[color + type];
+      img.alt = color + type;
+      img.draggable = false;
+      img.style.cssText = `width: 44px; height: 44px;`;
+
+      const cap = document.createElement("div");
+      cap.textContent = label;
+      cap.style.cssText = `
+        font-size: 10px;
+        margin-top: 4px;
+        color: rgba(17,255,255,0.9);
+        text-shadow: 0 0 8px rgba(17,255,255,0.7);
+        font-family: FrancoisOne, sans-serif;
+      `;
+
+      btn.appendChild(img);
+      btn.appendChild(cap);
+      return btn;
+    };
+
+    options.forEach((o) => row.appendChild(makeBtn(o.t, o.label)));
+    box.appendChild(row);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // Bloquear click fuera (no cerrar sin elegir)
+    overlay.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    function cleanup() {
+      overlay.remove();
+    }
+  });
+}
+
+function getWinnerAvatarSrc(winnerColor) {
+  // Online: usa los paneles de jugador (arriba/abajo)
+  if (isOnlineGame) {
+    const topImg = document.querySelector("#player1 img");   // rival (arriba)
+    const bottomImg = document.querySelector("#player2 img"); // tú (abajo)
+
+    // winnerColor: "w" o "b"
+    // Si tú eres blancas, tú estás abajo. Si tú eres negras, tú estás abajo igualmente.
+    // Por UI: abajo = humano local / tu cliente en online
+    // Para decidir avatar correcto, mapeamos por color real:
+    // player2 = humanColor
+    // player1 = color opuesto
+    return winnerColor === humanColor ? bottomImg?.src : topImg?.src;
+  }
+
+  // Local (robot): player2 = tú, player1 = robot
+  const topImg = document.querySelector("#player1 img");    // robot (arriba)
+  const bottomImg = document.querySelector("#player2 img"); // tú (abajo)
+
+  return winnerColor === humanColor ? bottomImg?.src : topImg?.src;
 }
 
 // ============================================================
@@ -2442,7 +2949,7 @@ function pushMoveToHistory(mv) {
 
   moveList.push(mv);
   if (!isReviewMode && !isNavigating) {
-  currentHistoryIndex = moveList.length; 
+    currentHistoryIndex = moveList.length;
   }
 
   renderMoveHistoryUI();
@@ -2459,10 +2966,10 @@ function renderMoveHistoryUI() {
 
   // En live: mostrar todo.
   // En review/navegación: mostrar solo hasta el snapshot actual.
-  const visibleMoves = (isReviewMode || isNavigating)
-  ? Math.max(0, currentHistoryIndex)
-  : moveList.length;
-
+  const visibleMoves =
+    isReviewMode || isNavigating
+      ? Math.max(0, currentHistoryIndex)
+      : moveList.length;
 
   for (let i = 0; i < visibleMoves; i++) {
     const m = moveList[i];
@@ -2471,18 +2978,27 @@ function renderMoveHistoryUI() {
     const entry = document.createElement("div");
     entry.className = "move-entry";
 
+    // 1) Número (primero)
+    const num = document.createElement("span");
+    num.className = "move-num";
+    num.textContent = `${i + 1}`;
+
+    // 2) Imagen
     const img = document.createElement("img");
     img.src = pieceImages[m.piece];
     img.alt = m.piece;
     img.draggable = false;
 
-    const span = document.createElement("span");
+    // 3) Texto del movimiento
+    const text = document.createElement("span");
+    text.className = "move-text";
     const arrow = m.capture ? "×" : "→";
-    span.textContent =
-      `${rcToAlgebraic(m.from)} ${arrow} ${rcToAlgebraic(m.to)}`;
+    text.textContent = `${rcToAlgebraic(m.from)} ${arrow} ${rcToAlgebraic(m.to)}`;
 
+    entry.appendChild(num);
     entry.appendChild(img);
-    entry.appendChild(span);
+    entry.appendChild(text);
+
     hist.appendChild(entry);
   }
 }
@@ -2520,8 +3036,9 @@ function startTimer(color) {
 
       if (timers[color] <= 0) {
         clearInterval(timerIntervals[color]);
-        const winner = color === "w" ? "Azules" : "Rosas";
-        showEndGameModal(winner + " ganan por tiempo");
+        const winnerColor = color === "w" ? "b" : "w"; // el rival gana
+        const winnerName = winnerColor === "w" ? "Rosas" : "Azules";
+        showEndGameModal(winnerName + " ganan por tiempo", winnerColor);
       }
     }
   }, 500);
@@ -2540,10 +3057,10 @@ function switchTurn() {
 
   // Local vs robot: si no es online y no es tu turno, juega stockfish
   if (!isOnlineGame && currentTurn !== humanColor && !isReviewMode) {
-    setRobotThinking(true);  
+    setRobotThinking(true);
     requestStockfishMove();
-  }else {
-    setRobotThinking(false);       // Por si vuelves al humano
+  } else {
+    setRobotThinking(false); // Por si vuelves al humano
   }
 }
 
@@ -2562,8 +3079,10 @@ function finishMove() {
       showEndGameModal(
         (currentTurn === humanColor ? "Humano" : "Rival/Robot") +
           " gana por jaque mate",
+        currentTurn // <- ganador: el que acaba de mover
       );
     }, 900);
+
     return;
   }
 
@@ -2701,12 +3220,74 @@ function onPointerUp(e) {
 
     if (dropCell) {
       const to = getLogicalPos(dropCell);
+      const piece = board?.[dragOrigin?.row]?.[dragOrigin?.col];
 
-      const piece = board?.[dragOrigin.row]?.[dragOrigin.col];
+      // Movimiento válido => ejecuta
       if (piece && isValidMove(dragOrigin, to)) {
-        // Drag sin animación (rápido y estable)
         movePieceNoAnim(dragOrigin, to, true);
       } else {
+        // =========================
+        // ✅ BLINDAJE REY (CRÍTICO)
+        // =========================
+        if (piece && piece[1] === "k") {
+          const dRow = to.row - dragOrigin.row;
+          const dCol = to.col - dragOrigin.col;
+
+          const isSingleStep = Math.abs(dRow) <= 1 && Math.abs(dCol) <= 1;
+          const isCastlingGeometry = dRow === 0 && Math.abs(dCol) === 2;
+
+          // Si NO es paso de 1 casilla y NO es enroque => error simple SIEMPRE
+          if (!isSingleStep && !isCastlingGeometry) {
+            blinkCell(dropCell);
+          } else {
+            // Aquí sí procede evaluar amenaza para el rey (paso/enroque)
+            if (isSquareAttacked(to, currentTurn)) {
+              playSound(errorSound, "error");
+              // rey amenazado: marca rey + amenaza (tu helper)
+              // (si tu helper espera "kingPos" y "attackerPos", puedes ajustar)
+              showKingThreatAnimation(to, to);
+            } else {
+              blinkCell(dropCell);
+            }
+          }
+          cleanupDrag();
+          return;
+        }
+
+        // ==========================================
+        // ✅ PIEZA CLAVADA / DEJA AL REY EN JAQUE
+        // (solo si el movimiento respeta geometría,
+        //  para no disparar animación en movimientos
+        //  absurdos tipo alfil recto, torre diagonal)
+        // ==========================================
+        if (piece) {
+          // Si la geometría del movimiento es imposible, error simple
+          if (!isPseudoLegalByType(dragOrigin, to, piece)) {
+            blinkCell(dropCell);
+            cleanupDrag();
+            return;
+          }
+
+          const kingPos = findKingPosition(currentTurn);
+
+          if (kingPos) {
+            const leaves = simulateMove(dragOrigin, to, () =>
+              isKingInCheck(currentTurn),
+            );
+            if (leaves) {
+              playSound(errorSound, "error");
+              showExposedKingThreatAfterMove(dragOrigin, to, currentTurn);
+            } else {
+              blinkCell(dropCell);
+            }
+          } else {
+            blinkCell(dropCell);
+          }
+
+          cleanupDrag();
+          return;
+        }
+        // Fallback
         blinkCell(dropCell);
       }
     }
@@ -2817,8 +3398,7 @@ function handleHistoryStep(direction) {
   // Fuente del movimiento según relación snapshots<->moves:
   // snapshot 0 = estado inicial; snapshot i = después de i movimientos.
   // Por tanto, mover "next" usa moveList[fromIdx], mover "prev" usa moveList[fromIdx - 1].
-  const mv =
-    direction === "next" ? moveList[fromIdx] : moveList[fromIdx - 1];
+  const mv = direction === "next" ? moveList[fromIdx] : moveList[fromIdx - 1];
 
   // Si no hay moveRecord (desfase), fallback a salto directo sin animación
   if (!mv) {
@@ -2848,9 +3428,7 @@ function handleHistoryStep(direction) {
   const isCapture = !!mv.capture;
   const isPawn = mv.piece && mv.piece[1] === "p";
   const isPromoForward =
-    direction === "next" &&
-    isPawn &&
-    (aTo.row === 0 || aTo.row === 7);
+    direction === "next" && isPawn && (aTo.row === 0 || aTo.row === 7);
 
   // Enroque (detectable por rey moviéndose 2 columnas)
   const isCastling =
@@ -2902,30 +3480,30 @@ function handleHistoryStep(direction) {
 
   // En forward-capture, elimina víctima del DOM y dispara VFX antes de animar
   if (direction === "next" && isCapture && toCell) {
-  // VFX (explosión) usando el código de la pieza capturada
-  try {
-    // mv.capture es el code tipo "bp", "wn", etc.
-    createCapturedPieceExplosion?.(mv.capture, aTo);
-  } catch (_) {}
+    // VFX (explosión) usando el código de la pieza capturada
+    try {
+      // mv.capture es el code tipo "bp", "wn", etc.
+      createCapturedPieceExplosion?.(mv.capture, aTo);
+    } catch (_) {}
 
-  // Quita la víctima del DOM para evitar duplicados durante la animación
-  const victimImg = toCell.querySelector("img.piece");
-  if (victimImg) victimImg.remove();
+    // Quita la víctima del DOM para evitar duplicados durante la animación
+    const victimImg = toCell.querySelector("img.piece");
+    if (victimImg) victimImg.remove();
   }
-
 
   // Sonidos (mínimo viable)
   if (isPromoForward) {
-  playSound(promotionSound, "promotion");
+    playSound(promotionSound, "promotion");
   } else if (isCapture) {
-  // Captura: solo sonido de captura al avanzar
-  // Al retroceder, suena como movimiento normal
-  playSound(direction === "next" ? captureSound : moveSound,
-            direction === "next" ? "capture" : "move");
+    // Captura: solo sonido de captura al avanzar
+    // Al retroceder, suena como movimiento normal
+    playSound(
+      direction === "next" ? captureSound : moveSound,
+      direction === "next" ? "capture" : "move",
+    );
   } else {
-  playSound(moveSound, "move");
+    playSound(moveSound, "move");
   }
-
 
   // Enroque: anima rey + torre
   if (isCastling) {
@@ -3116,14 +3694,8 @@ function appendChatMessage(msg) {
 }
 
 function initChatUI() {
-  const {
-    chatPanel,
-    chatModal,
-    chatForm,
-    chatInput,
-    btnChat,
-    chatClose,
-  } = getChatEls();
+  const { chatPanel, chatModal, chatForm, chatInput, btnChat, chatClose } =
+    getChatEls();
 
   // Si existe panel, lo ocultamos por defecto (se muestra al entrar en startGame)
   chatPanel?.classList.add("hidden");
@@ -3145,7 +3717,9 @@ function initChatUI() {
     });
   } else {
     // Si NO hay modal/botón, avisa (esto explica tu “ya no hay botón”)
-    console.warn("[CHAT] No existe btnChat/chatModal -> chat será inline (si el HTML lo muestra)");
+    console.warn(
+      "[CHAT] No existe btnChat/chatModal -> chat será inline (si el HTML lo muestra)",
+    );
   }
 
   // Bind submit una sola vez
@@ -3175,8 +3749,7 @@ function initChatUI() {
 
     const ts = Date.now();
     const id =
-      crypto?.randomUUID?.() ||
-      `${ts}-${Math.random().toString(16).slice(2)}`;
+      crypto?.randomUUID?.() || `${ts}-${Math.random().toString(16).slice(2)}`;
 
     // Optimistic UI SIEMPRE
     appendChatMessage({ id, from: s.id, text, ts, status: "sending" });
@@ -3205,7 +3778,6 @@ function initChatUI() {
 
       chatInput.value = "";
     });
-
   });
 }
 
@@ -3219,7 +3791,7 @@ btnSurrender?.addEventListener("pointerup", (e) => {
   showResignConfirmModal();
 });
 
-function showEndGameModal(message) {
+function showEndGameModal(message, winnerColor = null) {
   const overlay = document.createElement("div");
   overlay.id = "endGameModal";
 
@@ -3236,6 +3808,30 @@ function showEndGameModal(message) {
   const title = document.createElement("h2");
   title.textContent = "FIN DE LA PARTIDA";
   content.appendChild(title);
+    // Avatar del ganador (si se conoce el color)
+  if (winnerColor) {
+    const avatarSrc = getWinnerAvatarSrc(winnerColor);
+
+    if (avatarSrc) {
+      const avatar = document.createElement("img");
+      avatar.src = avatarSrc;
+      avatar.alt = "Ganador";
+      avatar.draggable = false;
+
+      avatar.style.cssText = `
+        width: 90px;
+        height: 90px;
+        border-radius: 12px;
+        margin: 12px auto;
+        display: block;
+        border: 2px solid rgb(79,246,255);
+        box-shadow: 0 0 15px rgb(79,246,255);
+        object-fit: cover;
+      `;
+
+      content.appendChild(avatar);
+    }
+  }
 
   const msg = document.createElement("p");
   msg.textContent = message;
@@ -3327,7 +3923,8 @@ function showResignConfirmModal() {
 
     stopTimer("w");
     stopTimer("b");
-    showEndGameModal("Rendición. Fin de la partida.");
+    const winnerColor = currentTurn === "w" ? "b" : "w";
+    showEndGameModal("Rendición. Fin de la partida.", winnerColor);
   });
 
   btns.append(cancel, confirm);
@@ -3557,12 +4154,11 @@ function actuallyStartGame() {
   if (!isOnlineGame) $("connStatus")?.classList.add("hidden");
 
   refreshConnVisibility();
-
 }
 
 // playButton (modo local)
 playButton?.addEventListener("pointerup", () => {
-  teardownSocket(); 
+  teardownSocket();
   // 🧹 Limpia estado online persistido
   localStorage.removeItem("NEONCHESS_ROOM");
   localStorage.removeItem("NEONCHESS_ONLINE");
@@ -3610,18 +4206,13 @@ playButton?.addEventListener("pointerup", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   try {
+    initVisualTheme();
     initGeneralUI();
     initUISetup();
     bindButtonSfx();
     initChatUI();
     bindHistoryScrollButtons();
-
-    // Estado inicial UI
     setConn("offline");
-
-    // Si quieres mostrar tablero vacío al cargar, descomenta:
-    // humanColor = "w";
-    // setupInitialBoard();
   } catch (err) {
     console.error("[BOOT] error:", err);
   }

@@ -1,0 +1,342 @@
+/*-------------------------------*/
+/*----------- TABLERO -----------*/
+/*-------------------------------*/
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 70px);
+  grid-template-rows: repeat(8, 70px);
+  gap: 0;
+  box-shadow: 0px 0px 20px var(--cycle-border-color);
+  margin: 0;
+  padding: 0;
+  position: relative;
+  border-top: 1px solid var(--cycle-border-color);
+  border-bottom: 1px solid var(--cycle-border-color);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#chessBoard.flipped {
+  transform: none;
+}
+
+/* Casillas */
+.cell {
+  border: 1px solid var(--cycle-border-color);
+  position: relative;
+  box-shadow: 0px 0px 4px var(--cycle-border-color) inset;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  background-size: cover;
+  background-position: center;
+  touch-action: manipulation;
+}
+
+.cell.light {
+  background-color: var(--board-light-color);
+}
+
+.cell.dark {
+  background-color: var(--board-dark-color);
+}
+
+/* Selección / último movimiento */
+.cell.selected::after,
+.cell.highlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--move-highlight-bg);
+  box-shadow: var(--move-highlight-shadow);
+  z-index: 0;
+  pointer-events: none;
+  animation: moveLight 1s backwards;
+  -webkit-animation: moveLight 1s backwards;
+}
+
+/* Indicador de movimiento válido */
+.move-indicator {
+  position: absolute;
+  inset: 0;
+  background-color: var(--move-highlight-bg);
+  box-shadow: var(--move-highlight-shadow);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Jaque */
+.cell.check::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--check-bg);
+  box-shadow: var(--check-shadow);
+  border: none;
+  pointer-events: none;
+  z-index: 3;
+  transition: background 0.3s;
+}
+
+/* Jaque mate */
+.cell.checkmate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--checkmate-bg);
+  box-shadow: var(--checkmate-shadow);
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.1s;
+  -webkit-transition: background 0.1s;
+  -moz-transition: background 0.1s;
+  -ms-transition: background 0.1s;
+  -o-transition: background 0.1s;
+}
+
+/* Amenaza */
+.threat-highlight {
+  animation: threatPulse 0.8s ease-out;
+  box-shadow: 0 0 20px red, 0 0 40px red inset;
+  transform: scale(1.05);
+  z-index: 3;
+  -webkit-transform: scale(1.05);
+  -moz-transform: scale(1.05);
+  -ms-transform: scale(1.05);
+  -o-transform: scale(1.05);
+}
+
+.cell.threat-highlight {
+  background-color: #ff0000c5;
+  box-shadow: 0px 0px 10px rgb(255, 255, 255) inset;
+  animation: threat-pulse 300ms linear;
+  -webkit-animation: threat-pulse 300ms linear;
+  transition: all 100ms linear;
+  -webkit-transition: all 100ms linear;
+  -moz-transition: all 100ms linear;
+  -ms-transition: all 100ms linear;
+  -o-transition: all 100ms linear;
+}
+
+@keyframes threatPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0px red;
+  }
+  50% {
+    box-shadow: 0 0 25px red, 0 0 50px red inset;
+    transform: scale(1.02);
+    -webkit-transform: scale(1.02);
+    -moz-transform: scale(1.02);
+    -ms-transform: scale(1.02);
+    -o-transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    -o-transform: scale(1);
+  }
+}
+
+@keyframes threat-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.7);
+    -webkit-transform: scale(1.7);
+    -moz-transform: scale(1.7);
+    -ms-transform: scale(1.7);
+    -o-transform: scale(1.7);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Movimiento inválido */
+.blink-error {
+  animation: blinkError 300ms ease;
+  -webkit-animation: blinkError 300ms ease;
+}
+
+@keyframes blinkError {
+  0% {
+    background-color: black;
+  }
+  25% {
+    background: rgb(255, 163, 163);
+    box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+  }
+  50% {
+    background-color: black;
+  }
+  75% {
+    background: rgb(255, 163, 163);
+    box-shadow: 0px 0px 50px rgb(255, 77, 77) inset;
+  }
+  100% {
+    background-color: black;
+  }
+}
+
+/* Piezas */
+.cell img {
+  position: relative;
+  opacity: 1 !important;
+  z-index: 4 !important;
+  height: auto;
+  width: 76% !important;
+  touch-action: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Explosión captura */
+.clone-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 300;
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+  animation: cloneExplosion 1000ms ease-out forwards;
+  -webkit-animation: cloneExplosion 1000ms ease-out forwards;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+@keyframes cloneExplosion {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Coordenadas */
+.coord-label {
+  position: absolute;
+  font-family: "FrancoisOne";
+  font-size: 0.65rem;
+  font-weight: 100;
+  color: var(--coord-color);
+  text-shadow: 0px 0px 10px var(--coord-color);
+  pointer-events: none;
+  user-select: none;
+}
+
+.coord-label.row {
+  top: 3px;
+  left: 3px;
+}
+
+.coord-label.col {
+  bottom: 3px;
+  right: 3px;
+}
+
+/* Animación texto CHECK */
+.check-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(190, 69, 203);
+  text-shadow:
+    0 0 5px rgb(248, 168, 255),
+    0 0 20px rgb(248, 168, 255),
+    0 0 30px rgb(248, 168, 255);
+  pointer-events: none;
+  z-index: 3000;
+  animation: checkAnimation 1.3s linear;
+  -webkit-animation: checkAnimation 1.3s linear;
+}
+
+@keyframes checkAnimation {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 1;
+    -webkit-transform: translate(-50%, -50%) scale(2);
+    -moz-transform: translate(-50%, -50%) scale(2);
+    -ms-transform: translate(-50%, -50%) scale(2);
+    -o-transform: translate(-50%, -50%) scale(2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.1);
+    opacity: 0;
+    -webkit-transform: translate(-50%, -50%) scale(3.1);
+    -moz-transform: translate(-50%, -50%) scale(3.1);
+    -ms-transform: translate(-50%, -50%) scale(3.1);
+    -o-transform: translate(-50%, -50%) scale(3.1);
+  }
+}
+
+/* Animación texto CHECKMATE */
+.checkmate-animation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(239, 81, 81);
+  text-shadow:
+    0 0 5px rgb(255, 0, 0),
+    0 0 20px rgb(255, 0, 0),
+    0 0 30px rgb(255, 0, 0);
+  pointer-events: none;
+  z-index: 3000;
+  animation: checkmateAnimation 1.6s linear;
+  -webkit-animation: checkmateAnimation 1.6s linear;
+}
+
+@keyframes checkmateAnimation {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+    -moz-transform: translate(-50%, -50%) scale(1.5);
+    -ms-transform: translate(-50%, -50%) scale(1.5);
+    -o-transform: translate(-50%, -50%) scale(1.5);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+    -webkit-transform: translate(-50%, -50%) scale(1.5);
+    -moz-transform: translate(-50%, -50%) scale(1.5);
+    -ms-transform: translate(-50%, -50%) scale(1.5);
+    -o-transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+/* Solo visible en partida */
+body.game-active .chess-container {
+  display: flex !important;
+  height: 100%;
+  background-size: 100% 100%;
+}

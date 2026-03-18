@@ -1,0 +1,170 @@
+/*-------------------------------*/
+/*----------- LAYOUT ------------*/
+/*-------------------------------*/
+
+/* Contenedor del juego */
+.game-container {
+  position: relative;
+  padding: 0px;
+  background-color: var(--main-bg-color);
+}
+
+/* Contenedor principal de ajedrez */
+.chess-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Barra de historial */
+.move-history-wrapper {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 33px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--cycle-border-color);
+  background: var(--game-button-bg);
+  color: var(--game-button-text);
+  overflow: hidden;
+
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+/* Botones laterales del historial */
+.history-btn {
+  flex: 0 0 34px;
+  height: 100%;
+  border: none;
+  background: var(--board-dark-color);
+  color: var(--cycle-border-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Área scrollable del historial */
+.move-history {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+  background: var(--game-panel-bg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.move-history::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cada movimiento */
+.move-history .move-entry {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 4px;
+  margin: 0;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* Icono de pieza */
+.move-history .move-entry img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Texto del movimiento */
+.move-history .move-entry span {
+  color: var(--history-text);
+  font-size: 0.9em;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* Separador */
+.move-history .move-entry:not(:last-child)::after {
+  content: "|";
+  margin-left: 6px;
+  color: var(--history-text);
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* Número del movimiento */
+.move-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border: 1px solid var(--cycle-border-color);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--cycle-border-color) 12%, transparent);
+  box-shadow:
+    0 0 6px var(--cycle-border-color),
+    inset 0 0 6px var(--cycle-border-color);
+  color: var(--history-text);
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -o-border-radius: 2px;
+}
+
+/* Barra de controles del juego */
+#controlBar {
+  display: flex;
+  flex-direction: row;
+  height: 30px;
+  margin-bottom: 0;
+  gap: 10px;
+}
+
+#controlBar button {
+  background: var(--controlbar-btn-bg);
+  color: var(--controlbar-btn-text);
+  box-shadow: var(--theme-shadow-soft);
+  border: 2px solid var(--cycle-border-color);
+  padding: 5px;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-family: "FrancoisOne";
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+#controlBar button img {
+  width: 20px;
+  height: auto;
+}

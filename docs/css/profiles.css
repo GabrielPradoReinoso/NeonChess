@@ -1,0 +1,335 @@
+/*-------------------------------*/
+/*---------- PERFILES -----------*/
+/*-------------------------------*/
+
+:root {
+  --profile-w: 370px;
+  --profile-h: 78px;
+  --avatar-box: 64px;
+  --avatar-size: 64px;
+  --meta-bg: var(--profile-inner-bg);
+  --panel-bg: var(--profile-panel-bg);
+  --neon: var(--game-panel-text);
+}
+
+/* Perfil jugador */
+.player-profile {
+  width: var(--profile-w);
+  height: var(--profile-h);
+  display: grid;
+  grid-template-columns: var(--avatar-box) 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 6px;
+  background: var(--panel-bg);
+  border: 2px solid var(--cycle-border-color);
+  box-shadow: 0 0 18px var(--cycle-border-color);
+  color: var(--neon);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.player-profile.top {
+  margin: 0 0 10px 0;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.player-profile.bottom {
+  margin: 10px 0 0 0;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Avatar */
+.profile-avatar {
+  width: var(--avatar-box);
+  height: var(--avatar-box);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 30px;
+}
+
+.profile-avatar img {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  object-fit: cover;
+  display: block;
+  background: var(--profile-inner-bg);
+  border: 2px solid var(--cycle-border-color);
+  border-radius: 8px;
+  box-shadow: 0 0 3px var(--cycle-border-color);
+}
+
+/* Caja meta */
+.profile-meta {
+  height: 50px;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: center;
+  row-gap: 6px;
+  padding: 6px 4px;
+  margin-bottom: 30px;
+  background: var(--game-bg);
+  border: 2px solid var(--cycle-border-color);
+  border-radius: 6px;
+  box-shadow: 0 0 14px var(--cycle-border-color);
+  position: relative;
+  z-index: 2;
+}
+
+/* Filas */
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.profile-row--mid {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+/* Elementos */
+.player-name {
+  max-width: 220px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--cycle-border-color);
+  background: var(--profile-chip-bg);
+  box-shadow: 0 0 10px var(--cycle-border-color);
+  color: var(--history-text);
+}
+
+.player-timer {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--cycle-border-color);
+  background: var(--profile-chip-bg);
+  box-shadow: 0 0 10px var(--cycle-border-color);
+  color: var(--history-text);
+}
+
+.player-score {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 6px;
+  border-radius: 6px;
+  background: var(--profile-score-bg);
+  color: var(--profile-score-text);
+  box-shadow: 0 0 10px var(--cycle-border-color);
+}
+
+.robot-diff {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 4px;
+  border-radius: 6px;
+  width: fit-content;
+  color: var(--game-button-bg);
+  background: transparent;
+}
+
+/* Indicador turno */
+.turn-led {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 10px;
+  margin-right: 10px;
+  border: 1px solid var(--cycle-border-color);
+  background: var(--board-light-color);
+  box-shadow: none;
+}
+
+.turn-led.on {
+  background: var(--board-light-color);
+  box-shadow:
+    0 0 10px var(--cycle-border-color),
+    0 0 25px var(--cycle-border-color);
+  animation: turnPulse 1.2s infinite;
+}
+
+@keyframes turnPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+/* Matrix overlay jugador superior */
+#player1 .matrix-overlay-player1 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+#player1.thinking .matrix-overlay-player1.visible {
+  opacity: 1;
+}
+
+#player1 .matrix-overlay-player1 .matrix-col {
+  height: 100%;
+  overflow: hidden;
+}
+
+#player1 .matrix-overlay-player1 .matrix-stream {
+  display: block;
+  white-space: pre;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Courier New",
+    monospace;
+  font-size: 19px;
+  font-weight: bold;
+  line-height: 19px;
+  letter-spacing: 0;
+  color: var(--matrix-color);
+  text-shadow: var(--matrix-shadow);
+  filter: none;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes matrix-down {
+  from {
+    transform: translate3d(0, -100%, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes matrix-up {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+/* Barras de salud */
+.health-bar {
+  width: 370px;
+  height: 20px;
+  background: var(--health-empty-bg);
+  box-shadow: var(--health-empty-shadow);
+  overflow: hidden;
+  border: 2px solid var(--cycle-border-color);
+}
+
+.health-progress {
+  height: 100%;
+  width: 100%;
+  background-color: hsl(210, 70%, 50%);
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.45);
+  transition:
+    width 0.5s ease-in-out,
+    background-color 0.5s ease-in-out;
+  animation: colorTransitio 2s linear infinite;
+  -webkit-animation: colorTransitio 2s linear infinite;
+}
+
+.health-bar-top {
+  margin-top: 20px;
+  border-radius: 3px 3px 0px 0px;
+  -webkit-border-radius: 3px 3px 0px 0px;
+  -moz-border-radius: 3px 3px 0px 0px;
+  -ms-border-radius: 3px 3px 0px 0px;
+  -o-border-radius: 3px 3px 0px 0px;
+}
+
+.health-bar-bottom {
+  margin-bottom: 10px;
+  border-radius: 0px 0px 3px 3px;
+  -webkit-border-radius: 0px 0px 3px 3px;
+  -moz-border-radius: 0px 0px 3px 3px;
+  -ms-border-radius: 0px 0px 3px 3px;
+  -o-border-radius: 0px 0px 3px 3px;
+}
+
+/* Estado conexión online */
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.conn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2cff7a;
+  box-shadow: 0 0 10px rgba(44, 255, 122, 0.7);
+}
+
+.conn-status.reconnecting .conn-dot {
+  background: #ffd84f;
+  box-shadow: 0 0 10px rgba(255, 216, 79, 0.7);
+  animation: pulse 1s infinite;
+  -webkit-animation: pulse 1s infinite;
+}
+
+.conn-status.offline .conn-dot {
+  background: #ff4f4f;
+  box-shadow: 0 0 10px rgba(255, 79, 79, 0.7);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+body:not(.online-game) #connStatus {
+  display: none !important;
+}

@@ -20,24 +20,21 @@
 
     <!-- Cabecera -->
     <header class="header">
-      <div class="logo">
-        <a href="index.html">
-          <img
-            src="assets/images/logo-neon-chess.png"
-            alt="Chess Logo"
-            id="logo"
-          />
-        </a>
-      </div>
 
+      <a href="index.html">
+      <div id="logo">
+       
+      </div>
+      </a>
+      
       <div class="main-title">
-        <h1>
-          <a href="index.html">
-            NEON
-            <br class="mobile-only" />
-            CHESS
-          </a>
-        </h1>
+        <a href="index.html">
+          <h1>
+              NEON
+              <br class="mobile-only" />
+              CHESS
+          </h1>
+        </a>
       </div>
 
       <div class="menu-dropdown">
@@ -46,11 +43,31 @@
         <div id="dropdownMenu" class="dropdown-menu">
           <div class="menu-close">x</div>
           <ul>
-            <li><a href="pagina-carga.html">Ajustes</a></li>
-            <li><a href="pagina-carga.html">Tablero y piezas</a></li>
-            <li><a href="pagina-carga.html">Videos</a></li>
-            <li><a href="pagina-carga.html">Campeonatos</a></li>
-            <li><a href="pagina-carga.html">Sobre este proyecto</a></li>
+            <li class="menu-item">
+              <div class="img-icon profile"></div>
+              <a href="pagina-carga.html">Cuenta ❌</a>
+            </li>
+
+            <li class="menu-item">
+              <div class="img-icon theme"></div>
+              <a href="#" id="openBoardPieces">Temas ✅</a>
+            </li>
+
+            <li class="menu-item">
+              <div class="img-icon gear"></div>
+              <a href="pagina-carga.html">Ajustes ❌</a>
+            </li>
+
+            <li class="menu-item">
+              <div class="img-icon trophy"></div>
+              <a href="pagina-carga.html">Campeonatos mundiales ❌</a>
+            </li>
+
+            <li class="menu-item">
+              <div class="img-icon project"></div>
+              <a href="pagina-carga.html">Sobre este proyecto ❌</a>
+            </li>
+
           </ul>
         </div>
       </div>
@@ -68,29 +85,29 @@
     <section id="onlineChoice" class="online-choice hidden">
       <h3>Juega online contra un amig@</h3>
       <p class="online-info">
-        Uno de los jugadores debe generar el código de la partida pulsando el
-        botón <b class="marked-text">"Obtener código"</b> y posteriormente
-        compartir el código con el amig@ que desea unirse, después este deberá
-        introducir el código en el campo indicado y una vez introducido el
-        código correctamente en el campo, deberá pulsar el botón de
-        <b class="marked-text">"Unirse"</b>, automaticamente se conectará la
-        partida y aparecera la página de juego y se podrá comenzar a jugar.
-        ¡Buena suerte!
+        <b class="player-text">JUGADOR 1</b> obtiene código de partida pulsando en<b class="marked-text">"Obtener código"</b>, después debe compartir su código con <b class="player-text">JUGADOR 2</b> y este deberá introducir el código y pulsar el botón
+        <b class="marked-text">"Unirse"</b>
       </p>
 
       <div class="online-actions">
-        <button id="btnCreateRoom" class="btn primary">Obtener código</button>
-        <p></p>
 
-        <div class="join-box">
+        <div class="player-one-online">
+          <p>JUGADOR 1</p>
+          <button id="btnCreateRoom" class="btn primary">Obtener código</button>
+        </div>
+
+        <div class="player-two-online">
+          <p>JUGADOR 2</p>
           <input
             id="joinCodeInput"
             type="text"
-            placeholder="Introduce código"
+            placeholder="Introduce tu código..."
             maxlength="8"
           />
+          
           <button id="btnJoinRoom" class="btn">Unirse</button>
         </div>
+
       </div>
 
       <div id="createdRoom" class="created-room hidden">
@@ -102,7 +119,7 @@
         <p class="muted">Esperando oponente…</p>
       </div>
 
-      <button id="cancelOnlineChoice" class="btn ghost">Cancelar</button>
+      <button id="cancelOnlineChoice" class="btn cancel">Cancelar</button>
     </section>
 
     <div id="onlineLobby" class="hidden">
@@ -122,7 +139,7 @@
             <label for="difficultyButton">Nivel de dificultad</label>
             <div class="dropdown">
               <button id="difficultyButton" class="buttons">Nivel 1</button>
-              <ul id="difficultyOptions" class="options hidden">
+              <ul id="difficultyOptions" class="options">
                 <li data-level="1">Nivel 1</li>
                 <li data-level="2">Nivel 2</li>
                 <li data-level="3">Nivel 3</li>
@@ -142,7 +159,7 @@
             <label for="timeConfigButton">Tiempo por jugador</label>
             <div class="dropdown">
               <button id="timeConfigButton" class="buttons">∞</button>
-              <ul id="timeOptions" class="options hidden">
+              <ul id="timeOptions" class="options">
                 <li data-time="1">1 min</li>
                 <li data-time="3">3 min</li>
                 <li data-time="5">5 min</li>
@@ -159,7 +176,7 @@
             <div class="dropdown">
               <button id="colorButton" class="buttons">Rosas</button>
 
-              <ul id="colorOptions" class="options hidden">
+              <ul id="colorOptions" class="options">
                 <li data-color="w" data-label="Rosas" id="pinkColor">
                   <img
                     src="assets/images/pink-neon-pawn.png"
@@ -328,6 +345,26 @@
       <!-- /.chess-container -->
     </div>
     <!-- /#gameContainer -->
+
+    <!-- MODAL DE TEMAS NEON CHESS -->
+    <div id="boardPiecesModal" class="settings-modal hidden">
+      <div class="settings-modal-content">
+        <button id="closeBoardPiecesModal" class="settings-close-btn">×</button>
+        <h2>Temas</h2>
+    
+        <div class="settings-section">
+          <div class="theme-options">
+            <button class="btn visual-theme-btn" data-visualtheme="default">
+              Neon 
+            </button>
+            <button class="btn visual-theme-btn" data-visualtheme="neon-classic">
+              Classic
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer>

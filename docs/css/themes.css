@@ -1,0 +1,173 @@
+/*-------------------------------*/
+/*------------ TEMAS ------------*/
+/*-------------------------------*/
+
+/* Variables genéricas */
+:root {
+  --header-height: 145px;
+  --footer-height: 68px;
+  --cycle-border-color: #6FF6FF;
+
+  --board-light-color: #5669C5;
+  --board-dark-color: #121c40e1;
+
+  --game-panel-bg: #121c40;
+  --game-panel-text: #6FF6FF;
+  --game-button-bg: #6FF6FF;
+  --game-button-text: #0f0d0a;
+  --game-accent-2: #DD61DF;
+}
+
+/* Tema Neon */
+body[data-theme="default"] {
+  --main-logo-image: url("../assets/images/logo-neon-chess.png");
+  --main-bg-image: url("../assets/images/retro-chess-background.webp");
+
+  --user-icon-img: url("../assets/images/user-icon-neon.png");
+  --user-icon-img-hover: url("../assets/images/user-icon-neon-hover.png");
+
+  --theme-icon-img: url("../assets/images/theme-icon-neon.png");
+  --theme-icon-img-hover: url("../assets/images/theme-icon-neon-hover.png");
+
+  --gear-icon-img: url("../assets/images/gear-icon-neon.png");
+  --gear-icon-img-hover: url("../assets/images/gear-icon-neon-hover.png");
+
+  --trophy-icon-img: url("../assets/images/trophy-icon-neon.png");
+  --trophy-icon-img-hover: url("../assets/images/trophy-icon-neon-hover.png");
+
+  --project-icon-img: url("../assets/images/project-icon-neon.png");
+  --project-icon-img-hover: url("../assets/images/project-icon-neon-hover.png");
+
+  --game-bg: #081729;
+  --game-bg-image: none;
+  --main-bg-color: #081729;
+
+  --game-panel-bg: #121c40;
+  --game-panel-bg-2: #0f1636;
+  --game-panel-text: #6FF6FF;
+
+  --game-button-bg: #6FF6FF;
+  --game-button-text: #0f0d0a;
+  --game-accent-2: #e5a1ee;
+
+  --theme-shadow-soft: 0 0 10px #6FF6FF;
+  --theme-shadow-strong: 0 0 20px #6FF6FF;
+  --theme-inner-shadow: 0 0 10px #6FF6FF inset;
+
+  --profile-inner-bg: #000;
+  --profile-panel-bg: #151C3E;
+  --profile-chip-bg: #000;
+  --profile-score-bg: #6FF6FF;
+  --profile-score-text: #081729;
+
+  --history-bg: #121c40;
+  --history-text: #6FF6FF;
+
+  --controlbar-btn-bg: #6FF6FF;
+  --controlbar-btn-text: #0f0d0a;
+
+  --coord-color: #59FFFF;
+
+  --move-highlight-bg: #bd31e086;
+  --move-highlight-shadow: 0px 0px 5px #E800C7 inset;
+
+  --check-bg: #79890E;
+  --check-shadow: 0px 0px 10px #F2FF00 inset;
+
+  --checkmate-bg: #7C2C2B;
+  --checkmate-shadow: 0px 0px 30px #E12622 inset;
+
+  --health-empty-bg: #121c40cb;
+  --health-empty-shadow: 0px 0px 6px #263d8ff6 inset;
+
+  --modal-bg: #121c40;
+  --modal-bg-2: #0f1636;
+  --modal-text: #6FF6FF;
+  --modal-overlay: #191D33;
+
+  --chat-bg: #0f1636;
+  --chat-input-bg: #0b1028;
+  --chat-text: #ffffff;
+
+  --matrix-color: #5BC1C8;
+  --matrix-shadow: 0 0 4px #427F84;
+}
+
+/* Tema Classic */
+body[data-theme="neon-classic"] {
+  --main-logo-image: url("../assets/images/logo-classic-chess.png");
+  --main-bg-image: url("../assets/images/classic-chess-background.png");
+
+  --user-icon-img: url("../assets/images/user-icon-classic.png");
+  --user-icon-img-hover: url("../assets/images/user-icon-classic-hover.png");
+
+  --theme-icon-img: url("../assets/images/theme-icon-classic.png");
+  --theme-icon-img-hover: url("../assets/images/theme-icon-classic-hover.png");
+
+  --gear-icon-img: url("../assets/images/gear-icon-classic.png");
+  --gear-icon-img-hover: url("../assets/images/gear-icon-classic-hover.png");
+
+  --trophy-icon-img: url("../assets/images/trophy-icon-classic.png");
+  --trophy-icon-img-hover: url("../assets/images/trophy-icon-classic-hover.png");
+
+  --project-icon-img: url("../assets/images/project-icon-classic.png");
+  --project-icon-img-hover: url("../assets/images/project-icon-classic-hover.png");
+
+  --cycle-border-color: #F5DFAF;
+  --board-light-color: #a89978;
+  --board-dark-color: #442c15;
+
+  --game-bg: #221704;
+  --game-bg-image: none;
+  --main-bg-color: #251605;
+
+  --game-panel-bg: #2b1a12;
+  --game-panel-bg-2: #24160f;
+  --game-panel-text: #ffe09a;
+
+  --game-button-bg: #ffe09a;
+  --game-button-text: #241208;
+  --game-accent-2: #ff8a5b;
+
+  --theme-shadow-soft: 0 0 10px #C4A86D;
+  --theme-shadow-strong: 0 0 20px #D9BA77;
+  --theme-inner-shadow: 0 0 10px #81704D inset;
+
+  --profile-inner-bg: #140d07;
+  --profile-panel-bg: #281A12;
+  --profile-chip-bg: #140d07;
+  --profile-score-bg: #ffe09a;
+  --profile-score-text: #241208;
+
+  --history-bg: #2b1a12;
+  --history-text: #ffe09a;
+
+  --controlbar-btn-bg: #ffe09a;
+  --controlbar-btn-text: #241208;
+
+  --coord-color: #ffe09a;
+
+  --move-highlight-bg: #8cac5188;
+  --move-highlight-shadow: 0px 0px 10px #e2ffdb inset;
+
+  --check-bg: #4E4728;
+  --check-shadow: 0px 0px 12px #CFB644 inset;
+
+  --checkmate-bg: #5A2F2E;
+  --checkmate-shadow: 0px 0px 24px #C04A49 inset;
+
+  --health-empty-bg: #281A12;
+  --health-empty-shadow: 0px 0px 6px #464031 inset;
+
+  --modal-bg: #2b1a12;
+  --modal-bg-2: #24160f;
+  --modal-text: #ffe09a;
+  --modal-overlay: #17110D;
+
+  --chat-bg: #24160f;
+  --chat-input-bg: #140d07;
+  --chat-text: #fff5dc;
+
+  --matrix-color: #CBB57C;
+  --matrix-shadow: 0 0 4px #776B4E;
+}
