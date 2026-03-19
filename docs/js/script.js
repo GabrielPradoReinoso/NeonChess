@@ -114,8 +114,8 @@ function initAnimatedBackground() {
 
   container.innerHTML = "";
 
-  const NUM_FILLED = 24;
-  const NUM_OUTLINED = 14;
+  const NUM_FILLED = 8;
+  const NUM_OUTLINED = 8;
 
   function createSquare(type = "fill") {
     const square = document.createElement("div");
@@ -650,11 +650,19 @@ function ensureSocket() {
     }
 
     const header = document.querySelector("header");
+    if (header) {
+      document.documentElement.style.setProperty(
+        "--header-height",
+        `${header.offsetHeight}px`
+      );
+    }
+
     if (header) header.classList.add("hidden");
     document.body.classList.add("game-active");
 
     if (gameContainer) gameContainer.classList.remove("hidden");
     if (chessContainer) chessContainer.classList.remove("hidden");
+    document.querySelector(".move-history-wrapper")?.classList.remove("hidden");
 
     // Chat visible en online
     const chatPanel = $("chatPanel");
@@ -951,32 +959,89 @@ const chatClose = $("chatClose");
 const chatBadge = $("chatBadge");
 
 // Dropdowns UI
+let activeDropdown = null;
+
+function closeActiveDropdown() {
+  if (!activeDropdown) return;
+
+  const { opts, placeholder } = activeDropdown;
+
+  opts.classList.remove("open");
+  document.body.classList.remove("dropdown-open");
+
+  if (placeholder && placeholder.parentNode) {
+    placeholder.parentNode.replaceChild(opts, placeholder);
+  }
+
+  activeDropdown = null;
+}
+
 function setupDropdown(buttonId, optionsId, onSelect) {
   const btn = $(buttonId);
   const opts = $(optionsId);
   if (!btn || !opts) return;
 
   btn.addEventListener("pointerup", (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    opts.classList.toggle("open");
+
+    // si este mismo está abierto, lo cerramos
+    if (activeDropdown && activeDropdown.opts === opts) {
+      closeActiveDropdown();
+      return;
+    }
+
+    // cerramos cualquier otro
+    closeActiveDropdown();
+
+    // dejamos una marca en su lugar original
+    const placeholder = document.createComment(`dropdown-placeholder-${optionsId}`);
+    opts.parentNode.insertBefore(placeholder, opts);
+
+    // movemos el UL al body para que el fixed sea REALMENTE fullscreen
+    document.body.appendChild(opts);
+
+    opts.classList.add("open");
+    document.body.classList.add("dropdown-open");
+
+    activeDropdown = { btn, opts, placeholder };
   });
 
   opts.querySelectorAll("li").forEach((li) => {
     li.addEventListener("pointerup", (e) => {
+      e.preventDefault();
       e.stopPropagation();
+
       const label = li.dataset.label || li.textContent.trim();
       btn.textContent = label;
-      opts.classList.remove("open");
+
       onSelect(li.dataset);
+      closeActiveDropdown();
     });
   });
-
-  document.addEventListener("pointerup", (e) => {
-    if (!btn.contains(e.target) && !opts.contains(e.target)) {
-      opts.classList.remove("open");
-    }
-  });
 }
+
+// cerrar al pulsar fuera
+document.addEventListener("pointerup", (e) => {
+  if (!activeDropdown) return;
+
+  const { btn, opts } = activeDropdown;
+  if (!btn.contains(e.target) && !opts.contains(e.target)) {
+    closeActiveDropdown();
+  }
+});
+
+// cerrar con Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeActiveDropdown();
+  }
+});
+
+// cerrar al redimensionar
+window.addEventListener("resize", () => {
+  closeActiveDropdown();
+});
 
 function initSetupDropdowns() {
   setupDropdown("difficultyButton", "difficultyOptions", ({ level }) => {
@@ -1041,6 +1106,9 @@ function initUISetup() {
     gameContainer?.classList.remove("hidden");
     const gameSetup = $("gameSetup");
     gameSetup?.classList.remove("hidden");
+
+    document.querySelector(".move-history-wrapper")?.classList.add("hidden");
+    document.querySelector(".chess-container")?.classList.add("hidden");
 
     // Defaults
     humanColor = "w";
@@ -1108,13 +1176,13 @@ function initUISetup() {
 // ============================================================
 
 const soundVolumes = {
-  move: 0.7,
-  capture: 0.6,
-  check: 0.6,
-  checkmate: 0.6,
-  promotion: 0.6,
-  select: 0.8,
-  error: 0.7,
+  move: 0.5,
+  capture: 0.4,
+  check: 0.4,
+  checkmate: 0.5,
+  promotion: 0.5,
+  select: 0.6,
+  error: 0.6,
 };
 
 function setSoundVolume(name, value) {
@@ -1141,13 +1209,13 @@ function playSound(audioObj, type) {
 }
 
 // Música (exponemos para que online startGame pueda usarla sin duplicar)
-const menuMusic = new Audio("assets/sounds/music-1.mp3");
+const menuMusic = new Audio("assets/sounds/music-1.m");
 menuMusic.loop = true;
-menuMusic.volume = 0.3;
+menuMusic.volume = 0.1;
 
 const gameMusic = new Audio();
 gameMusic.loop = true;
-gameMusic.volume = 0.3;
+gameMusic.volume = 0.1;
 
 const playlist = ["assets/sounds/music-4.mp3"];
 let currentTrack = 0;
@@ -1292,6 +1360,7 @@ function applyVisualTheme(themeName) {
     pieceImages = getPieceImages();
   }
 
+  updateColorOptionImages();
   renderBoard();
 }
 
@@ -1324,6 +1393,21 @@ function getPieceImages() {
 
 // objeto usado por el tablero
 let pieceImages = getPieceImages();
+
+function updateColorOptionImages() {
+  const whiteImg = $("colorOptionWhiteImg");
+  const blackImg = $("colorOptionBlackImg");
+
+  if (!whiteImg || !blackImg) return;
+
+  // Usa las imágenes reales del set activo
+  whiteImg.src = pieceImages.wp;
+  blackImg.src = pieceImages.bp;
+
+  // Fuerza repintado limpio por si venían de una ruta rota anterior
+  whiteImg.style.display = "block";
+  blackImg.style.display = "block";
+}
 
 function setPieceSet(setName) {
   if (!PIECESETS[setName]) return;
@@ -4297,6 +4381,7 @@ playButton?.addEventListener("pointerup", () => {
   // Muestra el tablero/contenedor
   $("gameContainer")?.classList.remove("hidden");
   document.querySelector(".chess-container")?.classList.remove("hidden");
+  document.querySelector(".move-history-wrapper")?.classList.remove("hidden");
 
   // Música
   try {
@@ -4315,6 +4400,7 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     initAnimatedBackground();
     initVisualTheme();
+    updateColorOptionImages();
     initGeneralUI();
     initUISetup();
     bindButtonSfx();

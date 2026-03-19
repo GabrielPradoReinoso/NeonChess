@@ -23,19 +23,16 @@
 
     <!-- Cabecera -->
     <header class="header">
-
       <a href="index.html">
-      <div id="logo">
-       
-      </div>
+        <div id="logo"></div>
       </a>
-      
+
       <div class="main-title">
         <a href="index.html">
           <h1>
-              NEON
-              <br class="mobile-only" />
-              CHESS
+            NEON
+            <br class="mobile-only" />
+            CHESS
           </h1>
         </a>
       </div>
@@ -70,7 +67,6 @@
               <div class="img-icon project"></div>
               <a href="pagina-carga.html">Sobre este proyecto ❌</a>
             </li>
-
           </ul>
         </div>
       </div>
@@ -88,12 +84,14 @@
     <section id="onlineChoice" class="online-choice hidden">
       <h3>Juega online contra un amig@</h3>
       <p class="online-info">
-        <b class="player-text">JUGADOR 1</b> obtiene código de partida pulsando en<b class="marked-text">"Obtener código"</b>, después debe compartir su código con <b class="player-text">JUGADOR 2</b> y este deberá introducir el código y pulsar el botón
+        <b class="player-text">JUGADOR 1</b> obtiene código de partida pulsando
+        en<b class="marked-text">"Obtener código"</b>, después debe compartir su
+        código con <b class="player-text">JUGADOR 2</b> y este deberá introducir
+        el código y pulsar el botón
         <b class="marked-text">"Unirse"</b>
       </p>
 
       <div class="online-actions">
-
         <div class="player-one-online">
           <p>JUGADOR 1</p>
           <button id="btnCreateRoom" class="btn primary">Obtener código</button>
@@ -107,10 +105,9 @@
             placeholder="Introduce tu código..."
             maxlength="8"
           />
-          
+
           <button id="btnJoinRoom" class="btn">Unirse</button>
         </div>
-
       </div>
 
       <div id="createdRoom" class="created-room hidden">
@@ -177,29 +174,20 @@
           <div class="plantilla-dos">
             <label for="colorButton">Color de tus piezas</label>
             <div class="dropdown">
-              <button id="colorButton" class="buttons">Rosas</button>
+              <button id="colorButton" class="buttons">Blancas</button>
 
               <ul id="colorOptions" class="options">
                 <li data-color="w" data-label="Rosas" id="pinkColor">
-                  <img
-                    src="assets/images/pink-neon-pawn.png"
-                    alt="pink pawn (first player)"
-                  />
-                  <br />
-                  Rosas
-                  <br />
-                  (mueven primero)
+                  <img id="colorOptionWhiteImg" src="" alt="Piezas rosas" />
+                  (Blancas)
                 </li>
 
                 <li data-color="b" data-label="Azules" id="blueColor">
-                  <img
-                    src="assets/images/blue-neon-pawn.png"
-                    alt="blue pawn (second player)"
-                  />
+                  <img id="colorOptionBlackImg" src="" alt="Piezas azules" />
                   <br />
                   Azules
                   <br />
-                  (mueven después)
+                  (Negras)
                 </li>
               </ul>
             </div>
@@ -211,7 +199,7 @@
       </div>
 
       <!-- 0) HISTORIAL DE MOVIMIENTOS -->
-      <div class="move-history-wrapper">
+      <div class="move-history-wrapper hidden">
         <button id="undoBtn" class="history-btn back" aria-label="Retroceder">
           ◀
         </button>
@@ -221,7 +209,7 @@
         </button>
       </div>
 
-      <div class="chess-container">
+      <div class="chess-container hidden">
         <!-- Health (top / player1) -->
         <div
           class="health-bar health-bar-top"
@@ -354,18 +342,20 @@
       <div class="settings-modal-content">
         <button id="closeBoardPiecesModal" class="settings-close-btn">×</button>
         <h2>Temas</h2>
-    
+
         <div class="settings-section">
           <div class="theme-options">
             <button class="btn visual-theme-btn" data-visualtheme="default">
-              Neon 
+              Neon
             </button>
-            <button class="btn visual-theme-btn" data-visualtheme="neon-classic">
+            <button
+              class="btn visual-theme-btn"
+              data-visualtheme="neon-classic"
+            >
               Classic
             </button>
           </div>
         </div>
-
       </div>
     </div>
 

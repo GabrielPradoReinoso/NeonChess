@@ -1,3 +1,5 @@
+/* responsive.css */
+
 /*-------------------------------*/
 /*---------- RESPONSIVE ---------*/
 /*-------------------------------*/
@@ -92,5 +94,25 @@
 
   .main-title a {
     font-size: clamp(1.2rem, 8vw, 1.8rem) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .bg-square.fill,
+  .bg-square.outline {
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .bg-square.fill {
+    box-shadow:
+      0 0 10px var(--bg-square-glow),
+      inset 0 0 6px var(--bg-square-inner-glow);
+  }
+
+  .bg-square.outline {
+    box-shadow:
+      0 0 8px var(--bg-square-glow),
+      inset 0 0 4px var(--bg-square-inner-glow);
   }
 }
