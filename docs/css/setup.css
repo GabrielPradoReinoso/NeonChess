@@ -116,7 +116,7 @@
 .plantilla-dos > label {
   flex: 0 0 40%;
   text-align: left;
-  color: rgb(79, 246, 255);
+  color: var(--cycle-border-color);
 }
 
 .plantilla-dos .buttons,
@@ -309,15 +309,15 @@
 /* Opción azul */
 #blueColor {
   background-color: var(--game-bg);
-  border: 3px solid var(--board-dark-color);
-  box-shadow: 0px 0px 10px rgb(157, 211, 255);
-  color: rgb(74, 255, 255);
+  border: 3px solid var(--board-light-color);
+  box-shadow: 0px 0px 10px var(--board-light-color);
+  color: var(--bg-square-outline-strong);
   transition: all 300ms linear;
 }
 
 #blueColor:hover {
-  background-color: rgba(132, 204, 209, 0.808);
-  border: 3px solid rgb(74, 255, 255);
-  box-shadow: 0px 0px 40px rgb(199, 230, 255);
-  color: rgb(176, 255, 255);
+  background-color: var(--bg-square-outline-strong);
+  border: 3px solid var(--bg-square-outline-strong);
+  box-shadow: 0px 0px 40px var(--bg-square-outline-strong);
+  color: var(--game-bg);
 }
